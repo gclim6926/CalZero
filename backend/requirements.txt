@@ -3,3 +3,4 @@ uvicorn[standard]
 bcrypt
 pyjwt
 python-multipart
+email-validator
