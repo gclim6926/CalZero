@@ -89,7 +89,7 @@ function App() {
   const loadInitialData = async () => {
     setIsLoading(true)
     try {
-      const devicesData = await api.device.getAll()
+      const devicesData = await api.devices.list()
       setDevices(devicesData)
       setApiError(null)
     } catch (error) {
@@ -103,8 +103,8 @@ function App() {
   const loadCalibrations = async (deviceId) => {
     try {
       const [actuator, intrinsic, extrinsic, handeye] = await Promise.all([
-        api.actuator.getAll(deviceId), api.intrinsic.getAll(deviceId),
-        api.extrinsic.getAll(deviceId), api.handeye.getAll(deviceId),
+        api.actuator.list(deviceId), api.intrinsic.list(deviceId),
+        api.extrinsic.list(deviceId), api.handeye.list(deviceId),
       ])
       setCalibrations(actuator)
       setIntrinsicCalibrations(intrinsic)
@@ -128,20 +128,20 @@ function App() {
   }
 
   const handleDeviceAdd = async (deviceData) => {
-    const saved = await api.device.create(deviceData)
+    const saved = await api.devices.create(deviceData)
     setDevices(prev => [...prev, saved])
     return saved
   }
 
   const handleDeviceUpdate = async (id, deviceData) => {
-    const updated = await api.device.update(id, deviceData)
+    const updated = await api.devices.update(id, deviceData)
     setDevices(prev => prev.map(d => d.id === id ? updated : d))
     if (selectedDevice?.id === id) setSelectedDevice(updated)
     return updated
   }
 
   const handleDeviceDelete = async (id) => {
-    await api.device.delete(id)
+    await api.devices.delete(id)
     setDevices(prev => prev.filter(d => d.id !== id))
     if (selectedDevice?.id === id) setSelectedDevice(null)
   }
