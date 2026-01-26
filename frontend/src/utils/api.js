@@ -1,4 +1,7 @@
-const API_BASE = 'http://localhost:8000/api'
+// 배포/로컬 환경 자동 분기
+const API_BASE = import.meta.env.PROD 
+  ? 'https://calzero-api.onrender.com/api'  // 배포용
+  : 'http://localhost:8000/api'              // 로컬용
 
 async function fetchAPI(endpoint, options = {}) {
   const url = `${API_BASE}${endpoint}`
@@ -11,7 +14,7 @@ async function fetchAPI(endpoint, options = {}) {
   }
 
   const response = await fetch(url, config)
-
+  
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}))
     throw new Error(errorData.detail || `HTTP ${response.status}`)
@@ -20,80 +23,79 @@ async function fetchAPI(endpoint, options = {}) {
   return response.json()
 }
 
-// port 필드 정리 유틸리티
-function cleanDeviceData(data) {
-  const cleanData = { ...data }
-  if (cleanData.port === '' || cleanData.port === null || cleanData.port === undefined) {
-    delete cleanData.port
-  } else {
-    cleanData.port = parseInt(cleanData.port)
-  }
-  return cleanData
-}
-
-const api = {
+export default {
   // Device API
-  device: {
-    getAll: () => fetchAPI('/devices'),
+  devices: {
+    list: () => fetchAPI('/devices'),
+    get: (id) => fetchAPI(`/devices/${id}`),
     create: (data) => fetchAPI('/devices', {
       method: 'POST',
-      body: JSON.stringify(cleanDeviceData(data)),
+      body: JSON.stringify(data),
     }),
     update: (id, data) => fetchAPI(`/devices/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(cleanDeviceData(data)),
+      body: JSON.stringify(data),
     }),
     delete: (id) => fetchAPI(`/devices/${id}`, { method: 'DELETE' }),
   },
 
   // Actuator Calibration API
   actuator: {
-    getAll: (deviceId) => fetchAPI(`/calibrations/actuator?device_id=${deviceId}`),
+    list: (deviceId) => fetchAPI(`/calibrations/actuator?device_id=${deviceId}`),
     create: (data) => fetchAPI('/calibrations/actuator', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
-    delete: (id, deviceId) => fetchAPI(`/calibrations/actuator/${id}?device_id=${deviceId}`, {
-      method: 'DELETE'
+    delete: (id, deviceId) => fetchAPI(`/calibrations/actuator/${id}?device_id=${deviceId}`, { 
+      method: 'DELETE' 
+    }),
+    activate: (id, deviceId) => fetchAPI(`/calibrations/actuator/${id}/activate?device_id=${deviceId}`, {
+      method: 'PUT',
     }),
   },
 
   // Intrinsic Calibration API
   intrinsic: {
-    getAll: (deviceId) => fetchAPI(`/calibrations/intrinsic?device_id=${deviceId}`),
+    list: (deviceId) => fetchAPI(`/calibrations/intrinsic?device_id=${deviceId}`),
     create: (data) => fetchAPI('/calibrations/intrinsic', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
-    delete: (id, deviceId) => fetchAPI(`/calibrations/intrinsic/${id}?device_id=${deviceId}`, {
-      method: 'DELETE'
+    delete: (id, deviceId) => fetchAPI(`/calibrations/intrinsic/${id}?device_id=${deviceId}`, { 
+      method: 'DELETE' 
+    }),
+    activate: (id, deviceId) => fetchAPI(`/calibrations/intrinsic/${id}/activate?device_id=${deviceId}`, {
+      method: 'PUT',
     }),
   },
 
   // Extrinsic Calibration API
   extrinsic: {
-    getAll: (deviceId) => fetchAPI(`/calibrations/extrinsic?device_id=${deviceId}`),
+    list: (deviceId) => fetchAPI(`/calibrations/extrinsic?device_id=${deviceId}`),
     create: (data) => fetchAPI('/calibrations/extrinsic', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
-    delete: (id, deviceId) => fetchAPI(`/calibrations/extrinsic/${id}?device_id=${deviceId}`, {
-      method: 'DELETE'
+    delete: (id, deviceId) => fetchAPI(`/calibrations/extrinsic/${id}?device_id=${deviceId}`, { 
+      method: 'DELETE' 
+    }),
+    activate: (id, deviceId) => fetchAPI(`/calibrations/extrinsic/${id}/activate?device_id=${deviceId}`, {
+      method: 'PUT',
     }),
   },
 
   // Hand-Eye Calibration API
   handeye: {
-    getAll: (deviceId) => fetchAPI(`/calibrations/handeye?device_id=${deviceId}`),
+    list: (deviceId) => fetchAPI(`/calibrations/handeye?device_id=${deviceId}`),
     create: (data) => fetchAPI('/calibrations/handeye', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
-    delete: (id, deviceId) => fetchAPI(`/calibrations/handeye/${id}?device_id=${deviceId}`, {
-      method: 'DELETE'
+    delete: (id, deviceId) => fetchAPI(`/calibrations/handeye/${id}?device_id=${deviceId}`, { 
+      method: 'DELETE' 
     }),
     activate: (id, deviceId) => fetchAPI(`/calibrations/handeye/${id}/activate?device_id=${deviceId}`, {
-      method: 'PUT'
+      method: 'PUT',
     }),
   },
 
@@ -122,5 +124,3 @@ const api = {
     reset: () => fetchAPI('/reset', { method: 'DELETE' }),
   },
 }
-
-export default api
