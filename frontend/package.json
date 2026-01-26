@@ -10,9 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@duckdb/duckdb-wasm": "^1.33.1-dev18.0",
     "apache-arrow": "^21.1.0",
     "hyparquet": "^1.24.0",
-    "parquet-wasm": "^0.7.1",
     "parquetjs-lite": "^0.8.7",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

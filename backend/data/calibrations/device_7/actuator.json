@@ -1,0 +1,52 @@
+[
+  {
+    "device_id": 7,
+    "notes": "follower",
+    "calibration_data": {
+      "shoulder_pan": {
+        "id": 1,
+        "drive_mode": 0,
+        "homing_offset": 259,
+        "range_min": 809,
+        "range_max": 3407
+      },
+      "shoulder_lift": {
+        "id": 2,
+        "drive_mode": 0,
+        "homing_offset": 222,
+        "range_min": 808,
+        "range_max": 3180
+      },
+      "elbow_flex": {
+        "id": 3,
+        "drive_mode": 0,
+        "homing_offset": -380,
+        "range_min": 951,
+        "range_max": 3150
+      },
+      "wrist_flex": {
+        "id": 4,
+        "drive_mode": 0,
+        "homing_offset": -1600,
+        "range_min": 847,
+        "range_max": 3119
+      },
+      "wrist_roll": {
+        "id": 5,
+        "drive_mode": 0,
+        "homing_offset": -1258,
+        "range_min": 47,
+        "range_max": 3906
+      },
+      "gripper": {
+        "id": 6,
+        "drive_mode": 0,
+        "homing_offset": -1334,
+        "range_min": 2036,
+        "range_max": 3466
+      }
+    },
+    "id": 1,
+    "created_at": "2026-01-24T06:52:47.368674"
+  }
+]

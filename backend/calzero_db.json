@@ -1,0 +1,113 @@
+{
+  "devices": {
+    "1": {
+      "name": "SO101@Lim",
+      "type": "so101_follower",
+      "status": "offline",
+      "location": "T\ud0c0\uc6cc 5\uce35",
+      "manager": "Lim",
+      "description": "",
+      "ip_address": "",
+      "port": null,
+      "serial_number": "",
+      "manufacturer": "",
+      "model": "",
+      "firmware_version": "",
+      "id": 1,
+      "created_at": "2026-01-24T05:25:20.619343"
+    },
+    "2": {
+      "name": "AliceM1@\ud310\uad50",
+      "type": "alice_m1",
+      "status": "offline",
+      "location": "\ud310\uad50 7\uce35",
+      "manager": "Tester",
+      "description": "",
+      "ip_address": "",
+      "port": null,
+      "serial_number": "",
+      "manufacturer": "",
+      "model": "",
+      "firmware_version": "",
+      "id": 2,
+      "created_at": "2026-01-24T05:25:46.498466"
+    },
+    "3": {
+      "name": "SO101@Kim",
+      "type": "so101_follower",
+      "status": "offline",
+      "location": "T\ud0c0\uc6cc 5\uce35",
+      "manager": "Kim",
+      "description": "",
+      "ip_address": "",
+      "port": null,
+      "serial_number": "",
+      "manufacturer": "",
+      "model": "",
+      "firmware_version": "",
+      "id": 3,
+      "created_at": "2026-01-24T05:26:17.300129"
+    }
+  },
+  "actuator_calibrations": {
+    "1": {
+      "id": 1,
+      "device_id": 1,
+      "notes": "Initial Calibration",
+      "created_at": "2025-01-15T10:30:00",
+      "calibration_data": {
+        "shoulder_pan": {
+          "homing_offset": 207,
+          "range_min": 853,
+          "range_max": 3171
+        },
+        "shoulder_lift": {
+          "homing_offset": 1117,
+          "range_min": 868,
+          "range_max": 2966
+        },
+        "elbow_flex": {
+          "homing_offset": -1270,
+          "range_min": 1067,
+          "range_max": 3121
+        },
+        "wrist_flex": {
+          "homing_offset": -44,
+          "range_min": 955,
+          "range_max": 3071
+        },
+        "wrist_roll": {
+          "homing_offset": -34,
+          "range_min": 955,
+          "range_max": 3096
+        },
+        "gripper": {
+          "homing_offset": -405,
+          "range_min": 1627,
+          "range_max": 2714
+        }
+      }
+    }
+  },
+  "users": {
+    "1": {
+      "id": 1,
+      "email": "test@test.com",
+      "password": "$2b$12$u./W0rNnN3/ruV0q.17JQeGmpZ0ZldGeJ0Gu1zlitmyFoOvhIxRBm",
+      "name": "Test User",
+      "role": "admin",
+      "created_at": "2026-01-24T03:11:19.329220"
+    },
+    "2": {
+      "id": 2,
+      "email": "new@test.com",
+      "password": "$2b$12$iCUBoPj9rHeUg2gitudsne6HtHAposZG2QuIhUX3pETzB9RsRsiYG",
+      "name": "\ud14c\uc2a4\ud2b8",
+      "role": "user",
+      "created_at": "2026-01-24T03:20:49.683826"
+    }
+  },
+  "intrinsic_calibrations": {},
+  "extrinsic_calibrations": {},
+  "handeye_calibrations": {}
+}
