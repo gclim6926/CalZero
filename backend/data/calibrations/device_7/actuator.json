@@ -48,5 +48,205 @@
     },
     "id": 1,
     "created_at": "2026-01-24T06:52:47.368674"
+  },
+  {
+    "device_id": 7,
+    "notes": "새 캘리브레이션",
+    "calibration_data": {
+      "shoulder_pan": {
+        "id": 1,
+        "drive_mode": 0,
+        "homing_offset": 270,
+        "range_min": 785,
+        "range_max": 3415
+      },
+      "shoulder_lift": {
+        "id": 2,
+        "drive_mode": 0,
+        "homing_offset": 130,
+        "range_min": 905,
+        "range_max": 3279
+      },
+      "elbow_flex": {
+        "id": 3,
+        "drive_mode": 0,
+        "homing_offset": -252,
+        "range_min": 819,
+        "range_max": 3027
+      },
+      "wrist_flex": {
+        "id": 4,
+        "drive_mode": 0,
+        "homing_offset": -1681,
+        "range_min": 933,
+        "range_max": 3200
+      },
+      "wrist_roll": {
+        "id": 5,
+        "drive_mode": 0,
+        "homing_offset": -1340,
+        "range_min": 0,
+        "range_max": 4095
+      },
+      "gripper": {
+        "id": 6,
+        "drive_mode": 0,
+        "homing_offset": -1336,
+        "range_min": 2039,
+        "range_max": 3507
+      }
+    },
+    "id": 2,
+    "created_at": "2026-01-26T08:01:39.178285"
+  },
+  {
+    "device_id": 7,
+    "notes": "새 캘리브레이션",
+    "calibration_data": {
+      "shoulder_pan": {
+        "id": 1,
+        "drive_mode": 0,
+        "homing_offset": 237,
+        "range_min": 1056,
+        "range_max": 3432
+      },
+      "shoulder_lift": {
+        "id": 2,
+        "drive_mode": 0,
+        "homing_offset": 142,
+        "range_min": 895,
+        "range_max": 3137
+      },
+      "elbow_flex": {
+        "id": 3,
+        "drive_mode": 0,
+        "homing_offset": -278,
+        "range_min": 921,
+        "range_max": 3047
+      },
+      "wrist_flex": {
+        "id": 4,
+        "drive_mode": 0,
+        "homing_offset": -1669,
+        "range_min": 1020,
+        "range_max": 3021
+      },
+      "wrist_roll": {
+        "id": 5,
+        "drive_mode": 0,
+        "homing_offset": -1370,
+        "range_min": 0,
+        "range_max": 4095
+      },
+      "gripper": {
+        "id": 6,
+        "drive_mode": 0,
+        "homing_offset": -1336,
+        "range_min": 2039,
+        "range_max": 3507
+      }
+    },
+    "id": 3,
+    "created_at": "2026-01-26T08:02:20.341018"
+  },
+  {
+    "device_id": 7,
+    "notes": "새 캘리브레이션",
+    "calibration_data": {
+      "shoulder_pan": {
+        "id": 1,
+        "drive_mode": 0,
+        "homing_offset": 263,
+        "range_min": 805,
+        "range_max": 3412
+      },
+      "shoulder_lift": {
+        "id": 2,
+        "drive_mode": 0,
+        "homing_offset": 146,
+        "range_min": 899,
+        "range_max": 3257
+      },
+      "elbow_flex": {
+        "id": 3,
+        "drive_mode": 0,
+        "homing_offset": -318,
+        "range_min": 876,
+        "range_max": 3090
+      },
+      "wrist_flex": {
+        "id": 4,
+        "drive_mode": 0,
+        "homing_offset": -1591,
+        "range_min": 837,
+        "range_max": 3115
+      },
+      "wrist_roll": {
+        "id": 5,
+        "drive_mode": 0,
+        "homing_offset": -1314,
+        "range_min": 0,
+        "range_max": 4095
+      },
+      "gripper": {
+        "id": 6,
+        "drive_mode": 0,
+        "homing_offset": -1336,
+        "range_min": 2039,
+        "range_max": 3507
+      }
+    },
+    "id": 4,
+    "created_at": "2026-01-26T08:03:08.404339"
+  },
+  {
+    "device_id": 7,
+    "notes": "새 캘리브레이션",
+    "calibration_data": {
+      "shoulder_pan": {
+        "id": 1,
+        "drive_mode": 0,
+        "homing_offset": 207,
+        "range_min": 853,
+        "range_max": 3471
+      },
+      "shoulder_lift": {
+        "id": 2,
+        "drive_mode": 0,
+        "homing_offset": 185,
+        "range_min": 855,
+        "range_max": 3213
+      },
+      "elbow_flex": {
+        "id": 3,
+        "drive_mode": 0,
+        "homing_offset": -294,
+        "range_min": 864,
+        "range_max": 3069
+      },
+      "wrist_flex": {
+        "id": 4,
+        "drive_mode": 0,
+        "homing_offset": -1639,
+        "range_min": 884,
+        "range_max": 3157
+      },
+      "wrist_roll": {
+        "id": 5,
+        "drive_mode": 0,
+        "homing_offset": -1323,
+        "range_min": 0,
+        "range_max": 4095
+      },
+      "gripper": {
+        "id": 6,
+        "drive_mode": 0,
+        "homing_offset": -1336,
+        "range_min": 2039,
+        "range_max": 3507
+      }
+    },
+    "id": 5,
+    "created_at": "2026-01-26T08:03:39.820279"
   }
 ]
