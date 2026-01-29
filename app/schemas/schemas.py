@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 # User
@@ -17,7 +17,7 @@ class UserResponse(BaseModel):
     email: str
     name: Optional[str]
     role: str
-    
+
     class Config:
         from_attributes = True
 
@@ -33,11 +33,11 @@ class DeviceResponse(BaseModel):
     device_type: str
     serial_number: Optional[str]
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
 
-# Calibration
+# Calibration (레거시)
 class CalibrationCreate(BaseModel):
     device_id: int
     calibration_data: str  # JSON 문자열
@@ -49,7 +49,86 @@ class CalibrationResponse(BaseModel):
     calibration_data: str
     notes: Optional[str]
     created_at: datetime
-    
+
+    class Config:
+        from_attributes = True
+
+# Actuator Calibration
+class ActuatorCalibrationCreate(BaseModel):
+    device_id: int
+    calibration_data: str  # JSON 문자열 (joints 데이터)
+    notes: Optional[str] = None
+
+class ActuatorCalibrationResponse(BaseModel):
+    id: int
+    device_id: int
+    calibration_data: str
+    notes: Optional[str]
+    is_active: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# Intrinsic Calibration (카메라 내부 파라미터)
+class IntrinsicCalibrationCreate(BaseModel):
+    device_id: int
+    camera: str  # 'front_cam' or 'wrist_cam'
+    fx: float
+    fy: float
+    cx: float
+    cy: float
+    dist_coeffs: Optional[List[float]] = None  # [k1, k2, p1, p2, k3]
+    rms_error: Optional[float] = None
+    image_count: Optional[int] = None
+    resolution: Optional[str] = None
+    notes: Optional[str] = None
+
+class IntrinsicCalibrationResponse(BaseModel):
+    id: int
+    device_id: int
+    camera: str
+    fx: float
+    fy: float
+    cx: float
+    cy: float
+    dist_coeffs: Optional[List[float]] = None
+    rms_error: Optional[float] = None
+    image_count: Optional[int] = None
+    resolution: Optional[str] = None
+    notes: Optional[str] = None
+    is_active: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# Extrinsic Calibration (카메라 외부 파라미터)
+class ExtrinsicCalibrationCreate(BaseModel):
+    device_id: int
+    camera: str  # 'front_cam' or 'wrist_cam'
+    intrinsic_id: Optional[int] = None
+    translation_vector: List[float]  # [tx, ty, tz] in mm
+    rotation_vector: List[float]  # [rx, ry, rz] in rad
+    rotation_matrix: Optional[List[List[float]]] = None  # 3x3 matrix
+    reprojection_error: Optional[float] = None
+    image_count: Optional[int] = None
+    notes: Optional[str] = None
+
+class ExtrinsicCalibrationResponse(BaseModel):
+    id: int
+    device_id: int
+    camera: str
+    intrinsic_id: Optional[int] = None
+    translation_vector: List[float]
+    rotation_vector: List[float]
+    rotation_matrix: Optional[List[List[float]]] = None
+    reprojection_error: Optional[float] = None
+    image_count: Optional[int] = None
+    notes: Optional[str] = None
+    is_active: bool
+    created_at: datetime
+
     class Config:
         from_attributes = True
 
