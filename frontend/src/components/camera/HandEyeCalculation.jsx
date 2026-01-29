@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { initPyodide, isPyodideReady } from '../../utils/calibration.js'
 
-function HandEyeCalibration({ device, intrinsicCalibrations, onCalibrationComplete }) {
+function HandEyeCalculation({ device, intrinsicCalibrations, onCalibrationComplete }) {
   const [pyReady, setPyReady] = useState(false)
   const [pyError, setPyError] = useState(null)
   const [calibrationType, setCalibrationType] = useState('eye-in-hand')
@@ -824,7 +824,7 @@ function HandEyeCalibration({ device, intrinsicCalibrations, onCalibrationComple
 
         {/* 타입 표시 */}
         <div className="mb-4 p-3 bg-gray-900 rounded-lg flex items-center justify-between">
-          <span className="text-gray-500 text-sm">캘리브레이션 타입:</span>
+          <span className="text-gray-500 text-sm">계산 타입:</span>
           <span className={`px-3 py-1 rounded-full text-sm font-medium ${
             calibrationType === 'eye-in-hand' ? 'bg-cyan-500/20 text-cyan-400' : 'bg-amber-500/20 text-amber-400'
           }`}>
@@ -958,4 +958,4 @@ function HandEyeCalibration({ device, intrinsicCalibrations, onCalibrationComple
   )
 }
 
-export default HandEyeCalibration
+export default HandEyeCalculation

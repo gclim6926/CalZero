@@ -10,7 +10,7 @@ function HandEyeHistory({ device, calibrations, setCalibrations }) {
     { id: 'front', name: 'Front Cam', icon: '📷', type: 'Eye-to-Hand' },
   ]
 
-  // 디바이스의 Hand-Eye 캘리브레이션 필터링
+  // 디바이스의 Hand-Eye 계산 필터링
   const getCalibrations = () => {
     if (!device || !calibrations) return []
     
@@ -56,8 +56,8 @@ function HandEyeHistory({ device, calibrations, setCalibrations }) {
   }
 
   const handleSetActive = (calib) => {
-    // 활성 캘리브레이션으로 설정
-    alert(`${calib.camera} 카메라의 Hand-Eye 캘리브레이션이 활성화되었습니다.`)
+    // 활성 계산으로 설정
+    alert(`${calib.camera} 카메라의 Hand-Eye 계산이 활성화되었습니다.`)
   }
 
   const formatMatrix = (matrix) => {
@@ -74,7 +74,7 @@ function HandEyeHistory({ device, calibrations, setCalibrations }) {
       camera: 'wrist',
       type: 'eye-in-hand',
       created_at: '2025-01-20T10:30:00Z',
-      notes: '초기 Hand-Eye 캘리브레이션',
+      notes: '초기 Hand-Eye 계산',
       poses_count: 15,
       translation: [25.3, -12.1, 45.7],
       rotation_euler: [1.13, 2.58, -1.34],
@@ -92,7 +92,7 @@ function HandEyeHistory({ device, calibrations, setCalibrations }) {
       camera: 'wrist',
       type: 'eye-in-hand',
       created_at: '2025-01-18T14:20:00Z',
-      notes: '테스트 캘리브레이션',
+      notes: '테스트 계산',
       poses_count: 12,
       translation: [24.8, -11.5, 46.2],
       rotation_euler: [1.08, 2.61, -1.29],
@@ -143,8 +143,8 @@ function HandEyeHistory({ device, calibrations, setCalibrations }) {
       <div className="bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/30 p-4 rounded-xl">
         <h3 className="text-violet-400 font-semibold text-sm mb-2">📋 Hand-Eye 히스토리</h3>
         <p className="text-gray-300 text-xs leading-relaxed">
-          Hand-Eye 캘리브레이션 이력을 관리합니다. 
-          <span className="text-emerald-400"> 활성화된 캘리브레이션</span>이 실제 로봇 운영에 사용됩니다.
+          Hand-Eye 계산 이력을 관리합니다. 
+          <span className="text-emerald-400"> 활성화된 계산</span>이 실제 로봇 운영에 사용됩니다.
         </p>
       </div>
 
@@ -171,12 +171,12 @@ function HandEyeHistory({ device, calibrations, setCalibrations }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* 왼쪽: 목록 */}
         <div className="lg:col-span-1 bg-gray-800 rounded-xl border border-gray-700 p-4">
-          <h4 className="text-white font-semibold text-sm mb-3">캘리브레이션 목록</h4>
+          <h4 className="text-white font-semibold text-sm mb-3">계산 목록</h4>
           
           {displayData.length === 0 ? (
             <div className="text-center py-8">
               <div className="text-3xl mb-2">📭</div>
-              <p className="text-gray-500 text-sm">캘리브레이션 이력이 없습니다</p>
+              <p className="text-gray-500 text-sm">계산 이력이 없습니다</p>
             </div>
           ) : (
             <div className="space-y-2 max-h-[500px] overflow-y-auto">
@@ -221,7 +221,7 @@ function HandEyeHistory({ device, calibrations, setCalibrations }) {
             <div className="h-64 flex items-center justify-center text-gray-500">
               <div className="text-center">
                 <div className="text-4xl mb-3">👈</div>
-                <p>왼쪽에서 캘리브레이션을 선택하세요</p>
+                <p>왼쪽에서 계산을 선택하세요</p>
               </div>
             </div>
           ) : (

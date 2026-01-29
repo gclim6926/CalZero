@@ -5,11 +5,11 @@ import CalibrationHistory from './components/actuator/CalibrationHistory'
 import ActuatorHistory from './components/actuator/ActuatorHistory'
 import CalibrationStats from './components/actuator/CalibrationStats'
 import DataAnalysis from './components/actuator/DataAnalysis'
-import IntrinsicCalibration from './components/camera/IntrinsicCalibration'
+import IntrinsicCalculation from './components/camera/IntrinsicCalculation'
 import IntrinsicHistory from './components/camera/IntrinsicHistory'
-import ExtrinsicCalibration from './components/camera/ExtrinsicCalibration'
+import ExtrinsicCalculation from './components/camera/ExtrinsicCalculation'
 import ExtrinsicHistory from './components/camera/ExtrinsicHistory'
-import HandEyeCalibration from './components/camera/HandEyeCalibration'
+import HandEyeCalculation from './components/camera/HandEyeCalculation'
 import HandEyeHistory from './components/camera/HandEyeHistory'
 import SettingsGeneral from './components/settings/SettingsGeneral'
 import api from './utils/api'
@@ -249,17 +249,17 @@ function App() {
 
     if (activeTopMenu === 'camera') {
       switch (activeSubMenu) {
-        case 'intrinsic': return <IntrinsicCalibration device={selectedDevice} onCalibrationComplete={handleIntrinsicCalibrationSave} />
+        case 'intrinsic': return <IntrinsicCalculation device={selectedDevice} onCalibrationComplete={handleIntrinsicCalibrationSave} />
         case 'intrinsic-history': return <IntrinsicHistory device={selectedDevice} calibrations={intrinsicCalibrations} onDelete={handleIntrinsicCalibrationDelete} />
-        case 'extrinsic': return <ExtrinsicCalibration device={selectedDevice} intrinsicCalibrations={intrinsicCalibrations} onCalibrationComplete={handleExtrinsicCalibrationSave} />
+        case 'extrinsic': return <ExtrinsicCalculation device={selectedDevice} intrinsicCalibrations={intrinsicCalibrations} onCalibrationComplete={handleExtrinsicCalibrationSave} />
         case 'extrinsic-history': return <ExtrinsicHistory device={selectedDevice} calibrations={extrinsicCalibrations} onDelete={handleExtrinsicCalibrationDelete} />
-        case 'hand-eye': return <HandEyeCalibration device={selectedDevice} intrinsicCalibrations={intrinsicCalibrations} onCalibrationComplete={handleHandEyeCalibrationSave} />
+        case 'hand-eye': return <HandEyeCalculation device={selectedDevice} intrinsicCalibrations={intrinsicCalibrations} onCalibrationComplete={handleHandEyeCalibrationSave} />
         case 'hand-eye-history': return <HandEyeHistory device={selectedDevice} calibrations={handEyeCalibrations} onDelete={handleHandEyeCalibrationDelete} onActivate={handleHandEyeActivate} />
         default: return null
       }
     }
 
-    if (activeTopMenu === 'sensors') return <div className="bg-gray-800 rounded-xl p-8 text-center"><div className="text-4xl mb-3">📡</div><p className="text-gray-400">센서 캘리브레이션 기능 준비 중</p></div>
+    if (activeTopMenu === 'sensors') return <div className="bg-gray-800 rounded-xl p-8 text-center"><div className="text-4xl mb-3">📡</div><p className="text-gray-400">센서 계산 기능 준비 중</p></div>
     return null
   }
 
@@ -276,12 +276,12 @@ function App() {
             <div><h3 className="text-white font-semibold">장치를 선택하세요</h3><p className="text-gray-500 text-sm">왼쪽 사이드바에서 시작</p></div>
           </div>
           <div className="space-y-3 text-sm">
-            <div className="flex items-center gap-3 p-3 bg-gray-900/50 rounded-lg"><span className="text-cyan-400">⚙️</span><span className="text-gray-300">Actuator - 모터/조인트 캘리브레이션</span></div>
-            <div className="flex items-center gap-3 p-3 bg-gray-900/50 rounded-lg"><span className="text-violet-400">📷</span><span className="text-gray-300">Camera - 카메라 캘리브레이션</span></div>
-            <div className="flex items-center gap-3 p-3 bg-gray-900/50 rounded-lg"><span className="text-emerald-400">📡</span><span className="text-gray-300">Sensors - 센서 캘리브레이션</span></div>
+            <div className="flex items-center gap-3 p-3 bg-gray-900/50 rounded-lg"><span className="text-cyan-400">⚙️</span><span className="text-gray-300">Actuator - 모터/조인트 계산</span></div>
+            <div className="flex items-center gap-3 p-3 bg-gray-900/50 rounded-lg"><span className="text-violet-400">📷</span><span className="text-gray-300">Camera - 카메라 계산</span></div>
+            <div className="flex items-center gap-3 p-3 bg-gray-900/50 rounded-lg"><span className="text-emerald-400">📡</span><span className="text-gray-300">Sensors - 센서 계산</span></div>
           </div>
         </div>
-        <p className="text-gray-600 text-xs mt-6">장치를 선택하면 캘리브레이션 메뉴가 표시됩니다</p>
+        <p className="text-gray-600 text-xs mt-6">장치를 선택하면 계산 메뉴가 표시됩니다</p>
       </div>
     </div>
   )

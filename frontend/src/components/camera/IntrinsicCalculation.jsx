@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { initPyodide, runCalibration as runPyCalibration, isPyodideReady } from '../../utils/calibration.js'
 
-function IntrinsicCalibration({ device, onCalibrationComplete }) {
+function IntrinsicCalculation({ device, onCalibrationComplete }) {
   const [pyReady, setPyReady] = useState(false)
   const [pyError, setPyError] = useState(null)
   const [selectedBoard, setSelectedBoard] = useState('standard_9x6')
@@ -108,7 +108,7 @@ function IntrinsicCalibration({ device, onCalibrationComplete }) {
 
     } catch (err) {
       console.error('Calibration error:', err)
-      setCalibError(err.message || '캘리브레이션 실패')
+      setCalibError(err.message || '계산 실패')
     } finally {
       setCalibrating(false)
     }
@@ -138,7 +138,7 @@ function IntrinsicCalibration({ device, onCalibrationComplete }) {
 
       // 저장 성공 후 결과 초기화
       setCalibResult(null)
-      alert('✅ 캘리브레이션이 저장되었습니다. 히스토리 탭에서 확인하세요.')
+      alert('✅ 계산 결과가 저장되었습니다. 히스토리 탭에서 확인하세요.')
     } catch (err) {
       console.error('Save error:', err)
       alert('저장에 실패했습니다: ' + err.message)
@@ -148,7 +148,7 @@ function IntrinsicCalibration({ device, onCalibrationComplete }) {
   }
 
   const handleDiscardCalibration = () => {
-    if (!confirm('캘리브레이션 결과를 버리시겠습니까?')) return
+    if (!confirm('계산 결과를 버리시겠습니까?')) return
     setCalibResult(null)
   }
 
@@ -164,21 +164,21 @@ function IntrinsicCalibration({ device, onCalibrationComplete }) {
       <div className="bg-gray-800 rounded-xl border border-amber-500/50 p-8 text-center">
         <div className="text-4xl mb-3">📷</div>
         <h3 className="text-xl font-semibold text-amber-400 mb-2">장치를 선택해주세요</h3>
-        <p className="text-gray-400 text-sm">왼쪽 사이드바에서 장치를 선택하면 카메라 캘리브레이션을 진행할 수 있습니다.</p>
+        <p className="text-gray-400 text-sm">왼쪽 사이드바에서 장치를 선택하면 Intrinsic 계산을 진행할 수 있습니다.</p>
       </div>
     )
   }
 
   return (
     <div className="space-y-4">
-      {/* Intrinsic 캘리브레이션 설명 */}
+      {/* Intrinsic 계산 설명 */}
       <div className="bg-gradient-to-r from-violet-500/10 to-purple-500/10 rounded-xl border border-violet-500/30 p-5">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 rounded-xl bg-violet-500/20 flex items-center justify-center flex-shrink-0">
             <span className="text-2xl">📷</span>
           </div>
           <div className="flex-1">
-            <h2 className="text-xl font-bold text-white mb-2">Intrinsic 캘리브레이션</h2>
+            <h2 className="text-xl font-bold text-white mb-2">Intrinsic 계산</h2>
             <p className="text-gray-300 text-sm leading-relaxed mb-3">
               카메라 <span className="text-violet-400 font-medium">내부 파라미터</span>를 계산합니다.
               체커보드 이미지에서 코너를 검출하고, Zhang's Method를 사용해 카메라 행렬과 왜곡 계수를 추정합니다.
@@ -236,7 +236,7 @@ function IntrinsicCalibration({ device, onCalibrationComplete }) {
       {/* 1. 체커보드 선택 */}
       <div className="bg-gray-800 rounded-xl border border-gray-700 p-4">
         <h3 className="text-white font-bold text-sm mb-1">1️⃣ 체커보드 선택</h3>
-        <p className="text-gray-500 text-xs mb-3">캘리브레이션에 사용할 체커보드를 선택하세요. A4 용지에 인쇄하여 사용합니다.</p>
+        <p className="text-gray-500 text-xs mb-3">계산에 사용할 체커보드를 선택하세요. A4 용지에 인쇄하여 사용합니다.</p>
         <div className="grid grid-cols-2 gap-3">
           {Object.entries(boardConfigs).map(([key, config]) => (
             <button key={key} onClick={() => setSelectedBoard(key)}
@@ -334,13 +334,13 @@ function IntrinsicCalibration({ device, onCalibrationComplete }) {
         )}
       </div>
 
-      {/* 4. 캘리브레이션 실행 */}
+      {/* 4. 계산 실행 */}
       <div className="bg-gray-800 rounded-xl border border-gray-700 p-4">
-        <h3 className="text-white font-bold text-sm mb-1">4️⃣ 캘리브레이션 실행</h3>
+        <h3 className="text-white font-bold text-sm mb-1">4️⃣ 계산 실행</h3>
         <p className="text-gray-500 text-xs mb-3">이미지에서 체커보드 코너를 검출하고 카메라 파라미터를 계산합니다.</p>
         <button onClick={runCalibration} disabled={!pyReady || images.length < 3 || calibrating}
           className={'px-6 py-3 rounded-lg font-medium transition ' + (pyReady && images.length >= 3 && !calibrating ? 'bg-violet-500 hover:bg-violet-600 text-white' : 'bg-gray-700 text-gray-500 cursor-not-allowed')}>
-          {calibrating ? <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>처리 중...</span> : '🎯 캘리브레이션 시작'}
+          {calibrating ? <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>처리 중...</span> : '🎯 계산 시작'}
         </button>
         {images.length > 0 && images.length < 3 && <p className="text-amber-400 text-xs mt-2">⚠️ 최소 3장 이상의 이미지가 필요합니다.</p>}
         {calibError && <div className="mt-3 p-3 bg-rose-500/20 border border-rose-500/30 rounded-lg"><p className="text-rose-400 text-sm">❌ {calibError}</p></div>}
@@ -352,7 +352,7 @@ function IntrinsicCalibration({ device, onCalibrationComplete }) {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <span className="text-emerald-400">✅</span>
-              <h3 className="text-white font-bold text-sm">5️⃣ 캘리브레이션 결과</h3>
+              <h3 className="text-white font-bold text-sm">5️⃣ 계산 결과</h3>
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 bg-violet-500/20 rounded-lg border border-violet-500/30">
               <span>{calibResult.camera === 'wrist_cam' ? '🤖' : '📷'}</span>
@@ -423,4 +423,4 @@ function IntrinsicCalibration({ device, onCalibrationComplete }) {
   )
 }
 
-export default IntrinsicCalibration
+export default IntrinsicCalculation

@@ -12,7 +12,7 @@ function IntrinsicHistory({ device, calibrations, onDelete }) {
     { id: 'wrist_cam', name: 'Wrist Cam', icon: '🤖' },
   ]
 
-  // 현재 장치의 캘리브레이션 필터링
+  // 현재 장치의 계산 필터링
   const getFilteredCalibrations = () => {
     if (!device || !calibrations) return []
 
@@ -50,7 +50,7 @@ function IntrinsicHistory({ device, calibrations, onDelete }) {
 
   const handleDelete = async (item, e) => {
     e.stopPropagation()
-    if (!confirm('이 캘리브레이션 기록을 삭제하시겠습니까?')) return
+    if (!confirm('이 계산 기록을 삭제하시겠습니까?')) return
 
     setIsDeleting(true)
     try {
@@ -110,11 +110,11 @@ function IntrinsicHistory({ device, calibrations, onDelete }) {
     return { width: 0, height: 0 }
   }
 
-  // 선택된 캘리브레이션 기준으로 범위/편차 분석 계산
+  // 선택된 계산 기준으로 범위/편차 분석 계산
   const calculateAnalysis = () => {
     if (!selectedItem || currentHistory.length < 2) return null
 
-    // 선택된 카메라 종류의 캘리브레이션만 사용
+    // 선택된 카메라 종류의 계산만 사용
     const sameCamera = currentHistory.filter(c => c.camera === selectedItem.camera)
     if (sameCamera.length < 2) return null
 
@@ -177,7 +177,7 @@ function IntrinsicHistory({ device, calibrations, onDelete }) {
       <div className="bg-gray-800 rounded-xl border border-amber-500/50 p-8 text-center">
         <div className="text-4xl mb-3">📋</div>
         <h3 className="text-xl font-semibold text-amber-400 mb-2">장치를 선택해주세요</h3>
-        <p className="text-gray-400 text-sm">왼쪽 사이드바에서 장치를 선택하면 캘리브레이션 히스토리를 볼 수 있습니다.</p>
+        <p className="text-gray-400 text-sm">왼쪽 사이드바에서 장치를 선택하면 계산 히스토리를 볼 수 있습니다.</p>
       </div>
     )
   }
@@ -188,7 +188,7 @@ function IntrinsicHistory({ device, calibrations, onDelete }) {
       <div className="bg-gradient-to-r from-violet-500/10 to-purple-500/10 rounded-xl border border-violet-500/30 p-4">
         <h3 className="text-violet-400 font-semibold text-sm mb-2">📋 Intrinsic 히스토리</h3>
         <p className="text-gray-300 text-xs leading-relaxed">
-          Intrinsic 캘리브레이션 이력을 관리합니다.
+          Intrinsic 계산 이력을 관리합니다.
           <span className="text-amber-400"> 파라미터 변화를 비교</span>하여 카메라 상태를 확인할 수 있습니다.
         </p>
       </div>
@@ -235,8 +235,8 @@ function IntrinsicHistory({ device, calibrations, onDelete }) {
           {currentHistory.length === 0 ? (
             <div className="text-center py-8">
               <div className="text-3xl mb-2">📷</div>
-              <p className="text-gray-500 text-sm">캘리브레이션 기록이 없습니다</p>
-              <p className="text-gray-600 text-xs mt-1">캘리브레이션 탭에서 새 캘리브레이션을 진행하세요</p>
+              <p className="text-gray-500 text-sm">계산 기록이 없습니다</p>
+              <p className="text-gray-600 text-xs mt-1">계산 탭에서 새 계산을 진행하세요</p>
             </div>
           ) : (
             <div className="space-y-2 max-h-[500px] overflow-y-auto">
@@ -274,7 +274,7 @@ function IntrinsicHistory({ device, calibrations, onDelete }) {
           {compareMode && compareItems.length === 2 ? (
             // 비교 뷰
             <div className="bg-gray-800 rounded-xl border border-gray-700 p-4">
-              <h3 className="text-white font-bold text-sm mb-4">🔀 캘리브레이션 비교</h3>
+              <h3 className="text-white font-bold text-sm mb-4">🔀 계산 비교</h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -403,7 +403,7 @@ function IntrinsicHistory({ device, calibrations, onDelete }) {
             </div>
           )}
 
-          {/* 범위/편차 분석 - 선택된 캘리브레이션 기준 */}
+          {/* 범위/편차 분석 - 선택된 계산 기준 */}
           {analysis && !compareMode && selectedItem && (
             <div className="bg-gray-800 rounded-xl border border-gray-700 p-4">
               <div className="flex items-center justify-between mb-2">

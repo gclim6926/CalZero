@@ -12,7 +12,7 @@ function ExtrinsicHistory({ device, calibrations, onDelete }) {
     { id: 'wrist_cam', name: 'Wrist Cam', icon: '🤖' },
   ]
 
-  // 현재 장치의 캘리브레이션 필터링
+  // 현재 장치의 계산 필터링
   const getFilteredCalibrations = () => {
     if (!device || !calibrations) return []
 
@@ -49,7 +49,7 @@ function ExtrinsicHistory({ device, calibrations, onDelete }) {
 
   const handleDelete = async (item, e) => {
     e.stopPropagation()
-    if (!confirm('이 캘리브레이션 기록을 삭제하시겠습니까?')) return
+    if (!confirm('이 계산 기록을 삭제하시겠습니까?')) return
 
     setIsDeleting(true)
     try {
@@ -141,7 +141,7 @@ function ExtrinsicHistory({ device, calibrations, onDelete }) {
       <div className="bg-gray-800 rounded-xl border border-amber-500/50 p-8 text-center">
         <div className="text-4xl mb-3">📋</div>
         <h3 className="text-xl font-semibold text-amber-400 mb-2">장치를 선택해주세요</h3>
-        <p className="text-gray-400 text-sm">왼쪽 사이드바에서 장치를 선택하면 캘리브레이션 히스토리를 볼 수 있습니다.</p>
+        <p className="text-gray-400 text-sm">왼쪽 사이드바에서 장치를 선택하면 계산 히스토리를 볼 수 있습니다.</p>
       </div>
     )
   }
@@ -152,7 +152,7 @@ function ExtrinsicHistory({ device, calibrations, onDelete }) {
       <div className="bg-gradient-to-r from-violet-500/10 to-purple-500/10 rounded-xl border border-violet-500/30 p-4">
         <h3 className="text-violet-400 font-semibold text-sm mb-2">📋 Extrinsic 히스토리</h3>
         <p className="text-gray-300 text-xs leading-relaxed mb-2">
-          Extrinsic 캘리브레이션 이력을 관리합니다.
+          Extrinsic 계산 이력을 관리합니다.
           촬영한 체커보드의 <span className="text-amber-400">기준위치(0,0)</span>를 기반으로 카메라의 상대적인 위치를 계산합니다.
         </p>
         <p className="text-amber-400/80 text-xs">
@@ -202,8 +202,8 @@ function ExtrinsicHistory({ device, calibrations, onDelete }) {
           {currentHistory.length === 0 ? (
             <div className="text-center py-8">
               <div className="text-3xl mb-2">🌍</div>
-              <p className="text-gray-500 text-sm">캘리브레이션 기록이 없습니다</p>
-              <p className="text-gray-600 text-xs mt-1">캘리브레이션 탭에서 새 캘리브레이션을 진행하세요</p>
+              <p className="text-gray-500 text-sm">계산 기록이 없습니다</p>
+              <p className="text-gray-600 text-xs mt-1">계산 탭에서 새 계산을 진행하세요</p>
             </div>
           ) : (
             <div className="space-y-2 max-h-[500px] overflow-y-auto">
@@ -242,7 +242,7 @@ function ExtrinsicHistory({ device, calibrations, onDelete }) {
           {compareMode && compareItems.length === 2 ? (
             // 비교 뷰
             <div className="bg-gray-800 rounded-xl border border-gray-700 p-4">
-              <h3 className="text-white font-bold text-sm mb-4">🔀 캘리브레이션 비교</h3>
+              <h3 className="text-white font-bold text-sm mb-4">🔀 계산 비교</h3>
 
               {/* Translation 비교 */}
               <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
@@ -445,7 +445,7 @@ function ExtrinsicHistory({ device, calibrations, onDelete }) {
                 <div className="flex items-start gap-2">
                   <span className="text-amber-400">⚠️</span>
                   <p className="text-amber-400/90 text-xs leading-relaxed">
-                    <span className="font-medium">[주의]</span> 동일한 체커보드 위치에서 촬영 및 캘리브레이션한 결과만 활용하세요.
+                    <span className="font-medium">[주의]</span> 동일한 체커보드 위치에서 촬영 및 계산한 결과만 활용하세요.
                     체커보드 위치가 변경되었다면 이 분석은 의미가 없습니다.
                   </p>
                 </div>

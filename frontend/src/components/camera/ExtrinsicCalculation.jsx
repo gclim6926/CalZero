@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { initPyodide, isPyodideReady } from '../../utils/calibration.js'
 
-function ExtrinsicCalibration({ device, intrinsicCalibrations, onCalibrationComplete }) {
+function ExtrinsicCalculation({ device, intrinsicCalibrations, onCalibrationComplete }) {
   const [pyReady, setPyReady] = useState(false)
   const [pyError, setPyError] = useState(null)
   const [selectedCamera, setSelectedCamera] = useState('front_cam')
@@ -26,7 +26,7 @@ function ExtrinsicCalibration({ device, intrinsicCalibrations, onCalibrationComp
   const currentBoard = boardConfigs[selectedBoard]
   const currentSquareSize = customSquareSize[selectedBoard]
 
-  // 현재 장치와 카메라에 맞는 Intrinsic 캘리브레이션 필터링
+  // 현재 장치와 카메라에 맞는 Intrinsic 계산 결과 필터링
   const deviceIntrinsics = device
     ? intrinsicCalibrations.filter(c => c.device_id === device.id && c.camera === selectedCamera)
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
@@ -161,7 +161,7 @@ function ExtrinsicCalibration({ device, intrinsicCalibrations, onCalibrationComp
 
     } catch (err) {
       console.error('Calibration error:', err)
-      setCalibError(err.message || '캘리브레이션 실패')
+      setCalibError(err.message || '계산 실패')
     } finally {
       setCalibrating(false)
     }
@@ -188,7 +188,7 @@ function ExtrinsicCalibration({ device, intrinsicCalibrations, onCalibrationComp
       setCalibResult(null)
       setNotes('')
       clearImages()
-      alert('✅ Extrinsic 캘리브레이션이 저장되었습니다.')
+      alert('✅ Extrinsic 계산 결과가 저장되었습니다.')
     } catch (err) {
       console.error('Save error:', err)
       alert('저장에 실패했습니다: ' + err.message)
@@ -198,7 +198,7 @@ function ExtrinsicCalibration({ device, intrinsicCalibrations, onCalibrationComp
   }
 
   const handleDiscardCalibration = () => {
-    if (!confirm('캘리브레이션 결과를 버리시겠습니까?')) return
+    if (!confirm('계산 결과를 버리시겠습니까?')) return
     setCalibResult(null)
   }
 
@@ -213,21 +213,21 @@ function ExtrinsicCalibration({ device, intrinsicCalibrations, onCalibrationComp
       <div className="bg-gray-800 rounded-xl border border-amber-500/50 p-8 text-center">
         <div className="text-4xl mb-3">🌍</div>
         <h3 className="text-xl font-semibold text-amber-400 mb-2">장치를 선택해주세요</h3>
-        <p className="text-gray-400 text-sm">왼쪽 사이드바에서 장치를 선택하면 Extrinsic 캘리브레이션을 진행할 수 있습니다.</p>
+        <p className="text-gray-400 text-sm">왼쪽 사이드바에서 장치를 선택하면 Extrinsic 계산을 진행할 수 있습니다.</p>
       </div>
     )
   }
 
   return (
     <div className="space-y-4">
-      {/* Extrinsic 캘리브레이션 설명 */}
+      {/* Extrinsic 계산 설명 */}
       <div className="bg-gradient-to-r from-violet-500/10 to-purple-500/10 rounded-xl border border-violet-500/30 p-5">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 rounded-xl bg-violet-500/20 flex items-center justify-center flex-shrink-0">
             <span className="text-2xl">🌍</span>
           </div>
           <div className="flex-1">
-            <h2 className="text-xl font-bold text-white mb-2">Extrinsic 캘리브레이션</h2>
+            <h2 className="text-xl font-bold text-white mb-2">Extrinsic 계산</h2>
             <p className="text-gray-300 text-sm leading-relaxed mb-3">
               카메라의 <span className="text-violet-400 font-medium">외부 파라미터</span>를 계산합니다.
               체커보드를 기준으로 카메라가 <span className="text-amber-400 font-medium">어디에(Translation)</span>,
@@ -246,7 +246,7 @@ function ExtrinsicCalibration({ device, intrinsicCalibrations, onCalibrationComp
               <div className="bg-gray-900/50 rounded-lg p-3">
                 <h4 className="text-cyan-400 font-semibold mb-1.5">⚙️ 필요 조건</h4>
                 <ul className="text-gray-400 space-y-1">
-                  <li>• <span className="text-white">Intrinsic 캘리브레이션</span> - 카메라 내부 파라미터</li>
+                  <li>• <span className="text-white">Intrinsic 계산 결과</span> - 카메라 내부 파라미터</li>
                   <li>• <span className="text-white">체커보드 이미지</span> - 기준점 검출용</li>
                   <li>• <span className="text-amber-400">solvePnP 알고리즘</span> 사용</li>
                 </ul>
@@ -255,7 +255,7 @@ function ExtrinsicCalibration({ device, intrinsicCalibrations, onCalibrationComp
 
             <div className="mt-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
               <p className="text-amber-400 text-xs">
-                💡 <span className="font-medium">활용:</span> 카메라 위치 변화 감지, Hand-Eye 캘리브레이션의 입력 데이터, 3D 재구성
+                💡 <span className="font-medium">활용:</span> 카메라 위치 변화 감지, Hand-Eye 계산의 입력 데이터, 3D 재구성
               </p>
             </div>
           </div>
@@ -273,7 +273,7 @@ function ExtrinsicCalibration({ device, intrinsicCalibrations, onCalibrationComp
         </div>
       </div>
 
-      {/* 메인 레이아웃: 왼쪽(Intrinsic 히스토리) + 오른쪽(캘리브레이션) */}
+      {/* 메인 레이아웃: 왼쪽(Intrinsic 히스토리) + 오른쪽(계산) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* 왼쪽: Intrinsic 히스토리 */}
         <div className="lg:col-span-1 space-y-4">
@@ -313,7 +313,7 @@ function ExtrinsicCalibration({ device, intrinsicCalibrations, onCalibrationComp
                 <p className="text-amber-400 text-sm font-medium">
                   {selectedCamera === 'front_cam' ? 'Front Cam' : 'Wrist Cam'}의 Intrinsic 데이터가 없습니다
                 </p>
-                <p className="text-gray-500 text-xs mt-1">먼저 Intrinsic 캘리브레이션을 진행해주세요</p>
+                <p className="text-gray-500 text-xs mt-1">먼저 Intrinsic 계산을 진행해주세요</p>
               </div>
             ) : (
               <div className="space-y-2 max-h-[400px] overflow-y-auto">
@@ -398,12 +398,12 @@ function ExtrinsicCalibration({ device, intrinsicCalibrations, onCalibrationComp
           )}
         </div>
 
-        {/* 오른쪽: 캘리브레이션 설정 및 결과 */}
+        {/* 오른쪽: 계산 설정 및 결과 */}
         <div className="lg:col-span-2 space-y-4">
           {/* 1. 체커보드 선택 */}
           <div className="bg-gray-800 rounded-xl border border-gray-700 p-4">
             <h3 className="text-white font-bold text-sm mb-1">1️⃣ 체커보드 선택</h3>
-            <p className="text-gray-500 text-xs mb-3">캘리브레이션에 사용할 체커보드를 선택하세요.</p>
+            <p className="text-gray-500 text-xs mb-3">계산에 사용할 체커보드를 선택하세요.</p>
             <div className="grid grid-cols-2 gap-3">
               {Object.entries(boardConfigs).map(([key, config]) => (
                 <button key={key} onClick={() => setSelectedBoard(key)}
@@ -498,9 +498,9 @@ function ExtrinsicCalibration({ device, intrinsicCalibrations, onCalibrationComp
             )}
           </div>
 
-          {/* 4. 캘리브레이션 실행 */}
+          {/* 4. 계산 실행 */}
           <div className="bg-gray-800 rounded-xl border border-gray-700 p-4">
-            <h3 className="text-white font-bold text-sm mb-1">4️⃣ 캘리브레이션 실행</h3>
+            <h3 className="text-white font-bold text-sm mb-1">4️⃣ 계산 실행</h3>
             <p className="text-gray-500 text-xs mb-3">
               이미지에서 체커보드 코너를 검출하고, 선택된 Intrinsic 파라미터를 사용해 카메라의 외부 위치(Extrinsic)를 계산합니다.
             </p>
@@ -519,11 +519,11 @@ function ExtrinsicCalibration({ device, intrinsicCalibrations, onCalibrationComp
 
             <button onClick={runCalibration} disabled={!pyReady || images.length < 1 || !selectedIntrinsic || calibrating}
               className={'w-full px-6 py-3 rounded-lg font-medium transition ' + (pyReady && images.length >= 1 && selectedIntrinsic && !calibrating ? 'bg-violet-500 hover:bg-violet-600 text-white' : 'bg-gray-700 text-gray-500 cursor-not-allowed')}>
-              {calibrating ? <span className="flex items-center justify-center gap-2"><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>처리 중...</span> : '🎯 캘리브레이션 시작'}
+              {calibrating ? <span className="flex items-center justify-center gap-2"><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>처리 중...</span> : '🎯 계산 시작'}
             </button>
 
             {!selectedIntrinsic && deviceIntrinsics.length > 0 && (
-              <p className="text-amber-400 text-xs mt-2">⚠️ 왼쪽에서 Intrinsic 캘리브레이션을 선택해주세요.</p>
+              <p className="text-amber-400 text-xs mt-2">⚠️ 왼쪽에서 Intrinsic 계산 결과를 선택해주세요.</p>
             )}
             {calibError && <div className="mt-3 p-3 bg-rose-500/20 border border-rose-500/30 rounded-lg"><p className="text-rose-400 text-sm">❌ {calibError}</p></div>}
           </div>
@@ -534,7 +534,7 @@ function ExtrinsicCalibration({ device, intrinsicCalibrations, onCalibrationComp
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <span className="text-emerald-400">✅</span>
-                  <h3 className="text-white font-bold text-sm">5️⃣ 캘리브레이션 결과</h3>
+                  <h3 className="text-white font-bold text-sm">5️⃣ 계산 결과</h3>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-violet-500/20 rounded-lg border border-violet-500/30">
                   <span>{calibResult.camera === 'wrist_cam' ? '🤖' : '📷'}</span>
@@ -635,4 +635,4 @@ function ExtrinsicCalibration({ device, intrinsicCalibrations, onCalibrationComp
   )
 }
 
-export default ExtrinsicCalibration
+export default ExtrinsicCalculation
