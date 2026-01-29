@@ -117,7 +117,12 @@ function DeviceModal({ isOpen, onClose, onSave, device = null }) {
     setLoading(true)
     try {
       const data = { ...formData }
-      if (data.port) data.port = parseInt(data.port)
+      // port를 정수로 변환하거나 비어있으면 null로 설정
+      if (data.port && data.port !== '') {
+        data.port = parseInt(data.port)
+      } else {
+        data.port = null
+      }
       await onSave(data, device?.id)
       onClose()
     } catch (error) {
