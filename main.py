@@ -228,7 +228,6 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
 
 # ==================== Health Check ====================
 
-@app.get("/")
 @app.get("/health")
 @app.get("/api/health")
 def health_check():
