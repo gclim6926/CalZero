@@ -45,11 +45,11 @@ const subMenus = {
     { id: 'stats', label: '통계', icon: '📈' },
   ],
   camera: [
-    { id: 'intrinsic', label: 'Intrinsic 캘리브레이션', icon: '📷' },
+    { id: 'intrinsic', label: 'Intrinsic 계산', icon: '📷' },
     { id: 'intrinsic-history', label: 'Intrinsic 히스토리', icon: '📋' },
-    { id: 'extrinsic', label: 'Extrinsic 캘리브레이션', icon: '🌍' },
+    { id: 'extrinsic', label: 'Extrinsic 계산', icon: '🌍' },
     { id: 'extrinsic-history', label: 'Extrinsic 히스토리', icon: '📋' },
-    { id: 'hand-eye', label: 'Hand-Eye 캘리브레이션', icon: '🤖' },
+    { id: 'hand-eye', label: 'Hand-Eye 계산', icon: '🤖' },
     { id: 'hand-eye-history', label: 'Hand-Eye 히스토리', icon: '📋' },
   ],
   sensors: [

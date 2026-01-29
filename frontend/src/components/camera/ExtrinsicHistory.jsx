@@ -151,9 +151,12 @@ function ExtrinsicHistory({ device, calibrations, onDelete }) {
       {/* Extrinsic 히스토리 설명 */}
       <div className="bg-gradient-to-r from-violet-500/10 to-purple-500/10 rounded-xl border border-violet-500/30 p-4">
         <h3 className="text-violet-400 font-semibold text-sm mb-2">📋 Extrinsic 히스토리</h3>
-        <p className="text-gray-300 text-xs leading-relaxed">
+        <p className="text-gray-300 text-xs leading-relaxed mb-2">
           Extrinsic 캘리브레이션 이력을 관리합니다.
-          <span className="text-amber-400"> 위치 변화를 비교</span>하여 카메라가 움직였는지 확인할 수 있습니다.
+          촬영한 체커보드의 <span className="text-amber-400">기준위치(0,0)</span>를 기반으로 카메라의 상대적인 위치를 계산합니다.
+        </p>
+        <p className="text-amber-400/80 text-xs">
+          ⚠️ 체커보드 위치가 변경되었다면, 히스토리 기반 '범위/편차 분석'은 의미가 없습니다.
         </p>
       </div>
 
@@ -419,7 +422,7 @@ function ExtrinsicHistory({ device, calibrations, onDelete }) {
                   {analysis.cameraName}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-xs mb-4">
+              <div className="flex items-center justify-between text-xs mb-3">
                 <span className="text-gray-500">{analysis.totalCount}개 측정 데이터 기준</span>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1.5">
@@ -434,6 +437,17 @@ function ExtrinsicHistory({ device, calibrations, onDelete }) {
                     <span className="text-gray-500 font-mono">σ</span>
                     <span className="text-gray-400">표준편차</span>
                   </div>
+                </div>
+              </div>
+
+              {/* 체커보드 위치 주의사항 */}
+              <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg mb-4">
+                <div className="flex items-start gap-2">
+                  <span className="text-amber-400">⚠️</span>
+                  <p className="text-amber-400/90 text-xs leading-relaxed">
+                    <span className="font-medium">[주의]</span> 동일한 체커보드 위치에서 촬영 및 캘리브레이션한 결과만 활용하세요.
+                    체커보드 위치가 변경되었다면 이 분석은 의미가 없습니다.
+                  </p>
                 </div>
               </div>
 
