@@ -226,6 +226,20 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
+# ==================== Health Check ====================
+
+@app.get("/")
+@app.get("/health")
+@app.get("/api/health")
+def health_check():
+    """Health check endpoint for Koyeb monitoring"""
+    return {
+        "status": "healthy",
+        "service": "CalZero API",
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
+
 # ==================== Auth Endpoints ====================
 
 @app.post("/api/auth/register", response_model=TokenResponse)
