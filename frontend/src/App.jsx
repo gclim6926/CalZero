@@ -5,6 +5,7 @@ import CalibrationHistory from './components/actuator/CalibrationHistory'
 import ActuatorHistory from './components/actuator/ActuatorHistory'
 import CalibrationStats from './components/actuator/CalibrationStats'
 import DataAnalysis from './components/actuator/DataAnalysis'
+import ReplayAnalysis from './components/actuator/ReplayAnalysis'
 import IntrinsicCalculation from './components/camera/IntrinsicCalculation'
 import IntrinsicHistory from './components/camera/IntrinsicHistory'
 import ExtrinsicCalculation from './components/camera/ExtrinsicCalculation'
@@ -41,6 +42,7 @@ const subMenus = {
   actuator: [
     { id: 'calibration', label: '캘리브레이션', icon: '⚙️' },
     { id: 'history', label: '히스토리 분석', icon: '📋' },
+    { id: 'replay-analysis', label: '리플레이 분석', icon: '🎯' },
     { id: 'data-analysis', label: '학습할 데이터 분석', icon: '📊' },
     { id: 'stats', label: '통계', icon: '📈' },
   ],
@@ -70,6 +72,7 @@ function App() {
   const [intrinsicCalibrations, setIntrinsicCalibrations] = useState([])
   const [extrinsicCalibrations, setExtrinsicCalibrations] = useState([])
   const [handEyeCalibrations, setHandEyeCalibrations] = useState([])
+  const [replayTests, setReplayTests] = useState([])
   const [activeTopMenu, setActiveTopMenu] = useState('actuator')
   const [activeSubMenu, setActiveSubMenu] = useState('calibration')
   const [isLoading, setIsLoading] = useState(true)
@@ -102,14 +105,16 @@ function App() {
 
   const loadCalibrations = async (deviceId) => {
     try {
-      const [actuator, intrinsic, extrinsic, handeye] = await Promise.all([
+      const [actuator, intrinsic, extrinsic, handeye, replay] = await Promise.all([
         api.actuator.list(deviceId), api.intrinsic.list(deviceId),
         api.extrinsic.list(deviceId), api.handeye.list(deviceId),
+        api.replay.list(deviceId),
       ])
       setCalibrations(actuator)
       setIntrinsicCalibrations(intrinsic)
       setExtrinsicCalibrations(extrinsic)
       setHandEyeCalibrations(handeye)
+      setReplayTests(replay)
     } catch (error) { console.error('Failed to load calibrations:', error) }
   }
 
@@ -203,6 +208,17 @@ function App() {
     })))
   }
 
+  const handleReplayTestSave = async (testData) => {
+    const saved = await api.replay.create(testData)
+    setReplayTests(prev => [saved, ...prev])
+    return saved
+  }
+
+  const handleReplayTestDelete = async (id, deviceId) => {
+    await api.replay.delete(id, deviceId)
+    setReplayTests(prev => prev.filter(t => t.id !== id))
+  }
+
   if (!user) return <Login onLogin={handleLogin} />
 
   const handleTopMenuChange = (menuId) => {
@@ -241,6 +257,7 @@ function App() {
       switch (activeSubMenu) {
         case 'calibration': return <CalibrationHistory device={selectedDevice} calibrations={calibrations} onSave={handleActuatorCalibrationSave} onDelete={handleActuatorCalibrationDelete} setActiveSubMenu={setActiveSubMenu} />
         case 'history': return <ActuatorHistory device={selectedDevice} calibrations={calibrations} onDelete={handleActuatorCalibrationDelete} />
+        case 'replay-analysis': return <ReplayAnalysis device={selectedDevice} calibrations={calibrations} replayTests={replayTests} onSave={handleReplayTestSave} onDelete={handleReplayTestDelete} />
         case 'data-analysis': return <DataAnalysis device={selectedDevice} calibrations={calibrations} />
         case 'stats': return <CalibrationStats calibrations={calibrations} />
         default: return null

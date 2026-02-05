@@ -91,11 +91,23 @@ export default {
       method: 'POST',
       body: JSON.stringify(data),
     }),
-    delete: (id, deviceId) => fetchAPI(`/calibrations/handeye/${id}?device_id=${deviceId}`, { 
-      method: 'DELETE' 
+    delete: (id, deviceId) => fetchAPI(`/calibrations/handeye/${id}?device_id=${deviceId}`, {
+      method: 'DELETE'
     }),
     activate: (id, deviceId) => fetchAPI(`/calibrations/handeye/${id}/activate?device_id=${deviceId}`, {
       method: 'PUT',
+    }),
+  },
+
+  // Replay Test API
+  replay: {
+    list: (deviceId) => fetchAPI(`/replay-tests?device_id=${deviceId}`),
+    create: (data) => fetchAPI('/replay-tests', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    delete: (id, deviceId) => fetchAPI(`/replay-tests/${id}?device_id=${deviceId}`, {
+      method: 'DELETE'
     }),
   },
 

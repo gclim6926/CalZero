@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import bcrypt
 import jwt
 import json
@@ -25,6 +25,13 @@ DEVICES_FILE = os.path.join(DATA_DIR, "devices.json")
 CALIBRATIONS_DIR = os.path.join(DATA_DIR, "calibrations")
 
 security = HTTPBearer(auto_error=False)
+
+# 한국 시간대 (KST = UTC+9)
+KST = timezone(timedelta(hours=9))
+
+def get_kst_now():
+    """현재 한국 시간 반환"""
+    return datetime.now(KST)
 
 
 # ==================== 파일 유틸리티 ====================
@@ -171,6 +178,20 @@ class HandEyeCalibrationCreate(BaseModel):
     notes: str = ""
 
 
+class ReplayTestPosition(BaseModel):
+    position: int
+    error_x: float
+    error_y: float
+    error_z: float
+
+
+class ReplayTestCreate(BaseModel):
+    device_id: int
+    calibration_id: Optional[int] = None
+    positions: List[ReplayTestPosition]
+    notes: str = ""
+
+
 # ==================== FastAPI App ====================
 
 app = FastAPI(title="CalZero API", version="0.3.0")
@@ -195,7 +216,7 @@ def verify_password(password: str, hashed: str) -> bool:
 
 
 def create_token(user_id: int, email: str) -> str:
-    expire = datetime.utcnow() + timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS)
+    expire = get_kst_now() + timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS)
     payload = {"sub": str(user_id), "email": email, "exp": expire}
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
@@ -232,7 +253,7 @@ def register(user: UserRegister):
         'password': hash_password(user.password),
         'name': user.name,
         'role': 'user',
-        'created_at': datetime.utcnow().isoformat()
+        'created_at': get_kst_now().isoformat()
     }
     users.append(user_data)
     save_json(USERS_FILE, users)
@@ -299,7 +320,7 @@ def create_device(device: DeviceCreate):
 
     data = device.dict()
     data['id'] = get_next_id(devices)
-    data['created_at'] = datetime.utcnow().isoformat()
+    data['created_at'] = get_kst_now().isoformat()
 
     # 장치별 캘리브레이션 디렉토리 생성
     device_dir = get_device_calib_dir(data['id'])
@@ -320,8 +341,8 @@ def update_device(device_id: int, device: DeviceUpdate):
 
     update_data = device.dict()
     update_data['id'] = device_id
-    update_data['created_at'] = devices[idx].get('created_at', datetime.utcnow().isoformat())
-    update_data['updated_at'] = datetime.utcnow().isoformat()
+    update_data['created_at'] = devices[idx].get('created_at', get_kst_now().isoformat())
+    update_data['updated_at'] = get_kst_now().isoformat()
 
     devices[idx] = update_data
     save_json(DEVICES_FILE, devices)
@@ -372,7 +393,7 @@ def create_actuator_calibration(calib: ActuatorCalibrationCreate):
 
     data = calib.dict()
     data['id'] = get_next_id(calibs)
-    data['created_at'] = datetime.utcnow().isoformat()
+    data['created_at'] = get_kst_now().isoformat()
 
     calibs.append(data)
     save_json(filepath, calibs)
@@ -418,7 +439,7 @@ def create_intrinsic_calibration(calib: IntrinsicCalibrationCreate):
 
     data = calib.dict()
     data['id'] = get_next_id(calibs)
-    data['created_at'] = datetime.utcnow().isoformat()
+    data['created_at'] = get_kst_now().isoformat()
 
     calibs.append(data)
     save_json(filepath, calibs)
@@ -464,7 +485,7 @@ def create_extrinsic_calibration(calib: ExtrinsicCalibrationCreate):
 
     data = calib.dict()
     data['id'] = get_next_id(calibs)
-    data['created_at'] = datetime.utcnow().isoformat()
+    data['created_at'] = get_kst_now().isoformat()
 
     calibs.append(data)
     save_json(filepath, calibs)
@@ -510,7 +531,7 @@ def create_handeye_calibration(calib: HandEyeCalibrationCreate):
 
     data = calib.dict()
     data['id'] = get_next_id(calibs)
-    data['created_at'] = datetime.utcnow().isoformat()
+    data['created_at'] = get_kst_now().isoformat()
 
     # 같은 device+camera의 기존 active 해제
     if data.get('is_active'):
@@ -555,6 +576,77 @@ def delete_handeye_calibration(calib_id: int, device_id: int):
     return {"message": "Calibration deleted"}
 
 
+# ==================== Replay Test Endpoints ====================
+
+@app.get("/api/replay-tests")
+def get_replay_tests(device_id: Optional[int] = None):
+    """리플레이 테스트 목록 조회"""
+    if device_id:
+        calibs = load_json(get_calib_file(device_id, "replay"), [])
+        return sorted(calibs, key=lambda x: x.get('created_at', ''), reverse=True)
+
+    # 모든 장치의 테스트
+    devices = load_json(DEVICES_FILE, [])
+    all_tests = []
+    for device in devices:
+        tests = load_json(get_calib_file(device['id'], "replay"), [])
+        all_tests.extend(tests)
+    return sorted(all_tests, key=lambda x: x.get('created_at', ''), reverse=True)
+
+
+@app.post("/api/replay-tests")
+def create_replay_test(test: ReplayTestCreate):
+    """새 리플레이 테스트 저장"""
+    import math
+
+    device_id = test.device_id
+    filepath = get_calib_file(device_id, "replay")
+    tests = load_json(filepath, [])
+
+    # 각 위치별 거리 계산 및 통계
+    positions_data = []
+    distances = []
+    for pos in test.positions:
+        distance = math.sqrt(pos.error_x**2 + pos.error_y**2 + pos.error_z**2)
+        distances.append(distance)
+        positions_data.append({
+            "position": pos.position,
+            "error_x": pos.error_x,
+            "error_y": pos.error_y,
+            "error_z": pos.error_z,
+            "distance": round(distance, 3)
+        })
+
+    data = {
+        "id": get_next_id(tests),
+        "device_id": device_id,
+        "calibration_id": test.calibration_id,
+        "positions": positions_data,
+        "avg_error": round(sum(distances) / len(distances), 3) if distances else 0,
+        "max_error": round(max(distances), 3) if distances else 0,
+        "notes": test.notes,
+        "created_at": get_kst_now().isoformat()
+    }
+
+    tests.append(data)
+    save_json(filepath, tests)
+    return data
+
+
+@app.delete("/api/replay-tests/{test_id}")
+def delete_replay_test(test_id: int, device_id: int):
+    """리플레이 테스트 삭제"""
+    filepath = get_calib_file(device_id, "replay")
+    tests = load_json(filepath, [])
+
+    if not any(t['id'] == test_id for t in tests):
+        raise HTTPException(status_code=404, detail="Test not found")
+
+    tests = [t for t in tests if t['id'] != test_id]
+    save_json(filepath, tests)
+    return {"message": "Test deleted"}
+
+
 # ==================== Health Check ====================
 
 @app.get("/api/health")
@@ -574,7 +666,7 @@ def create_backup():
     """전체 데이터 백업 생성"""
     backup_data = {
         "version": "0.3.0",
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": get_kst_now().isoformat(),
         "users": load_json(USERS_FILE, []),
         "devices": load_json(DEVICES_FILE, []),
         "calibrations": {}
@@ -586,7 +678,7 @@ def create_backup():
         device_id = device["id"]
         device_calibs = {}
 
-        for calib_type in ["actuator", "intrinsic", "extrinsic", "handeye"]:
+        for calib_type in ["actuator", "intrinsic", "extrinsic", "handeye", "replay"]:
             filepath = get_calib_file(device_id, calib_type)
             calibs = load_json(filepath, [])
             if calibs:
@@ -681,7 +773,7 @@ def startup_event():
             'password': hash_password('test1234'),
             'name': 'Test User',
             'role': 'admin',
-            'created_at': datetime.utcnow().isoformat()
+            'created_at': get_kst_now().isoformat()
         })
         save_json(USERS_FILE, users)
         print("✅ Sample user created (test@test.com / test1234)")

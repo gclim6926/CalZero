@@ -136,7 +136,29 @@ function ActuatorHistory({ device, calibrations, onDelete }) {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+    <div className="space-y-4">
+      {/* 상단 헤더: 분석 목적 */}
+      <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-xl border border-cyan-500/30 p-6">
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center flex-shrink-0">
+            <span className="text-2xl">📊</span>
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-white mb-2">히스토리 분석</h2>
+              <span className="px-3 py-1 bg-cyan-500/20 text-cyan-400 text-sm rounded-full">
+                {deviceCalibrations.length}개 기록
+              </span>
+            </div>
+            <p className="text-gray-300 text-sm leading-relaxed">
+              캘리브레이션 이력을 관리하고, 새로 측정한 데이터가 과거 데이터 대비<span className="text-cyan-400">(최소 5개 이상)</span> 어느 수준인지 통계적으로 파악합니다.
+              극단값<span className="text-amber-400">(2σ 이상)</span>이 감지되면 측정 오류 가능성이 있으므로 <span className="text-amber-400">재캘리브레이션</span>을 권장합니다.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
       {/* 왼쪽: 히스토리 목록 */}
       <div className="lg:col-span-1">
         <div className="bg-gray-800 rounded-xl border border-gray-700 p-4">
@@ -228,20 +250,38 @@ function ActuatorHistory({ device, calibrations, onDelete }) {
                 {Object.keys(analysis).length} Joints
               </span>
             </div>
-            <div className="flex items-center justify-between text-xs mb-4">
-              <span className="text-gray-500">{deviceCalibrations.length}개 측정 데이터 기준</span>
-              <div className="flex items-center gap-4">
+
+            <div className="flex flex-col gap-2 text-xs mb-4">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500">{deviceCalibrations.length}개 측정 데이터 기준</span>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-3 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 border border-white/30"></div>
+                    <span className="text-gray-400">현재 선택 <span className="text-gray-500">({formatDate(selectedCalibration?.created_at)})</span></span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-0.5 bg-gray-400"></div>
+                    <span className="text-gray-400">평균</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-gray-500 font-mono">σ</span>
+                    <span className="text-gray-400">표준편차</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 text-[10px] text-gray-500">
+                <span>판정 기준:</span>
                 <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 border border-white/30"></div>
-                  <span className="text-gray-400">현재 선택 <span className="text-gray-500">({formatDate(selectedCalibration?.created_at)})</span></span>
+                  <span className="px-1.5 py-0.5 rounded bg-gray-700/50 text-gray-400">&lt;2σ</span>
+                  <span className="text-emerald-400">정상</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-0.5 bg-gray-400"></div>
-                  <span className="text-gray-400">평균</span>
+                  <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400">2σ~3σ</span>
+                  <span className="text-amber-400">경고</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-gray-500 font-mono">σ</span>
-                  <span className="text-gray-400">표준편차</span>
+                  <span className="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-400">≥3σ</span>
+                  <span className="text-rose-400">위험</span>
                 </div>
               </div>
             </div>
@@ -436,12 +476,30 @@ function ActuatorHistory({ device, calibrations, onDelete }) {
                             </div>
 
                             {/* 현재값 vs 평균 비교 */}
-                            <div className="mt-2 pt-2 border-t border-gray-700/50 flex items-center justify-between">
-                              <span className="text-[10px] text-gray-500">평균 대비</span>
-                              <span className={`text-xs font-mono ${stats.current < stats.avg ? 'text-emerald-400' : stats.current > stats.avg ? 'text-rose-400' : 'text-gray-400'}`}>
-                                {stats.current < stats.avg ? '▼' : stats.current > stats.avg ? '▲' : '='} {Math.abs(stats.current - stats.avg).toFixed(1)}
-                              </span>
-                            </div>
+                            {(() => {
+                              const diff = stats.current - stats.avg
+                              const sigmaDistance = stats.stdDev > 0 ? Math.abs(diff) / stats.stdDev : 0
+                              const isWarning = sigmaDistance >= 2
+                              const isDanger = sigmaDistance >= 3
+
+                              return (
+                                <div className="mt-2 pt-2 border-t border-gray-700/50 flex items-center justify-between">
+                                  <span className="text-[10px] text-gray-500">평균 대비</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`text-xs font-mono ${diff < 0 ? 'text-emerald-400' : diff > 0 ? 'text-rose-400' : 'text-gray-400'}`}>
+                                      {diff < 0 ? '▼' : diff > 0 ? '▲' : '='} {Math.abs(diff).toFixed(1)}
+                                    </span>
+                                    <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                                      isDanger ? 'bg-rose-500/20 text-rose-400' :
+                                      isWarning ? 'bg-amber-500/20 text-amber-400' :
+                                      'bg-gray-700/50 text-gray-400'
+                                    }`}>
+                                      {sigmaDistance.toFixed(2)}σ
+                                    </span>
+                                  </div>
+                                </div>
+                              )
+                            })()}
                           </div>
                         )
                       })}
@@ -462,6 +520,7 @@ function ActuatorHistory({ device, calibrations, onDelete }) {
             <p className="text-gray-400 text-sm">캘리브레이션 탭에서 새 데이터를 등록해주세요.</p>
           </div>
         )}
+      </div>
       </div>
     </div>
   )
