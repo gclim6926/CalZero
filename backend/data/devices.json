@@ -17,22 +17,6 @@
     "updated_at": "2026-01-26T02:20:46.047278"
   },
   {
-    "name": "SO101@T타워2",
-    "type": "so101_follower",
-    "status": "offline",
-    "location": "T타워 5층",
-    "manager": "Kim",
-    "description": "",
-    "ip_address": "",
-    "port": null,
-    "serial_number": "",
-    "manufacturer": "",
-    "model": "",
-    "firmware_version": "",
-    "id": 9,
-    "created_at": "2026-01-26T02:20:38.230812"
-  },
-  {
     "name": "SO101@판교1",
     "type": "so101_follower",
     "status": "offline",
@@ -80,5 +64,53 @@
     "firmware_version": "",
     "id": 12,
     "created_at": "2026-01-26T02:24:13.132448"
+  },
+  {
+    "name": "New Robo1@판교",
+    "type": "robo1",
+    "status": "offline",
+    "location": "판교 3층",
+    "manager": "운영자",
+    "description": "",
+    "ip_address": "",
+    "port": null,
+    "serial_number": "",
+    "manufacturer": "",
+    "model": "",
+    "firmware_version": "",
+    "id": 13,
+    "created_at": "2026-01-29T05:17:26.759981"
+  },
+  {
+    "name": "New Robot2@판교",
+    "type": "robo2",
+    "status": "maintenance",
+    "location": "판교 3층",
+    "manager": "홍길동",
+    "description": "",
+    "ip_address": "",
+    "port": null,
+    "serial_number": "",
+    "manufacturer": "",
+    "model": "",
+    "firmware_version": "",
+    "id": 14,
+    "created_at": "2026-01-30T01:33:11.782643"
+  },
+  {
+    "name": "New Robot3@판교",
+    "type": "custom_robot",
+    "status": "maintenance",
+    "location": "판교 3층",
+    "manager": "홍길동",
+    "description": "",
+    "ip_address": "",
+    "port": null,
+    "serial_number": "",
+    "manufacturer": "",
+    "model": "",
+    "firmware_version": "",
+    "id": 15,
+    "created_at": "2026-01-30T01:33:41.620487"
   }
 ]

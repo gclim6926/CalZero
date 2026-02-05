@@ -1,0 +1,320 @@
+[
+  {
+    "id": 1,
+    "device_id": 7,
+    "calibration_id": null,
+    "positions": [
+      {
+        "position": 1,
+        "error_x": 1,
+        "error_y": 1,
+        "error_z": 0,
+        "distance": 1.414
+      },
+      {
+        "position": 2,
+        "error_x": 2,
+        "error_y": 2,
+        "error_z": 0,
+        "distance": 2.828
+      },
+      {
+        "position": 3,
+        "error_x": 3,
+        "error_y": 3,
+        "error_z": 0,
+        "distance": 4.243
+      },
+      {
+        "position": 4,
+        "error_x": 2,
+        "error_y": 2,
+        "error_z": 0,
+        "distance": 2.828
+      },
+      {
+        "position": 5,
+        "error_x": 1,
+        "error_y": 1,
+        "error_z": 0,
+        "distance": 1.414
+      },
+      {
+        "position": 6,
+        "error_x": 2,
+        "error_y": 2,
+        "error_z": 0,
+        "distance": 2.828
+      }
+    ],
+    "avg_error": 2.593,
+    "max_error": 4.243,
+    "notes": "모터 교체 후 테스트 ",
+    "created_at": "2026-02-05T09:24:38.319518"
+  },
+  {
+    "id": 2,
+    "device_id": 7,
+    "calibration_id": null,
+    "positions": [
+      {
+        "position": 1,
+        "error_x": 1,
+        "error_y": 1,
+        "error_z": 0,
+        "distance": 1.414
+      },
+      {
+        "position": 2,
+        "error_x": 2,
+        "error_y": 2,
+        "error_z": 0,
+        "distance": 2.828
+      },
+      {
+        "position": 3,
+        "error_x": 1,
+        "error_y": 1,
+        "error_z": 0,
+        "distance": 1.414
+      },
+      {
+        "position": 4,
+        "error_x": 2,
+        "error_y": 1,
+        "error_z": 0,
+        "distance": 2.236
+      },
+      {
+        "position": 5,
+        "error_x": 2,
+        "error_y": 1,
+        "error_z": 0,
+        "distance": 2.236
+      },
+      {
+        "position": 6,
+        "error_x": 2,
+        "error_y": 2,
+        "error_z": 0,
+        "distance": 2.828
+      }
+    ],
+    "avg_error": 2.16,
+    "max_error": 2.828,
+    "notes": "새 테스트",
+    "created_at": "2026-02-05T09:25:31.085674"
+  },
+  {
+    "id": 3,
+    "device_id": 7,
+    "calibration_id": null,
+    "positions": [
+      {
+        "position": 1,
+        "error_x": 2,
+        "error_y": 1,
+        "error_z": 0,
+        "distance": 2.236
+      },
+      {
+        "position": 2,
+        "error_x": 2,
+        "error_y": 1,
+        "error_z": 0,
+        "distance": 2.236
+      },
+      {
+        "position": 3,
+        "error_x": 1,
+        "error_y": 1,
+        "error_z": 0,
+        "distance": 1.414
+      },
+      {
+        "position": 4,
+        "error_x": 1,
+        "error_y": 2,
+        "error_z": 0,
+        "distance": 2.236
+      },
+      {
+        "position": 5,
+        "error_x": 1,
+        "error_y": 2,
+        "error_z": 0,
+        "distance": 2.236
+      },
+      {
+        "position": 6,
+        "error_x": 1,
+        "error_y": 2,
+        "error_z": 0,
+        "distance": 2.236
+      }
+    ],
+    "avg_error": 2.099,
+    "max_error": 2.236,
+    "notes": "새 테스트",
+    "created_at": "2026-02-05T09:25:45.815482"
+  },
+  {
+    "id": 4,
+    "device_id": 7,
+    "calibration_id": null,
+    "positions": [
+      {
+        "position": 1,
+        "error_x": 1,
+        "error_y": 1,
+        "error_z": 0,
+        "distance": 1.414
+      },
+      {
+        "position": 2,
+        "error_x": 1,
+        "error_y": 1,
+        "error_z": 0,
+        "distance": 1.414
+      },
+      {
+        "position": 3,
+        "error_x": 1,
+        "error_y": 1,
+        "error_z": 1,
+        "distance": 1.732
+      },
+      {
+        "position": 4,
+        "error_x": 1,
+        "error_y": 0.96,
+        "error_z": 0,
+        "distance": 1.386
+      },
+      {
+        "position": 5,
+        "error_x": 2,
+        "error_y": 1,
+        "error_z": 0,
+        "distance": 2.236
+      },
+      {
+        "position": 6,
+        "error_x": 2,
+        "error_y": 2,
+        "error_z": 0,
+        "distance": 2.828
+      }
+    ],
+    "avg_error": 1.835,
+    "max_error": 2.828,
+    "notes": "새 테스트",
+    "created_at": "2026-02-05T09:26:08.285932"
+  },
+  {
+    "id": 5,
+    "device_id": 7,
+    "calibration_id": null,
+    "positions": [
+      {
+        "position": 1,
+        "error_x": 1,
+        "error_y": 1,
+        "error_z": 0,
+        "distance": 1.414
+      },
+      {
+        "position": 2,
+        "error_x": 2,
+        "error_y": 1,
+        "error_z": 0,
+        "distance": 2.236
+      },
+      {
+        "position": 3,
+        "error_x": 1,
+        "error_y": 1,
+        "error_z": 0,
+        "distance": 1.414
+      },
+      {
+        "position": 4,
+        "error_x": 1,
+        "error_y": 2,
+        "error_z": 0,
+        "distance": 2.236
+      },
+      {
+        "position": 5,
+        "error_x": 2,
+        "error_y": 1,
+        "error_z": 0,
+        "distance": 2.236
+      },
+      {
+        "position": 6,
+        "error_x": 1,
+        "error_y": 1,
+        "error_z": 0,
+        "distance": 1.414
+      }
+    ],
+    "avg_error": 1.825,
+    "max_error": 2.236,
+    "notes": "새 테스트",
+    "created_at": "2026-02-05T09:26:20.703156"
+  },
+  {
+    "id": 6,
+    "device_id": 7,
+    "calibration_id": null,
+    "positions": [
+      {
+        "position": 1,
+        "error_x": 2,
+        "error_y": 2,
+        "error_z": 0,
+        "distance": 2.828
+      },
+      {
+        "position": 2,
+        "error_x": 2,
+        "error_y": 2,
+        "error_z": 0,
+        "distance": 2.828
+      },
+      {
+        "position": 3,
+        "error_x": 1,
+        "error_y": 1,
+        "error_z": 0,
+        "distance": 1.414
+      },
+      {
+        "position": 4,
+        "error_x": 2,
+        "error_y": 2,
+        "error_z": 0,
+        "distance": 2.828
+      },
+      {
+        "position": 5,
+        "error_x": 2,
+        "error_y": 1,
+        "error_z": 0,
+        "distance": 2.236
+      },
+      {
+        "position": 6,
+        "error_x": 2,
+        "error_y": 2,
+        "error_z": 0,
+        "distance": 2.828
+      }
+    ],
+    "avg_error": 2.494,
+    "max_error": 2.828,
+    "notes": "새 테스트",
+    "created_at": "2026-02-05T09:27:34.901317"
+  }
+]
