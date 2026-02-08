@@ -322,31 +322,38 @@ function App() {
           {/* 네온 글로우 배경 */}
           <div className="absolute inset-0 animate-neon-pulse bg-gradient-to-r from-cyan-500/20 via-blue-500/10 to-violet-500/20"></div>
 
-          {/* 수직 스캔 라인 */}
+          {/* 수평 스캔 라인 1 - 오렌지 (상단) */}
           <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute left-0 right-0 h-full animate-cyber-scan">
-              <div className="h-8 bg-gradient-to-b from-transparent via-cyan-400/30 to-transparent"></div>
+            <div className="absolute top-[20%] w-full h-[2px] animate-scan-line">
+              <div className="w-24 h-full bg-gradient-to-r from-transparent via-orange-400/80 to-transparent shadow-lg shadow-orange-500/50"></div>
             </div>
           </div>
 
-          {/* 수평 스캔 라인 */}
+          {/* 수평 스캔 라인 2 - 시안 (중앙) */}
           <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute top-1/2 -translate-y-1/2 w-full h-[2px] animate-scan-line">
-              <div className="w-20 h-full bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent"></div>
+            <div className="absolute top-1/2 -translate-y-1/2 w-full h-[2px] animate-scan-line-delay-1">
+              <div className="w-20 h-full bg-gradient-to-r from-transparent via-cyan-400/70 to-transparent shadow-lg shadow-cyan-500/50"></div>
+            </div>
+          </div>
+
+          {/* 수평 스캔 라인 3 - 옐로우 (하단) */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute top-[75%] w-full h-[2px] animate-scan-line-delay-2">
+              <div className="w-16 h-full bg-gradient-to-r from-transparent via-yellow-400/80 to-transparent shadow-lg shadow-yellow-500/50"></div>
             </div>
           </div>
 
           {/* 상단 네온 테두리 */}
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-500/80 via-blue-400 to-violet-500/80 animate-flicker"></div>
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-orange-500/80 via-amber-400 to-yellow-500/80"></div>
 
           {/* 하단 네온 테두리 */}
-          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-violet-500/80 via-blue-400 to-cyan-500/80"></div>
+          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-500/80 via-blue-400 to-violet-500/80"></div>
 
           {/* 코너 악센트 */}
-          <div className="absolute top-0 left-0 w-4 h-4 border-l-2 border-t-2 border-cyan-400/80"></div>
-          <div className="absolute top-0 right-0 w-4 h-4 border-r-2 border-t-2 border-violet-400/80"></div>
-          <div className="absolute bottom-0 left-0 w-4 h-4 border-l-2 border-b-2 border-violet-400/80"></div>
-          <div className="absolute bottom-0 right-0 w-4 h-4 border-r-2 border-b-2 border-cyan-400/80"></div>
+          <div className="absolute top-0 left-0 w-4 h-4 border-l-2 border-t-2 border-orange-400/80"></div>
+          <div className="absolute top-0 right-0 w-4 h-4 border-r-2 border-t-2 border-yellow-400/80"></div>
+          <div className="absolute bottom-0 left-0 w-4 h-4 border-l-2 border-b-2 border-cyan-400/80"></div>
+          <div className="absolute bottom-0 right-0 w-4 h-4 border-r-2 border-b-2 border-violet-400/80"></div>
 
           <div className="flex items-center gap-4 relative z-10">
             {/* 로고 아이콘 - 강화된 글로우 효과 */}
@@ -359,9 +366,7 @@ function App() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-white tracking-tight drop-shadow-lg">CalZero</h1>
-              <p className="text-[11px] text-cyan-400 font-medium tracking-wider animate-flicker">
-                <span className="text-cyan-300">&lt;</span> Calibration Suite for R2D2 <span className="text-cyan-300">/&gt;</span>
-              </p>
+              <p className="text-[11px] text-cyan-400/80 font-medium">Calibration Suite for R2D2</p>
             </div>
           </div>
         </div>

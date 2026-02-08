@@ -66,18 +66,8 @@
     transform: translateX(-100%);
   }
   100% {
-    transform: translateX(100%);
+    transform: translateX(200%);
   }
-}
-
-/* 깜빡이는 효과 */
-@keyframes flicker {
-  0%, 100% { opacity: 1; }
-  92% { opacity: 1; }
-  93% { opacity: 0.3; }
-  94% { opacity: 1; }
-  96% { opacity: 0.5; }
-  97% { opacity: 1; }
 }
 
 .animate-gradient-x {
@@ -102,11 +92,17 @@
 }
 
 .animate-scan-line {
-  animation: scan-line 2s ease-in-out infinite;
+  animation: scan-line 2.5s ease-in-out infinite;
 }
 
-.animate-flicker {
-  animation: flicker 4s linear infinite;
+.animate-scan-line-delay-1 {
+  animation: scan-line 3s ease-in-out infinite;
+  animation-delay: 0.8s;
+}
+
+.animate-scan-line-delay-2 {
+  animation: scan-line 2s ease-in-out infinite;
+  animation-delay: 1.5s;
 }
 
 /* 사이버 그리드 패턴 */
