@@ -15,6 +15,7 @@ import HandEyeHistory from './components/camera/HandEyeHistory'
 import SettingsGeneral from './components/settings/SettingsGeneral'
 import api from './utils/api'
 
+// 상단 메뉴 (Device 의존적인 기능들)
 const menuConfig = {
   actuator: {
     id: 'actuator', label: 'Actuator',
@@ -31,12 +32,13 @@ const menuConfig = {
     icon: (<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>),
     bgActive: 'bg-emerald-500/20', textActive: 'text-emerald-400', borderActive: 'border-emerald-500/50', subMenuBorder: 'border-emerald-400',
   },
-  settings: {
-    id: 'settings', label: 'Settings',
-    icon: (<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>),
-    bgActive: 'bg-gray-600/30', textActive: 'text-gray-300', borderActive: 'border-gray-500/50', subMenuBorder: 'border-gray-400',
-  },
 }
+
+// 사이드바 Settings 메뉴
+const sidebarSettingsMenu = [
+  { id: 'general', label: '일반 설정', icon: '⚙️' },
+  { id: 'about', label: '정보', icon: 'ℹ️' },
+]
 
 const subMenus = {
   actuator: [
@@ -58,10 +60,6 @@ const subMenus = {
     { id: 'force-torque', label: 'Force/Torque', icon: '💪' },
     { id: 'imu', label: 'IMU', icon: '🧭' },
   ],
-  settings: [
-    { id: 'general', label: '일반', icon: '⚙️' },
-    { id: 'about', label: '정보', icon: 'ℹ️' },
-  ],
 }
 
 function App() {
@@ -75,6 +73,7 @@ function App() {
   const [replayTests, setReplayTests] = useState([])
   const [activeTopMenu, setActiveTopMenu] = useState('actuator')
   const [activeSubMenu, setActiveSubMenu] = useState('calibration')
+  const [activeSettingsMenu, setActiveSettingsMenu] = useState(null) // null이면 Settings 비활성
   const [isLoading, setIsLoading] = useState(true)
   const [apiError, setApiError] = useState(null)
 
@@ -224,13 +223,20 @@ function App() {
   const handleTopMenuChange = (menuId) => {
     setActiveTopMenu(menuId)
     setActiveSubMenu(subMenus[menuId]?.[0]?.id || '')
+    setActiveSettingsMenu(null) // Settings 비활성화
+  }
+
+  const handleSettingsMenuClick = (menuId) => {
+    setActiveSettingsMenu(menuId)
+    setSelectedDevice(null) // 장치 선택 해제
   }
 
   const currentMenuConfig = menuConfig[activeTopMenu]
 
   const renderContent = () => {
-    if (activeTopMenu === 'settings') {
-      switch (activeSubMenu) {
+    // Settings 메뉴가 활성화된 경우
+    if (activeSettingsMenu) {
+      switch (activeSettingsMenu) {
         case 'general': return <SettingsGeneral />
         case 'about': return (
           <div className="bg-gray-800 rounded-xl p-8 max-w-lg">
@@ -305,7 +311,7 @@ function App() {
 
   if (isLoading) return <div className="min-h-screen bg-gray-900 flex items-center justify-center"><div className="text-center"><div className="w-12 h-12 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div><p className="text-gray-400">로딩 중...</p></div></div>
 
-  const showFullUI = selectedDevice || activeTopMenu === 'settings'
+  const showFullUI = selectedDevice || activeSettingsMenu
 
   return (
     <div className="min-h-screen bg-gray-900 flex">
@@ -371,8 +377,31 @@ function App() {
           </div>
         </div>
 
+        {/* Settings 메뉴 */}
+        <div className="px-4 pt-4 pb-2">
+          <div className="space-y-1">
+            {sidebarSettingsMenu.map(menu => (
+              <button
+                key={menu.id}
+                onClick={() => handleSettingsMenuClick(menu.id)}
+                className={`w-full px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2.5 ${
+                  activeSettingsMenu === menu.id
+                    ? 'bg-slate-700/80 text-white border border-slate-600'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                }`}
+              >
+                <span>{menu.icon}</span>
+                <span>{menu.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 구분선 */}
+        <div className="mx-4 border-t border-slate-700/50"></div>
+
         {/* Devices 헤더 */}
-        <div className="px-5 pt-5 pb-3">
+        <div className="px-5 pt-4 pb-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-4 rounded-full bg-gradient-to-b from-cyan-400 to-blue-500"></div>
@@ -387,7 +416,10 @@ function App() {
           <DeviceList
             devices={devices}
             selectedDevice={selectedDevice}
-            onSelectDevice={setSelectedDevice}
+            onSelectDevice={(device) => {
+              setSelectedDevice(device)
+              setActiveSettingsMenu(null) // Settings 해제
+            }}
             onDeviceAdd={handleDeviceAdd}
             onDeviceUpdate={handleDeviceUpdate}
             onDeviceDelete={handleDeviceDelete}
@@ -416,44 +448,63 @@ function App() {
       {/* 메인 영역 */}
       {!showFullUI ? renderWelcomeScreen() : (
         <div className="flex-1 flex flex-col min-w-0 bg-gray-900">
-          <header className="bg-gray-800/90 backdrop-blur-sm border-b border-gray-700/50 sticky top-0 z-10">
-            <div className="px-5">
-              <div className="flex items-center justify-between h-14">
-                <nav className="flex items-center gap-1">
-                  {Object.values(menuConfig).map(menu => (
-                    <button key={menu.id} onClick={() => handleTopMenuChange(menu.id)} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2.5 ${activeTopMenu === menu.id ? `${menu.bgActive} ${menu.textActive} border ${menu.borderActive} shadow-sm` : 'text-gray-400 hover:text-white hover:bg-gray-700/50 border border-transparent'}`}>
-                      {menu.icon}<span>{menu.label}</span>
-                    </button>
-                  ))}
-                </nav>
-                <div className="flex items-center gap-3">
-                  {selectedDevice && (
-                    <div className="flex items-center gap-2.5 px-3 py-1.5 bg-gray-700/50 rounded-lg border border-gray-600/50">
-                      <div className={`w-2 h-2 rounded-full ${selectedDevice.status === 'online' ? 'bg-emerald-400 shadow-emerald-400/50 animate-pulse' : 'bg-gray-500'} shadow-sm`}></div>
-                      <span className="text-gray-200 text-sm font-medium">{selectedDevice.name}</span>
-                      <button onClick={() => setSelectedDevice(null)} className="ml-1 text-gray-500 hover:text-gray-300 transition" title="장치 선택 해제">✕</button>
-                    </div>
-                  )}
-                  <button className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-700/50 transition-all relative">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full"></span>
-                  </button>
+          {activeSettingsMenu ? (
+            /* Settings 헤더 */
+            <header className="bg-gray-800/90 backdrop-blur-sm border-b border-gray-700/50 sticky top-0 z-10">
+              <div className="px-5">
+                <div className="flex items-center h-14">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl">⚙️</span>
+                    <h1 className="text-white font-semibold">
+                      {sidebarSettingsMenu.find(m => m.id === activeSettingsMenu)?.label || 'Settings'}
+                    </h1>
+                  </div>
                 </div>
               </div>
-            </div>
-          </header>
+            </header>
+          ) : (
+            /* 기존 메뉴 헤더 */
+            <>
+              <header className="bg-gray-800/90 backdrop-blur-sm border-b border-gray-700/50 sticky top-0 z-10">
+                <div className="px-5">
+                  <div className="flex items-center justify-between h-14">
+                    <nav className="flex items-center gap-1">
+                      {Object.values(menuConfig).map(menu => (
+                        <button key={menu.id} onClick={() => handleTopMenuChange(menu.id)} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2.5 ${activeTopMenu === menu.id && !activeSettingsMenu ? `${menu.bgActive} ${menu.textActive} border ${menu.borderActive} shadow-sm` : 'text-gray-400 hover:text-white hover:bg-gray-700/50 border border-transparent'}`}>
+                          {menu.icon}<span>{menu.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                    <div className="flex items-center gap-3">
+                      {selectedDevice && (
+                        <div className="flex items-center gap-2.5 px-3 py-1.5 bg-gray-700/50 rounded-lg border border-gray-600/50">
+                          <div className={`w-2 h-2 rounded-full ${selectedDevice.status === 'online' ? 'bg-emerald-400 shadow-emerald-400/50 animate-pulse' : 'bg-gray-500'} shadow-sm`}></div>
+                          <span className="text-gray-200 text-sm font-medium">{selectedDevice.name}</span>
+                          <button onClick={() => setSelectedDevice(null)} className="ml-1 text-gray-500 hover:text-gray-300 transition" title="장치 선택 해제">✕</button>
+                        </div>
+                      )}
+                      <button className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-700/50 transition-all relative">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full"></span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </header>
 
-          <div className="bg-gray-800/50 border-b border-gray-700/50">
-            <div className="px-5">
-              <nav className="flex items-center gap-1 h-12 overflow-x-auto">
-                {subMenus[activeTopMenu]?.map(menu => (
-                  <button key={menu.id} onClick={() => setActiveSubMenu(menu.id)} className={`px-4 py-2.5 text-sm transition-all flex items-center gap-2 border-b-2 -mb-px whitespace-nowrap ${activeSubMenu === menu.id ? `${currentMenuConfig.subMenuBorder} ${currentMenuConfig.textActive} font-medium` : 'border-transparent text-gray-400 hover:text-white hover:border-gray-600'}`}>
-                    <span className="text-base">{menu.icon}</span><span>{menu.label}</span>
-                  </button>
-                ))}
-              </nav>
-            </div>
-          </div>
+              <div className="bg-gray-800/50 border-b border-gray-700/50">
+                <div className="px-5">
+                  <nav className="flex items-center gap-1 h-12 overflow-x-auto">
+                    {subMenus[activeTopMenu]?.map(menu => (
+                      <button key={menu.id} onClick={() => setActiveSubMenu(menu.id)} className={`px-4 py-2.5 text-sm transition-all flex items-center gap-2 border-b-2 -mb-px whitespace-nowrap ${activeSubMenu === menu.id ? `${currentMenuConfig.subMenuBorder} ${currentMenuConfig.textActive} font-medium` : 'border-transparent text-gray-400 hover:text-white hover:border-gray-600'}`}>
+                        <span className="text-base">{menu.icon}</span><span>{menu.label}</span>
+                      </button>
+                    ))}
+                  </nav>
+                </div>
+              </div>
+            </>
+          )}
 
           <main className="flex-1 overflow-y-auto p-5">{renderContent()}</main>
         </div>
