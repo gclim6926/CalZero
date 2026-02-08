@@ -411,36 +411,46 @@ function App() {
           </div>
         </div>
 
-        {/* 구분선 - 글로우 효과 */}
-        <div className="mx-4 relative">
-          <div className="border-t border-slate-700/50"></div>
-          <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-slate-500/30 to-transparent"></div>
-        </div>
+        {/* Devices 영역 - 사이버틱 카드 스타일 */}
+        <div className="px-4 pt-3 pb-4 flex-1 overflow-hidden flex flex-col">
+          <div className="relative rounded-xl overflow-hidden flex-1 flex flex-col">
+            {/* 배경 효과 */}
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-800/90 via-slate-700/50 to-slate-800/90"></div>
+            <div className="absolute inset-0 cyber-grid opacity-20"></div>
 
-        {/* Devices 헤더 */}
-        <div className="px-5 pt-4 pb-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-4 rounded-full bg-gradient-to-b from-cyan-400 to-blue-500"></div>
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Devices</span>
+            {/* 테두리 글로우 - 바이올렛 계열 */}
+            <div className="absolute inset-0 rounded-xl border border-violet-500/20"></div>
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-violet-400/50 to-transparent"></div>
+
+            {/* 컨텐츠 */}
+            <div className="relative flex flex-col flex-1 overflow-hidden">
+              {/* Devices 헤더 */}
+              <div className="px-3 pt-3 pb-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-4 rounded-full bg-gradient-to-b from-violet-400 to-purple-500"></div>
+                    <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Devices</span>
+                  </div>
+                  <span className="text-[11px] text-violet-400 bg-violet-500/15 px-2.5 py-1 rounded-full font-semibold">{devices.length}</span>
+                </div>
+              </div>
+
+              {/* 장치 목록 */}
+              <div className="flex-1 overflow-y-auto px-2 pb-2">
+                <DeviceList
+                  devices={devices}
+                  selectedDevice={selectedDevice}
+                  onSelectDevice={(device) => {
+                    setSelectedDevice(device)
+                    setActiveSettingsMenu(null) // Settings 해제
+                  }}
+                  onDeviceAdd={handleDeviceAdd}
+                  onDeviceUpdate={handleDeviceUpdate}
+                  onDeviceDelete={handleDeviceDelete}
+                />
+              </div>
             </div>
-            <span className="text-[11px] text-cyan-400 bg-cyan-500/15 px-2.5 py-1 rounded-full font-semibold">{devices.length}</span>
           </div>
-        </div>
-
-        {/* 장치 목록 */}
-        <div className="flex-1 overflow-y-auto px-4 pb-4">
-          <DeviceList
-            devices={devices}
-            selectedDevice={selectedDevice}
-            onSelectDevice={(device) => {
-              setSelectedDevice(device)
-              setActiveSettingsMenu(null) // Settings 해제
-            }}
-            onDeviceAdd={handleDeviceAdd}
-            onDeviceUpdate={handleDeviceUpdate}
-            onDeviceDelete={handleDeviceDelete}
-          />
         </div>
 
         {/* 사용자 정보 */}
