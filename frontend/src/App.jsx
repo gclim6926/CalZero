@@ -377,28 +377,45 @@ function App() {
           </div>
         </div>
 
-        {/* Settings 메뉴 */}
-        <div className="px-4 pt-4 pb-2">
-          <div className="space-y-1">
-            {sidebarSettingsMenu.map(menu => (
-              <button
-                key={menu.id}
-                onClick={() => handleSettingsMenuClick(menu.id)}
-                className={`w-full px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2.5 ${
-                  activeSettingsMenu === menu.id
-                    ? 'bg-slate-700/80 text-white border border-slate-600'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
-                }`}
-              >
-                <span>{menu.icon}</span>
-                <span>{menu.label}</span>
-              </button>
-            ))}
+        {/* Settings 메뉴 - 사이버틱 카드 스타일 */}
+        <div className="px-4 pt-4 pb-3">
+          <div className="relative rounded-xl overflow-hidden">
+            {/* 배경 효과 */}
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-800/90 via-slate-700/50 to-slate-800/90"></div>
+            <div className="absolute inset-0 cyber-grid opacity-30"></div>
+
+            {/* 테두리 글로우 */}
+            <div className="absolute inset-0 rounded-xl border border-cyan-500/20"></div>
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"></div>
+
+            {/* 메뉴 컨텐츠 */}
+            <div className="relative p-2 space-y-1">
+              {sidebarSettingsMenu.map(menu => (
+                <button
+                  key={menu.id}
+                  onClick={() => handleSettingsMenuClick(menu.id)}
+                  className={`w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2.5 ${
+                    activeSettingsMenu === menu.id
+                      ? 'bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-violet-500/20 text-cyan-300 border border-cyan-500/40 shadow-lg shadow-cyan-500/10'
+                      : 'text-slate-300 hover:text-white hover:bg-slate-600/50'
+                  }`}
+                >
+                  <span className={activeSettingsMenu === menu.id ? 'drop-shadow-lg' : ''}>{menu.icon}</span>
+                  <span>{menu.label}</span>
+                  {activeSettingsMenu === menu.id && (
+                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></div>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* 구분선 */}
-        <div className="mx-4 border-t border-slate-700/50"></div>
+        {/* 구분선 - 글로우 효과 */}
+        <div className="mx-4 relative">
+          <div className="border-t border-slate-700/50"></div>
+          <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-slate-500/30 to-transparent"></div>
+        </div>
 
         {/* Devices 헤더 */}
         <div className="px-5 pt-4 pb-3">
