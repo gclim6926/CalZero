@@ -23,6 +23,63 @@
   }
 }
 
+/* 사이버 그리드 스캔 애니메이션 */
+@keyframes cyber-scan {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* 네온 글로우 펄스 */
+@keyframes neon-pulse {
+  0%, 100% {
+    opacity: 0.4;
+    filter: blur(8px);
+  }
+  50% {
+    opacity: 0.8;
+    filter: blur(12px);
+  }
+}
+
+/* 움직이는 그리드 라인 */
+@keyframes grid-flow {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 50px 50px;
+  }
+}
+
+/* 수평 스캔 라인 */
+@keyframes scan-line {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* 깜빡이는 효과 */
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  92% { opacity: 1; }
+  93% { opacity: 0.3; }
+  94% { opacity: 1; }
+  96% { opacity: 0.5; }
+  97% { opacity: 1; }
+}
+
 .animate-gradient-x {
   background-size: 200% 200%;
   animation: gradient-x 6s ease infinite;
@@ -30,4 +87,32 @@
 
 .animate-shimmer {
   animation: shimmer 3s ease-in-out infinite;
+}
+
+.animate-cyber-scan {
+  animation: cyber-scan 2.5s ease-in-out infinite;
+}
+
+.animate-neon-pulse {
+  animation: neon-pulse 2s ease-in-out infinite;
+}
+
+.animate-grid-flow {
+  animation: grid-flow 3s linear infinite;
+}
+
+.animate-scan-line {
+  animation: scan-line 2s ease-in-out infinite;
+}
+
+.animate-flicker {
+  animation: flicker 4s linear infinite;
+}
+
+/* 사이버 그리드 패턴 */
+.cyber-grid {
+  background-image:
+    linear-gradient(rgba(6, 182, 212, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(6, 182, 212, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
 }

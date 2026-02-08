@@ -311,34 +311,57 @@ function App() {
     <div className="min-h-screen bg-gray-900 flex">
       {/* 사이드바 - 강조, 입체감, 너비 확대 */}
       <aside className="w-72 bg-gradient-to-b from-slate-800 via-slate-850 to-slate-900 border-r border-slate-600/50 flex flex-col shadow-2xl shadow-black/50 relative z-20">
-        {/* 로고 - 흐르는 배경 효과 */}
-        <div className="p-5 border-b border-slate-700/50 relative overflow-hidden">
-          {/* 흐르는 그라데이션 배경 */}
-          <div
-            className="absolute inset-0 animate-gradient-x"
-            style={{
-              background: 'linear-gradient(90deg, #0f172a 0%, #164e63 20%, #1e3a5f 40%, #312e81 60%, #1e3a5f 80%, #164e63 100%)',
-              backgroundSize: '200% 100%'
-            }}
-          ></div>
+        {/* 로고 - 사이버틱 배경 효과 */}
+        <div className="p-5 border-b border-cyan-500/30 relative overflow-hidden">
+          {/* 기본 배경 */}
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"></div>
 
-          {/* 상단 테두리 라인 */}
-          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-cyan-500/50 via-blue-500/50 to-violet-500/50"></div>
+          {/* 사이버 그리드 패턴 */}
+          <div className="absolute inset-0 cyber-grid animate-grid-flow opacity-60"></div>
 
-          {/* 하단 테두리 라인 */}
-          <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-violet-500/50 via-blue-500/50 to-cyan-500/50"></div>
+          {/* 네온 글로우 배경 */}
+          <div className="absolute inset-0 animate-neon-pulse bg-gradient-to-r from-cyan-500/20 via-blue-500/10 to-violet-500/20"></div>
+
+          {/* 수직 스캔 라인 */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute left-0 right-0 h-full animate-cyber-scan">
+              <div className="h-8 bg-gradient-to-b from-transparent via-cyan-400/30 to-transparent"></div>
+            </div>
+          </div>
+
+          {/* 수평 스캔 라인 */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute top-1/2 -translate-y-1/2 w-full h-[2px] animate-scan-line">
+              <div className="w-20 h-full bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent"></div>
+            </div>
+          </div>
+
+          {/* 상단 네온 테두리 */}
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-500/80 via-blue-400 to-violet-500/80 animate-flicker"></div>
+
+          {/* 하단 네온 테두리 */}
+          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-violet-500/80 via-blue-400 to-cyan-500/80"></div>
+
+          {/* 코너 악센트 */}
+          <div className="absolute top-0 left-0 w-4 h-4 border-l-2 border-t-2 border-cyan-400/80"></div>
+          <div className="absolute top-0 right-0 w-4 h-4 border-r-2 border-t-2 border-violet-400/80"></div>
+          <div className="absolute bottom-0 left-0 w-4 h-4 border-l-2 border-b-2 border-violet-400/80"></div>
+          <div className="absolute bottom-0 right-0 w-4 h-4 border-r-2 border-b-2 border-cyan-400/80"></div>
 
           <div className="flex items-center gap-4 relative z-10">
-            {/* 로고 아이콘 - 글로우 효과 */}
-            <div className="relative">
-              <div className="absolute -inset-1 rounded-xl bg-gradient-to-br from-cyan-400 via-blue-500 to-violet-600 blur-lg opacity-40 animate-pulse"></div>
-              <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 via-blue-500 to-violet-600 flex items-center justify-center shadow-lg shadow-blue-500/40 ring-2 ring-white/10">
-                <span className="text-white font-black text-lg tracking-tight">C0</span>
+            {/* 로고 아이콘 - 강화된 글로우 효과 */}
+            <div className="relative group">
+              <div className="absolute -inset-2 rounded-xl bg-gradient-to-br from-cyan-400 via-blue-500 to-violet-600 blur-xl opacity-50 animate-neon-pulse"></div>
+              <div className="absolute -inset-1 rounded-xl bg-gradient-to-br from-cyan-400 via-blue-500 to-violet-600 blur-md opacity-60"></div>
+              <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 via-blue-500 to-violet-600 flex items-center justify-center shadow-lg shadow-cyan-500/50 ring-2 ring-white/20">
+                <span className="text-white font-black text-lg tracking-tight drop-shadow-lg">C0</span>
               </div>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white tracking-tight">CalZero</h1>
-              <p className="text-[11px] text-cyan-400/80 font-medium">Calibration Suite for R2D2</p>
+              <h1 className="text-xl font-bold text-white tracking-tight drop-shadow-lg">CalZero</h1>
+              <p className="text-[11px] text-cyan-400 font-medium tracking-wider animate-flicker">
+                <span className="text-cyan-300">&lt;</span> Calibration Suite for R2D2 <span className="text-cyan-300">/&gt;</span>
+              </p>
             </div>
           </div>
         </div>
