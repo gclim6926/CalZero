@@ -10,10 +10,10 @@ function ReplayAnalysis({ device, calibrations, replayTests, onSave, onDelete })
 
   // 품질 판정 기준 (localStorage 저장)
   const [thresholdNormal, setThresholdNormal] = useState(() => {
-    return parseFloat(localStorage.getItem('replay_threshold_normal') || '1')
+    return parseFloat(localStorage.getItem('replay_threshold_normal') || '3')
   })
   const [thresholdWarning, setThresholdWarning] = useState(() => {
-    return parseFloat(localStorage.getItem('replay_threshold_warning') || '2')
+    return parseFloat(localStorage.getItem('replay_threshold_warning') || '5')
   })
 
   // 6개 위치 오차 입력

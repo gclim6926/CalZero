@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nImprove Koyeb Docker deployment configuration\n\n- Fix Dockerfile to correctly copy backend/data directory\n- Add health check endpoints \\(/, /health, /api/health\\)\n- Enhance .dockerignore with better organization\n- Add .env.example for environment variable template\n- Add KOYEB_DEPLOY.md deployment guide\n- Remove nixpacks.toml \\(using Dockerfile now\\)\n- Remove duplicate dockerignore file\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nFix: Upgrade Node.js to v20 for rolldown-vite compatibility\n\n- Node.js 18 doesn''t support styleText from node:util\n- rolldown-vite requires Node.js 20+\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(curl:*)",
+      "Bash(python3:*)",
+      "Bash(git commit:*)",
+      "Bash(/opt/homebrew/bin/npm run build)",
+      "Bash(/usr/local/bin/npm --version)",
+      "Bash(source ~/.zshrc)",
+      "Bash(source ~/.nvm/nvm.sh)",
+      "Bash(nvm use:*)",
+      "Bash(npm run build:*)",
+      "Bash(source venv/bin/activate)",
+      "Bash(pip install:*)",
+      "Bash(pkill:*)",
+      "Bash(npm install:*)",
+      "Bash(brew list:*)",
+      "Bash(git init:*)",
+      "Bash(brew install:*)",
+      "Bash(export PATH=\"/opt/homebrew/bin:$PATH\")",
+      "Bash(npm --version:*)",
+      "Bash(npm run dev:*)",
+      "Bash(/bin/sleep 4)",
+      "Bash(gh repo create:*)",
+      "Bash(gh auth:*)",
+      "Bash(pip show:*)",
+      "Bash(pip freeze:*)"
+    ]
+  }
+}

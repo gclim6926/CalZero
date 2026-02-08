@@ -1,3 +1,24 @@
+ > [frontend-builder 6/6] RUN npm run build:
+0.288 file:///app/frontend/node_modules/rolldown/dist/shared/src-CYkh2Ybc.mjs:8
+0.288 import { styleText } from "node:util";
+0.288          ^^^^^^^^^
+0.288 SyntaxError: The requested module 'node:util' does not provide an export named 'styleText'
+0.288     at ModuleJob._instantiate (node:internal/modules/esm/module_job:123:21)
+0.288     at async ModuleJob.run (node:internal/modules/esm/module_job:191:5)
+0.288     at async ModuleLoader.import (node:internal/modules/esm/loader:337:24)
+0.288     at async CAC.<anonymous> (file:///app/frontend/node_modules/vite/dist/node/cli.js:626:28)
+0.288 
+0.288 Node.js v18.20.8
+------
+Dockerfile:10
+--------------------
+   8 |     RUN npm install
+   9 |     COPY frontend/ ./
+  10 | >>> RUN npm run build
+  11 |     
+  12 |     # ============================================
+--------------------
+error: failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
 # Koyeb 배포 가이드
 
 ## 준비사항
