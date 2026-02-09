@@ -34,8 +34,8 @@ const menuConfig = {
   },
 }
 
-// 사이드바 Settings 메뉴
-const sidebarSettingsMenu = [
+// Settings 서브메뉴 (상단 탭용)
+const settingsSubMenus = [
   { id: 'general', label: '일반 설정', icon: '⚙️' },
   { id: 'about', label: '정보', icon: 'ℹ️' },
 ]
@@ -74,6 +74,7 @@ function App() {
   const [activeTopMenu, setActiveTopMenu] = useState('actuator')
   const [activeSubMenu, setActiveSubMenu] = useState('calibration')
   const [activeSettingsMenu, setActiveSettingsMenu] = useState(null) // null이면 Settings 비활성
+  const [activeSettingsSubMenu, setActiveSettingsSubMenu] = useState('general') // Settings 서브메뉴
   const [isLoading, setIsLoading] = useState(true)
   const [apiError, setApiError] = useState(null)
 
@@ -236,7 +237,7 @@ function App() {
   const renderContent = () => {
     // Settings 메뉴가 활성화된 경우
     if (activeSettingsMenu) {
-      switch (activeSettingsMenu) {
+      switch (activeSettingsSubMenu) {
         case 'general': return <SettingsGeneral />
         case 'about': return (
           <div className="bg-gray-800 rounded-xl p-8 max-w-lg">
@@ -377,7 +378,7 @@ function App() {
           </div>
         </div>
 
-        {/* Settings 메뉴 - 사이버틱 카드 스타일 */}
+        {/* Settings 메뉴 + 사용자 정보 - 사이버틱 카드 스타일 */}
         <div className="px-4 pt-4 pb-3">
           <div className="relative rounded-xl overflow-hidden">
             {/* 배경 효과 */}
@@ -389,24 +390,46 @@ function App() {
             <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"></div>
 
             {/* 메뉴 컨텐츠 */}
-            <div className="relative p-2 space-y-1">
-              {sidebarSettingsMenu.map(menu => (
-                <button
-                  key={menu.id}
-                  onClick={() => handleSettingsMenuClick(menu.id)}
-                  className={`w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2.5 ${
-                    activeSettingsMenu === menu.id
-                      ? 'bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-violet-500/20 text-cyan-300 border border-cyan-500/40 shadow-lg shadow-cyan-500/10'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-600/50'
-                  }`}
-                >
-                  <span className={activeSettingsMenu === menu.id ? 'drop-shadow-lg' : ''}>{menu.icon}</span>
-                  <span>{menu.label}</span>
-                  {activeSettingsMenu === menu.id && (
-                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></div>
-                  )}
-                </button>
-              ))}
+            <div className="relative p-2 space-y-2">
+              {/* 일반 설정 버튼 */}
+              <button
+                onClick={() => handleSettingsMenuClick('settings')}
+                className={`w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2.5 ${
+                  activeSettingsMenu
+                    ? 'bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-violet-500/20 text-cyan-300 border border-cyan-500/40 shadow-lg shadow-cyan-500/10'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-600/50'
+                }`}
+              >
+                <span className={activeSettingsMenu ? 'drop-shadow-lg' : ''}>⚙️</span>
+                <span>일반 설정</span>
+                {activeSettingsMenu && (
+                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></div>
+                )}
+              </button>
+
+              {/* 사용자 정보 + 로그아웃 */}
+              <div className="pt-2 border-t border-slate-600/30">
+                <div className="flex items-center justify-between px-1 py-1.5">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 via-blue-500 to-violet-600 flex items-center justify-center shadow-md shadow-cyan-500/20 ring-1 ring-white/10">
+                      <span className="text-white text-xs font-bold">{(user.name || user.email)[0].toUpperCase()}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-white text-xs font-medium truncate">{user.name || user.email}</p>
+                      <p className="text-slate-500 text-[10px] truncate">{user.email}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all"
+                    title="로그아웃"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -453,42 +476,47 @@ function App() {
           </div>
         </div>
 
-        {/* 사용자 정보 */}
-        <div className="p-4 border-t border-slate-700/50 bg-gradient-to-r from-slate-800/80 to-slate-800/50">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-11 h-11 rounded-full bg-gradient-to-br from-cyan-500 via-blue-500 to-violet-600 flex items-center justify-center shadow-lg shadow-cyan-500/30 ring-2 ring-white/10">
-                <span className="text-white text-sm font-bold">{(user.name || user.email)[0].toUpperCase()}</span>
-              </div>
-              <div className="min-w-0">
-                <p className="text-white text-sm font-semibold truncate">{user.name || user.email}</p>
-                <p className="text-slate-400 text-[11px] truncate">{user.email}</p>
-              </div>
-            </div>
-            <button onClick={handleLogout} className="p-2.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/15 rounded-xl transition-all" title="로그아웃">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-            </button>
-          </div>
-        </div>
       </aside>
 
       {/* 메인 영역 */}
       {!showFullUI ? renderWelcomeScreen() : (
         <div className="flex-1 flex flex-col min-w-0 bg-gray-900">
           {activeSettingsMenu ? (
-            /* Settings 헤더 */
-            <header className="bg-gray-800/90 backdrop-blur-sm border-b border-gray-700/50 sticky top-0 z-10">
-              <div className="px-5">
-                <div className="flex items-center h-14">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl">⚙️</span>
-                    <h1 className="text-white font-semibold">
-                      {sidebarSettingsMenu.find(m => m.id === activeSettingsMenu)?.label || 'Settings'}
-                    </h1>
+            /* Settings 헤더 + 서브메뉴 탭 */
+            <>
+              <header className="bg-gray-800/90 backdrop-blur-sm border-b border-gray-700/50 sticky top-0 z-10">
+                <div className="px-5">
+                  <div className="flex items-center h-14">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">⚙️</span>
+                      <h1 className="text-white font-semibold">Settings</h1>
+                    </div>
                   </div>
                 </div>
+              </header>
+
+              {/* Settings 서브메뉴 탭 */}
+              <div className="bg-gray-800/50 border-b border-gray-700/50">
+                <div className="px-5">
+                  <nav className="flex items-center gap-1 h-12 overflow-x-auto">
+                    {settingsSubMenus.map(menu => (
+                      <button
+                        key={menu.id}
+                        onClick={() => setActiveSettingsSubMenu(menu.id)}
+                        className={`px-4 py-2.5 text-sm transition-all flex items-center gap-2 border-b-2 -mb-px whitespace-nowrap ${
+                          activeSettingsSubMenu === menu.id
+                            ? 'border-cyan-400 text-cyan-400 font-medium'
+                            : 'border-transparent text-gray-400 hover:text-white hover:border-gray-600'
+                        }`}
+                      >
+                        <span className="text-base">{menu.icon}</span>
+                        <span>{menu.label}</span>
+                      </button>
+                    ))}
+                  </nav>
+                </div>
               </div>
-            </header>
+            </>
           ) : (
             /* 기존 메뉴 헤더 */
             <>
