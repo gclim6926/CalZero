@@ -1,7 +1,7 @@
 # ============================================
 # Stage 1: Build Frontend
 # ============================================
-FROM node:20-alpine AS frontend-builder
+FROM node:22-alpine AS frontend-builder
 
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
@@ -21,11 +21,9 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy backend code
-COPY main.py ./
+COPY backend/main.py ./main.py
 
-# Copy initial data
-# NOTE: Koyeb uses ephemeral storage - data resets on restart
-# For persistent data, use Koyeb Database Add-ons or external storage
+# Copy initial data (default; overridden by Volume mount in production)
 COPY backend/data ./data
 
 # Copy built frontend from stage 1
@@ -34,10 +32,5 @@ COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 # Expose port
 EXPOSE 8000
 
-# Health check (optional - Koyeb has built-in health checks)
-# HEALTHCHECK --interval=30s --timeout=3s --start-period=5s \
-#   CMD curl -f http://localhost:8000/ || exit 1
-
 # Run application
-# Set SECRET_KEY environment variable in Koyeb for production
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
