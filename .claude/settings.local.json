@@ -29,7 +29,10 @@
       "Bash(gh repo create:*)",
       "Bash(gh auth:*)",
       "Bash(pip show:*)",
-      "Bash(pip freeze:*)"
+      "Bash(pip freeze:*)",
+      "Bash(wc -l:*)",
+      "Bash(gh pr create:*)",
+      "Bash(docker build -t calzero .)"
     ]
   }
 }
