@@ -1,7 +1,7 @@
 # ============================================
 # Stage 1: Build Frontend
 # ============================================
-FROM node:22-alpine AS frontend-builder
+FROM node:22 AS frontend-builder
 
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
@@ -15,6 +15,9 @@ RUN npm run build
 FROM python:3.11-slim
 
 WORKDIR /app
+
+# Python stdout/stderr 즉시 출력 (Docker 로그 버퍼링 방지)
+ENV PYTHONUNBUFFERED=1
 
 # Install Python dependencies
 COPY requirements.txt ./
@@ -32,5 +35,5 @@ COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 # Default port (Railway overrides via PORT env var)
 EXPOSE 8000
 
-# Run application — exec form으로 signal 처리 + PORT 변수 지원
+# Run application
 CMD ["sh", "-c", "exec uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
