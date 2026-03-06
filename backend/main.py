@@ -19,7 +19,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_HOURS = 24
 
 # 데이터 디렉토리 구조
-DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+DATA_DIR = os.getenv("DATA_DIR", os.path.join(os.path.dirname(__file__), "data"))
 USERS_FILE = os.path.join(DATA_DIR, "users.json")
 DEVICES_FILE = os.path.join(DATA_DIR, "devices.json")
 CALIBRATIONS_DIR = os.path.join(DATA_DIR, "calibrations")
@@ -119,6 +119,8 @@ class DeviceCreate(BaseModel):
     manufacturer: str = ""
     model: str = ""
     firmware_version: str = ""
+    usd_file_path: str = ""
+    target_device_ids: List[int] = []
 
 
 class DeviceUpdate(BaseModel):
@@ -134,6 +136,8 @@ class DeviceUpdate(BaseModel):
     manufacturer: str = ""
     model: str = ""
     firmware_version: str = ""
+    usd_file_path: str = ""
+    target_device_ids: List[int] = []
 
 
 class ActuatorCalibrationCreate(BaseModel):
