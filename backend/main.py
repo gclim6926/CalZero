@@ -795,7 +795,10 @@ def startup_event():
 
 # ==================== Frontend Static Files ====================
 
-STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+# Docker에서는 frontend/dist, 로컬에서는 static 폴더
+STATIC_DIR = os.path.join(os.path.dirname(__file__), "frontend", "dist")
+if not os.path.exists(STATIC_DIR):
+    STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 
 if os.path.exists(STATIC_DIR):
     app.mount("/assets", StaticFiles(directory=os.path.join(STATIC_DIR, "assets")), name="assets")
