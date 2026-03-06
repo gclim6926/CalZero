@@ -209,6 +209,13 @@ app.add_middleware(
 )
 
 
+# ==================== Health Check ====================
+
+@app.get("/api/health")
+def health_check():
+    return {"status": "ok"}
+
+
 # ==================== Auth Helpers ====================
 
 def hash_password(password: str) -> str:
