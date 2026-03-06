@@ -1,6 +1,6 @@
 // 배포/로컬 환경 자동 분기
-const API_BASE = import.meta.env.PROD 
-  ? 'https://calzero-api.onrender.com/api'  // 배포용
+const API_BASE = import.meta.env.PROD
+  ? '/api'                                   // 배포용 (같은 서버)
   : 'http://localhost:8000/api'              // 로컬용
 
 async function fetchAPI(endpoint, options = {}) {
