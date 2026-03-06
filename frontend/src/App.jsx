@@ -75,6 +75,7 @@ function App() {
   const [activeSubMenu, setActiveSubMenu] = useState('calibration')
   const [activeSettingsMenu, setActiveSettingsMenu] = useState(null) // null이면 Settings 비활성
   const [activeSettingsSubMenu, setActiveSettingsSubMenu] = useState('general') // Settings 서브메뉴
+  const [sidebarTab, setSidebarTab] = useState('physical') // 'physical' | 'isaac_sim'
   const [isLoading, setIsLoading] = useState(true)
   const [apiError, setApiError] = useState(null)
 
@@ -147,7 +148,21 @@ function App() {
 
   const handleDeviceDelete = async (id) => {
     await api.devices.delete(id)
-    setDevices(prev => prev.filter(d => d.id !== id))
+    // 삭제된 Physical Robot ID를 Sim의 target_device_ids에서 정리
+    setDevices(prev => {
+      const remaining = prev.filter(d => d.id !== id)
+      remaining.forEach(async (d) => {
+        if (d.type === 'isaac_sim' && (d.target_device_ids || []).includes(id)) {
+          const newIds = d.target_device_ids.filter(tid => tid !== id)
+          await api.devices.update(d.id, { ...d, target_device_ids: newIds })
+        }
+      })
+      return remaining.map(d =>
+        d.type === 'isaac_sim' && (d.target_device_ids || []).includes(id)
+          ? { ...d, target_device_ids: d.target_device_ids.filter(tid => tid !== id) }
+          : d
+      )
+    })
     if (selectedDevice?.id === id) setSelectedDevice(null)
   }
 
@@ -372,7 +387,7 @@ function App() {
               </div>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white tracking-tight drop-shadow-lg">CalZero</h1>
+              <h1 className="text-xl font-bold text-white tracking-tight drop-shadow-lg">Dataset Factory · CalZero</h1>
               <p className="text-[11px] text-cyan-400/80 font-medium">Calibration Suite for R2D2</p>
             </div>
           </div>
@@ -447,14 +462,37 @@ function App() {
 
             {/* 컨텐츠 */}
             <div className="relative flex flex-col flex-1 overflow-hidden">
-              {/* Devices 헤더 */}
-              <div className="px-3 pt-3 pb-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-4 rounded-full bg-gradient-to-b from-violet-400 to-purple-500"></div>
-                    <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Devices</span>
-                  </div>
-                  <span className="text-[11px] text-violet-400 bg-violet-500/15 px-2.5 py-1 rounded-full font-semibold">{devices.length}</span>
+              {/* Robots 탭 */}
+              <div className="px-2 pt-3 pb-1">
+                <div className="flex rounded-lg bg-slate-900/80 p-0.5 gap-0.5">
+                  <button
+                    onClick={() => setSidebarTab('physical')}
+                    className={`flex-1 py-1.5 px-2 rounded-md text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                      sidebarTab === 'physical'
+                        ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/15 text-cyan-300 border border-cyan-500/30 shadow-sm'
+                        : 'text-slate-500 hover:text-slate-300'
+                    }`}
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35" />
+                      <circle cx="12" cy="12" r="3" strokeWidth={2} />
+                    </svg>
+                    Physical Robot
+                  </button>
+                  <button
+                    onClick={() => setSidebarTab('isaac_sim')}
+                    className={`flex-1 py-1.5 px-2 rounded-md text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                      sidebarTab === 'isaac_sim'
+                        ? 'bg-gradient-to-r from-violet-500/20 to-purple-500/15 text-violet-300 border border-violet-500/30 shadow-sm'
+                        : 'text-slate-500 hover:text-slate-300'
+                    }`}
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12" />
+                    </svg>
+                    Isaac Sim
+                  </button>
                 </div>
               </div>
 
@@ -470,6 +508,7 @@ function App() {
                   onDeviceAdd={handleDeviceAdd}
                   onDeviceUpdate={handleDeviceUpdate}
                   onDeviceDelete={handleDeviceDelete}
+                  activeTab={sidebarTab}
                 />
               </div>
             </div>

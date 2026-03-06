@@ -21,9 +21,9 @@ const saveCustomType = (newType) => {
   }
 }
 
-function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [] }) {
+function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [], defaultCategory = 'physical' }) {
   const [deviceTypes, setDeviceTypes] = useState(getDeviceTypes())
-  const [robotCategory, setRobotCategory] = useState('physical') // 'physical' | 'simulation'
+  const [robotCategory, setRobotCategory] = useState('physical')
   const [formData, setFormData] = useState({
     name: '',
     location: '',
@@ -38,12 +38,13 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [] }) {
     model: '',
     firmware_version: '',
     usd_file_path: '',
-    target_device_id: null,
+    target_device_ids: [],
   })
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
   const [showAddType, setShowAddType] = useState(false)
   const [newTypeName, setNewTypeName] = useState('')
+  const [linkedSimId, setLinkedSimId] = useState(null)
 
   const isEdit = !!device
 
@@ -63,15 +64,23 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [] }) {
         model: device.model || '',
         firmware_version: device.firmware_version || '',
         usd_file_path: device.usd_file_path || '',
-        target_device_id: device.target_device_id || null,
+        target_device_ids: device.target_device_ids || [],
       })
       setRobotCategory(device.type === 'isaac_sim' ? 'simulation' : 'physical')
+      // 편집 시 연결된 Sim 탐지
+      if (device.type !== 'isaac_sim') {
+        const linkedSim = robots.find(r => r.type === 'isaac_sim' && (r.target_device_ids || []).includes(device.id))
+        setLinkedSimId(linkedSim ? linkedSim.id : null)
+      } else {
+        setLinkedSimId(null)
+      }
     } else {
+      const isSim = defaultCategory === 'simulation'
       setFormData({
         name: '',
         location: '',
         manager: '',
-        type: 'so101_follower',
+        type: isSim ? 'isaac_sim' : 'so101_follower',
         status: 'offline',
         description: '',
         ip_address: '',
@@ -81,9 +90,10 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [] }) {
         model: '',
         firmware_version: '',
         usd_file_path: '',
-        target_device_id: null,
+        target_device_ids: [],
       })
-      setRobotCategory('physical')
+      setRobotCategory(isSim ? 'simulation' : 'physical')
+      setLinkedSimId(null)
     }
     setErrors({})
     setShowAddType(false)
@@ -93,7 +103,6 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [] }) {
   const validate = () => {
     const newErrors = {}
     if (!formData.name.trim()) newErrors.name = '장치 이름을 입력하세요'
-    if (!formData.location.trim()) newErrors.location = '설치 장소를 입력하세요'
     if (!formData.manager.trim()) newErrors.manager = '관리자를 입력하세요'
     if (formData.ip_address && !/^(\d{1,3}\.){3}\d{1,3}$/.test(formData.ip_address)) {
       newErrors.ip_address = '올바른 IP 주소 형식이 아닙니다'
@@ -117,8 +126,7 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [] }) {
       } else {
         data.port = null
       }
-      if (data.target_device_id === '') data.target_device_id = null
-      await onSave(data, device?.id)
+      await onSave(data, device?.id, linkedSimId)
       onClose()
     } catch (error) {
       console.error('Failed to save device:', error)
@@ -130,15 +138,6 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [] }) {
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     if (errors[field]) setErrors(prev => ({ ...prev, [field]: null }))
-  }
-
-  const handleCategoryChange = (category) => {
-    setRobotCategory(category)
-    if (category === 'simulation') {
-      setFormData(prev => ({ ...prev, type: 'isaac_sim' }))
-    } else {
-      setFormData(prev => ({ ...prev, type: deviceTypes[0]?.value || 'so101_follower', usd_file_path: '', target_device_id: null }))
-    }
   }
 
   const handleAddType = () => {
@@ -159,6 +158,7 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [] }) {
 
   const isSimulation = robotCategory === 'simulation'
   const physicalRobots = robots.filter(r => r.type !== 'isaac_sim' && r.id !== device?.id)
+  const simDevices = robots.filter(r => r.type === 'isaac_sim')
 
   const statusOptions = [
     { value: 'online', label: 'Online', color: 'bg-emerald-500', desc: '연결됨' },
@@ -210,37 +210,6 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [] }) {
             </div>
           )}
 
-          {/* 카테고리 탭: Physical Robot / Isaac Sim */}
-          <div className="flex rounded-xl bg-slate-900 p-1 gap-1">
-            <button
-              type="button"
-              onClick={() => handleCategoryChange('physical')}
-              className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${
-                !isSimulation
-                  ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-300 border border-cyan-500/30'
-                  : 'text-slate-400 hover:text-slate-300'
-              }`}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35" />
-                <circle cx="12" cy="12" r="3" strokeWidth={1.5} />
-              </svg>
-              Physical Robot
-            </button>
-            <button
-              type="button"
-              onClick={() => handleCategoryChange('simulation')}
-              className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${
-                isSimulation
-                  ? 'bg-gradient-to-r from-violet-500/20 to-purple-500/20 text-violet-300 border border-violet-500/30'
-                  : 'text-slate-400 hover:text-slate-300'
-              }`}
-            >
-              {getRobotTypeIcon('isaac_sim', 'w-4 h-4')}
-              Isaac Sim
-            </button>
-          </div>
-
           {/* 기본 정보 (필수) */}
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
@@ -267,21 +236,6 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [] }) {
               </div>
               <div>
                 <label className="block text-slate-400 text-sm mb-1.5">
-                  설치 장소 <span className="text-rose-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.location}
-                  onChange={(e) => handleChange('location', e.target.value)}
-                  placeholder={isSimulation ? '예: Sim Server #1' : '예: Lab 101'}
-                  className={`w-full px-4 py-2.5 bg-slate-900 border rounded-lg text-white text-sm focus:outline-none transition ${
-                    errors.location ? 'border-rose-500 focus:border-rose-500' : 'border-slate-600 focus:border-cyan-500'
-                  }`}
-                />
-                {errors.location && <p className="text-rose-400 text-xs mt-1">{errors.location}</p>}
-              </div>
-              <div>
-                <label className="block text-slate-400 text-sm mb-1.5">
                   관리자 <span className="text-rose-400">*</span>
                 </label>
                 <input
@@ -294,6 +248,16 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [] }) {
                   }`}
                 />
                 {errors.manager && <p className="text-rose-400 text-xs mt-1">{errors.manager}</p>}
+              </div>
+              <div>
+                <label className="block text-slate-400 text-sm mb-1.5">설치 장소</label>
+                <input
+                  type="text"
+                  value={formData.location}
+                  onChange={(e) => handleChange('location', e.target.value)}
+                  placeholder={isSimulation ? '예: Sim Server #1' : '예: Lab 101'}
+                  className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-cyan-500 transition"
+                />
               </div>
             </div>
           </div>
@@ -369,6 +333,43 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [] }) {
             </div>
           )}
 
+          {/* Physical Robot: Isaac Sim 연결 드롭다운 */}
+          {!isSimulation && (
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-violet-400"></span>
+                Isaac Sim 연결
+                <span className="text-slate-500 text-xs font-normal">(선택사항)</span>
+              </h3>
+              {simDevices.length === 0 ? (
+                <div className="p-4 bg-slate-700/20 border border-slate-600/30 rounded-xl">
+                  <p className="text-slate-500 text-sm">등록된 Isaac Sim이 없습니다. Isaac Sim 탭에서 먼저 추가하세요.</p>
+                </div>
+              ) : (
+                <div className="p-4 bg-violet-500/5 border border-violet-500/20 rounded-xl space-y-2">
+                  <div className="relative">
+                    <select
+                      value={linkedSimId || ''}
+                      onChange={(e) => setLinkedSimId(e.target.value ? parseInt(e.target.value) : null)}
+                      className="w-full px-4 py-2.5 bg-slate-900 border border-violet-500/30 rounded-lg text-white text-sm focus:outline-none focus:border-violet-400 transition appearance-none cursor-pointer"
+                    >
+                      <option value="">연결 안 함</option>
+                      {simDevices.map(sim => (
+                        <option key={sim.id} value={sim.id}>{sim.name}</option>
+                      ))}
+                    </select>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-violet-400">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="text-slate-500 text-xs">이 Physical Robot을 배포할 Isaac Sim을 선택하세요</p>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Isaac Sim: 전용 설정 */}
           {isSimulation && (
             <div className="space-y-4">
@@ -389,51 +390,84 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [] }) {
                   />
                 </div>
 
-                {/* Sim-to-Real 타겟 */}
+                {/* Sim-to-Real 타겟 (다중 선택) */}
                 <div>
-                  <label className="block text-violet-300 text-sm mb-1.5">Sim-to-Real 타겟 로봇</label>
-                  <select
-                    value={formData.target_device_id || ''}
-                    onChange={(e) => handleChange('target_device_id', e.target.value ? parseInt(e.target.value) : null)}
-                    className="w-full px-4 py-2.5 bg-slate-900 border border-violet-500/30 rounded-lg text-white text-sm focus:outline-none focus:border-violet-400 transition"
-                  >
-                    <option value="">연결 안 함</option>
-                    {physicalRobots.map(r => (
-                      <option key={r.id} value={r.id}>{r.name} ({r.type})</option>
-                    ))}
-                  </select>
-                  <p className="text-slate-500 text-xs mt-1">시뮬레이션 결과를 배포할 물리 로봇을 선택하세요</p>
+                  <label className="block text-violet-300 text-sm mb-1.5">
+                    Sim-to-Real 타겟 로봇
+                    {formData.target_device_ids.length > 0 && (
+                      <span className="ml-2 text-[10px] text-violet-400 bg-violet-500/20 px-1.5 py-0.5 rounded">{formData.target_device_ids.length}개 선택</span>
+                    )}
+                  </label>
+                  {physicalRobots.length === 0 ? (
+                    <p className="text-slate-500 text-sm py-2">등록된 Physical Robot이 없습니다</p>
+                  ) : (
+                    <div className="space-y-1 max-h-40 overflow-y-auto rounded-lg border border-violet-500/20 bg-slate-900 p-2">
+                      {physicalRobots.map(r => {
+                        const isChecked = formData.target_device_ids.includes(r.id)
+                        return (
+                          <label
+                            key={r.id}
+                            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg cursor-pointer transition-all ${
+                              isChecked ? 'bg-violet-500/10 border border-violet-500/30' : 'hover:bg-slate-800 border border-transparent'
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => {
+                                const newIds = isChecked
+                                  ? formData.target_device_ids.filter(id => id !== r.id)
+                                  : [...formData.target_device_ids, r.id]
+                                handleChange('target_device_ids', newIds)
+                              }}
+                              className="w-3.5 h-3.5 rounded border-slate-600 text-violet-500 focus:ring-violet-500 bg-slate-800"
+                            />
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <div className="w-5 h-5 rounded flex items-center justify-center bg-slate-700/60 text-slate-400">
+                                {getRobotTypeIcon(r.type, 'w-3 h-3')}
+                              </div>
+                              <span className={`text-sm truncate ${isChecked ? 'text-violet-200' : 'text-slate-300'}`}>{r.name}</span>
+                              <span className="text-[10px] text-slate-500">{r.type}</span>
+                            </div>
+                          </label>
+                        )
+                      })}
+                    </div>
+                  )}
+                  <p className="text-slate-500 text-xs mt-1">시뮬레이션 결과를 배포할 물리 로봇을 선택하세요 (복수 선택 가능)</p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* 상태 */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-              상태
-              <span className="text-slate-500 text-xs font-normal">(선택사항)</span>
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {statusOptions.map(status => (
-                <button
-                  key={status.value}
-                  type="button"
-                  onClick={() => handleChange('status', status.value)}
-                  className={`px-4 py-2 rounded-lg border flex items-center gap-2 transition-all ${
-                    formData.status === status.value
-                      ? 'bg-slate-700 border-slate-500'
-                      : 'bg-slate-800 border-slate-700 hover:border-slate-600'
-                  }`}
-                >
-                  <div className={`w-2 h-2 rounded-full ${status.color}`}></div>
-                  <span className={`text-sm ${formData.status === status.value ? 'text-white' : 'text-slate-400'}`}>{status.label}</span>
-                  <span className="text-[10px] text-slate-500">({status.desc})</span>
-                </button>
-              ))}
+          {/* 연결 상태 (Physical만) */}
+          {!isSimulation && (
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                연결 상태
+                <span className="text-slate-500 text-xs font-normal">(선택사항)</span>
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {statusOptions.map(status => (
+                  <button
+                    key={status.value}
+                    type="button"
+                    onClick={() => handleChange('status', status.value)}
+                    className={`px-4 py-2 rounded-lg border flex items-center gap-2 transition-all ${
+                      formData.status === status.value
+                        ? 'bg-slate-700 border-slate-500'
+                        : 'bg-slate-800 border-slate-700 hover:border-slate-600'
+                    }`}
+                  >
+                    <div className={`w-2 h-2 rounded-full ${status.color}`}></div>
+                    <span className={`text-sm ${formData.status === status.value ? 'text-white' : 'text-slate-400'}`}>{status.label}</span>
+                    <span className="text-[10px] text-slate-500">({status.desc})</span>
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* 연결 정보 (Physical만) */}
           {!isSimulation && (

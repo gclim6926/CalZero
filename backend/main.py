@@ -120,7 +120,7 @@ class DeviceCreate(BaseModel):
     model: str = ""
     firmware_version: str = ""
     usd_file_path: str = ""
-    target_device_id: Optional[int] = None
+    target_device_ids: List[int] = []
 
 
 class DeviceUpdate(BaseModel):
@@ -137,7 +137,7 @@ class DeviceUpdate(BaseModel):
     model: str = ""
     firmware_version: str = ""
     usd_file_path: str = ""
-    target_device_id: Optional[int] = None
+    target_device_ids: List[int] = []
 
 
 class ActuatorCalibrationCreate(BaseModel):
