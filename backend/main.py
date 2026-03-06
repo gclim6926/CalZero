@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
@@ -19,7 +19,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_HOURS = 24
 
 # 데이터 디렉토리 구조
-DATA_DIR = os.getenv("DATA_DIR", os.path.join(os.path.dirname(__file__), "data"))
+DATA_DIR = os.getenv("DATA_DIR", os.path.join(os.path.dirname(os.path.abspath(__file__)), "data"))
 USERS_FILE = os.path.join(DATA_DIR, "users.json")
 DEVICES_FILE = os.path.join(DATA_DIR, "devices.json")
 CALIBRATIONS_DIR = os.path.join(DATA_DIR, "calibrations")
@@ -788,27 +788,44 @@ def startup_event():
 
 # ==================== Frontend Static Files ====================
 
-# 절대 경로로 변환하여 Docker/로컬 모두 안정적으로 동작
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Docker: /app/frontend/dist, 로컬: /app/static
-STATIC_DIR = os.path.join(BASE_DIR, "frontend", "dist")
-if not os.path.exists(STATIC_DIR):
-    STATIC_DIR = os.path.join(BASE_DIR, "static")
+_dist = os.path.join(BASE_DIR, "frontend", "dist")
+_static = os.path.join(BASE_DIR, "static")
+STATIC_DIR = _dist if os.path.exists(_dist) else _static
+INDEX_HTML = os.path.join(STATIC_DIR, "index.html")
 
-print(f"📂 Static directory: {STATIC_DIR} (exists: {os.path.exists(STATIC_DIR)})")
+print(f"📂 STATIC_DIR={STATIC_DIR} exists={os.path.exists(STATIC_DIR)}")
+print(f"📄 INDEX_HTML={INDEX_HTML} exists={os.path.exists(INDEX_HTML)}")
 
 if os.path.exists(STATIC_DIR):
-    assets_dir = os.path.join(STATIC_DIR, "assets")
-    if os.path.exists(assets_dir):
-        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+    # /assets 정적 파일 (JS, CSS, 이미지)
+    _assets = os.path.join(STATIC_DIR, "assets")
+    if os.path.exists(_assets):
+        app.mount("/assets", StaticFiles(directory=_assets), name="assets")
+        print(f"✅ /assets mounted from {_assets}")
 
+    # SPA catch-all: 모든 비-API 경로에 index.html 반환
     @app.get("/{full_path:path}")
     async def serve_frontend(full_path: str):
-        file_path = os.path.join(STATIC_DIR, full_path)
-        if os.path.isfile(file_path):
-            return FileResponse(file_path)
-        return FileResponse(os.path.join(STATIC_DIR, "index.html"))
+        try:
+            if full_path:
+                fp = os.path.join(STATIC_DIR, full_path)
+                if os.path.isfile(fp):
+                    return FileResponse(fp)
+            if os.path.isfile(INDEX_HTML):
+                return FileResponse(INDEX_HTML)
+            return HTMLResponse("<h1>CalZero</h1><p>index.html not found</p>")
+        except Exception as e:
+            print(f"❌ serve_frontend error: {e}")
+            return HTMLResponse(f"<h1>Error</h1><pre>{e}</pre>", status_code=500)
+else:
+    print("⚠️ No static directory found - frontend will not be served")
+
+    @app.get("/")
+    async def root():
+        return {"message": "CalZero API running", "static_dir": STATIC_DIR, "exists": False}
 
 if __name__ == "__main__":
     import uvicorn
