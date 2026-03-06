@@ -209,13 +209,6 @@ app.add_middleware(
 )
 
 
-# ==================== Health Check ====================
-
-@app.get("/api/health")
-def health_check():
-    return {"status": "ok"}
-
-
 # ==================== Auth Helpers ====================
 
 def hash_password(password: str) -> str:
@@ -795,14 +788,20 @@ def startup_event():
 
 # ==================== Frontend Static Files ====================
 
-# Docker에서는 frontend/dist, 로컬에서는 static 폴더
-STATIC_DIR = os.path.join(os.path.dirname(__file__), "frontend", "dist")
+# 절대 경로로 변환하여 Docker/로컬 모두 안정적으로 동작
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Docker: /app/frontend/dist, 로컬: /app/static
+STATIC_DIR = os.path.join(BASE_DIR, "frontend", "dist")
 if not os.path.exists(STATIC_DIR):
-    STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+    STATIC_DIR = os.path.join(BASE_DIR, "static")
+
+print(f"📂 Static directory: {STATIC_DIR} (exists: {os.path.exists(STATIC_DIR)})")
 
 if os.path.exists(STATIC_DIR):
-    app.mount("/assets", StaticFiles(directory=os.path.join(STATIC_DIR, "assets")), name="assets")
-
+    assets_dir = os.path.join(STATIC_DIR, "assets")
+    if os.path.exists(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
 
     @app.get("/{full_path:path}")
     async def serve_frontend(full_path: str):
