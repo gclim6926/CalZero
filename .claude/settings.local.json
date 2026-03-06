@@ -32,7 +32,14 @@
       "Bash(pip freeze:*)",
       "Bash(wc -l:*)",
       "Bash(gh pr create:*)",
-      "Bash(docker build -t calzero .)"
+      "Bash(docker build -t calzero .)",
+      "Bash(claude --chrome --version)",
+      "Bash(claude --version)",
+      "Bash(env)",
+      "Bash(npx vite build)",
+      "Bash(lsof -ti:8000)",
+      "Bash(lsof -ti:5173)",
+      "Bash(git status -u)"
     ]
   }
 }
