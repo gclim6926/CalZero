@@ -32,8 +32,5 @@ COPY backend/data ./data
 # Copy built frontend from stage 1
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
-# Default port (Railway overrides via PORT env var)
-EXPOSE 8000
-
-# Run application
-CMD ["sh", "-c", "exec uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Run application (--loop asyncio: 순수 Python 이벤트 루프 사용)
+CMD ["sh", "-c", "exec uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000} --loop asyncio"]
