@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getRobotTypeIcon, defaultDeviceTypes } from '../../utils/robotIcons'
+import { getRobotTypeIcon, defaultDeviceTypes, imageIconTypes } from '../../utils/robotIcons'
 
 // 로컬스토리지에서 커스텀 타입 불러오기
 const getDeviceTypes = () => {
@@ -28,7 +28,7 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [], defa
     name: '',
     location: '',
     manager: '',
-    type: 'so101_follower',
+    type: 'so101',
     status: 'offline',
     description: '',
     ip_address: '',
@@ -80,7 +80,7 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [], defa
         name: '',
         location: '',
         manager: '',
-        type: isSim ? 'isaac_sim' : 'so101_follower',
+        type: isSim ? 'isaac_sim' : 'so101',
         status: 'offline',
         description: '',
         ip_address: '',
@@ -102,7 +102,7 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [], defa
 
   const validate = () => {
     const newErrors = {}
-    if (!formData.name.trim()) newErrors.name = '장치 이름을 입력하세요'
+    if (!formData.name.trim()) newErrors.name = '로봇 이름을 입력하세요'
     if (!formData.manager.trim()) newErrors.manager = '관리자를 입력하세요'
     if (formData.ip_address && !/^(\d{1,3}\.){3}\d{1,3}$/.test(formData.ip_address)) {
       newErrors.ip_address = '올바른 IP 주소 형식이 아닙니다'
@@ -188,10 +188,10 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [], defa
             </div>
             <div>
               <h2 className="text-lg font-semibold text-white">
-                {isEdit ? (isSimulation ? 'Sim 모델 수정' : '장치 수정') : (isSimulation ? '새 Sim 모델 추가' : '새 장치 추가')}
+                {isEdit ? (isSimulation ? 'Sim 모델 수정' : '로봇 수정') : (isSimulation ? '새 Sim 모델 추가' : '새 로봇 추가')}
               </h2>
               <p className="text-slate-400 text-xs">
-                {isSimulation ? 'Isaac Sim 모델 정보를 입력하세요' : '장치 정보를 입력하세요'}
+                {isSimulation ? 'Isaac Sim 모델 정보를 입력하세요' : '로봇 정보를 입력하세요'}
               </p>
             </div>
           </div>
@@ -220,7 +220,7 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [], defa
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-slate-400 text-sm mb-1.5">
-                  {isSimulation ? '모델 이름' : '장치 이름'} <span className="text-rose-400">*</span>
+                  {isSimulation ? '모델 이름' : '로봇 이름'} <span className="text-rose-400">*</span>
                 </label>
                 <input
                   type="text"
@@ -262,12 +262,12 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [], defa
             </div>
           </div>
 
-          {/* Physical Robot: 장치 타입 선택 */}
+          {/* Physical Robot: 로봇 타입 선택 */}
           {!isSimulation && (
             <div className="space-y-4">
               <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-violet-400"></span>
-                장치 타입
+                로봇 타입
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 {deviceTypes.map(type => (
@@ -282,11 +282,19 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [], defa
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                        formData.type === type.value ? 'bg-cyan-500/30 text-cyan-300' : 'bg-slate-600/50 text-slate-400'
-                      }`}>
-                        {getRobotTypeIcon(type.value, 'w-4 h-4')}
-                      </div>
+                      {imageIconTypes.includes(type.value) ? (
+                        <div className={`w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 ring-1 ${
+                          formData.type === type.value ? 'ring-cyan-500/50' : 'ring-slate-600/50'
+                        }`}>
+                          {getRobotTypeIcon(type.value, 'w-10 h-10')}
+                        </div>
+                      ) : (
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                          formData.type === type.value ? 'bg-cyan-500/30 text-cyan-300' : 'bg-slate-600/50 text-slate-400'
+                        }`}>
+                          {getRobotTypeIcon(type.value, 'w-4 h-4')}
+                        </div>
+                      )}
                       <div className="flex-1 min-w-0">
                         <span className={`text-sm font-medium block truncate ${
                           formData.type === type.value ? 'text-cyan-300' : 'text-slate-200'
@@ -310,7 +318,7 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [], defa
 
               {showAddType && (
                 <div className="p-4 bg-slate-700/50 rounded-xl border border-slate-600/50 space-y-3">
-                  <span className="text-sm text-slate-300 font-medium">새 장치 타입 추가</span>
+                  <span className="text-sm text-slate-300 font-medium">새 로봇 타입 추가</span>
                   <div className="flex gap-3 items-end">
                     <div className="flex-1">
                       <label className="block text-slate-400 text-xs mb-1">타입 이름</label>
@@ -423,8 +431,8 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [], defa
                               className="w-3.5 h-3.5 rounded border-slate-600 text-violet-500 focus:ring-violet-500 bg-slate-800"
                             />
                             <div className="flex items-center gap-2 flex-1 min-w-0">
-                              <div className="w-5 h-5 rounded flex items-center justify-center bg-slate-700/60 text-slate-400">
-                                {getRobotTypeIcon(r.type, 'w-3 h-3')}
+                              <div className="w-5 h-5 rounded flex items-center justify-center overflow-hidden bg-slate-700/60 text-slate-400">
+                                {imageIconTypes.includes(r.type) ? getRobotTypeIcon(r.type, 'w-5 h-5') : getRobotTypeIcon(r.type, 'w-3 h-3')}
                               </div>
                               <span className={`text-sm truncate ${isChecked ? 'text-violet-200' : 'text-slate-300'}`}>{r.name}</span>
                               <span className="text-[10px] text-slate-500">{r.type}</span>
@@ -502,7 +510,7 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [], defa
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
-              {isSimulation ? '모델 상세 정보' : '장치 상세 정보'}
+              {isSimulation ? '모델 상세 정보' : '로봇 상세 정보'}
               <span className="text-slate-500 text-xs font-normal">(선택사항)</span>
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -543,7 +551,7 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [], defa
               <label className="block text-slate-400 text-sm mb-1.5">메모</label>
               <textarea
                 value={formData.description} onChange={(e) => handleChange('description', e.target.value)}
-                placeholder={isSimulation ? '시뮬레이션 모델에 대한 메모' : '장치에 대한 간단한 메모'}
+                placeholder={isSimulation ? '시뮬레이션 모델에 대한 메모' : '로봇에 대한 간단한 메모'}
                 rows={2}
                 className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-cyan-500 transition resize-none"
               />

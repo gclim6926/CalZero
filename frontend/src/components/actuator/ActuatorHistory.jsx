@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import ExportButton from '../common/ExportButton'
+import { ALICE_M1_BODY_JOINTS, ALICE_M1_HAND_JOINTS } from './AliceM1CalibrationForm'
 
 function ActuatorHistory({ device, calibrations, onDelete }) {
   const [selectedCalibration, setSelectedCalibration] = useState(null)
@@ -66,16 +67,23 @@ function ActuatorHistory({ device, calibrations, onDelete }) {
       if (c.calibration_data) Object.keys(c.calibration_data).forEach(j => allJoints.add(j))
     })
 
+    const isAliceM1 = device?.type === 'alice_m1'
+    const paramKeys = isAliceM1 ? ['min', 'max', 'base'] : ['homing_offset', 'range_min', 'range_max']
+
+    // 선택된 캘리브레이션을 제외한 나머지 데이터로 통계 계산
+    const otherCalibrations = deviceCalibrations.filter(c => c.id !== selectedCalibration.id)
+
     const analysis = {}
     allJoints.forEach(joint => {
-      const values = { homing_offset: [], range_min: [], range_max: [] }
+      const values = {}
+      paramKeys.forEach(k => { values[k] = [] })
 
-      deviceCalibrations.forEach(c => {
+      otherCalibrations.forEach(c => {
         const data = c.calibration_data?.[joint]
         if (data) {
-          if (data.homing_offset !== undefined) values.homing_offset.push(data.homing_offset)
-          if (data.range_min !== undefined) values.range_min.push(data.range_min)
-          if (data.range_max !== undefined) values.range_max.push(data.range_max)
+          paramKeys.forEach(k => {
+            if (data[k] !== undefined && data[k] !== null) values[k].push(data[k])
+          })
         }
       })
 
@@ -84,18 +92,19 @@ function ActuatorHistory({ device, calibrations, onDelete }) {
 
       const calcStats = (arr, currentVal) => {
         if (arr.length === 0) return null
-        const min = Math.min(...arr)
-        const max = Math.max(...arr)
+        const minVal = Math.min(...arr)
+        const maxVal = Math.max(...arr)
         const avg = arr.reduce((a, b) => a + b, 0) / arr.length
-        const stdDev = Math.sqrt(arr.reduce((sum, v) => sum + Math.pow(v - avg, 2), 0) / arr.length)
-        return { min, max, avg, stdDev, current: currentVal ?? arr[0], count: arr.length }
+        const stdDev = arr.length > 1
+          ? Math.sqrt(arr.reduce((sum, v) => sum + Math.pow(v - avg, 2), 0) / (arr.length - 1))
+          : 0
+        return { min: minVal, max: maxVal, avg, stdDev, current: currentVal ?? arr[0], count: arr.length }
       }
 
-      analysis[joint] = {
-        homing_offset: calcStats(values.homing_offset, selectedData?.homing_offset),
-        range_min: calcStats(values.range_min, selectedData?.range_min),
-        range_max: calcStats(values.range_max, selectedData?.range_max),
-      }
+      analysis[joint] = {}
+      paramKeys.forEach(k => {
+        analysis[joint][k] = calcStats(values[k], selectedData?.[k])
+      })
     })
     return analysis
   }
@@ -116,11 +125,17 @@ function ActuatorHistory({ device, calibrations, onDelete }) {
   }
 
   // 파라미터별 색상
+  const isAliceM1 = device?.type === 'alice_m1'
+  const paramKeys = isAliceM1 ? ['min', 'max', 'base'] : ['homing_offset', 'range_min', 'range_max']
+
   const getParamStyle = (param) => {
     const styles = {
       homing_offset: { label: 'Homing Offset', icon: '🏠', color: 'cyan' },
       range_min: { label: 'Range Min', icon: '⬇️', color: 'emerald' },
       range_max: { label: 'Range Max', icon: '⬆️', color: 'amber' },
+      min: { label: 'Min', icon: '⬇️', color: 'cyan' },
+      max: { label: 'Max', icon: '⬆️', color: 'amber' },
+      base: { label: 'Base 자세', icon: '🏠', color: 'emerald' },
     }
     return styles[param] || { label: param, icon: '📊', color: 'gray' }
   }
@@ -213,28 +228,99 @@ function ActuatorHistory({ device, calibrations, onDelete }) {
               <ExportButton data={selectedCalibration} filename={`calibration_${selectedCalibration.id}`} format="json" />
             </div>
             {selectedCalibration.calibration_data && (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-700">
-                      <th className="text-left text-gray-400 font-medium py-2 px-3">Joint</th>
-                      <th className="text-right text-gray-400 font-medium py-2 px-3">homing_offset</th>
-                      <th className="text-right text-gray-400 font-medium py-2 px-3">range_min</th>
-                      <th className="text-right text-gray-400 font-medium py-2 px-3">range_max</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(selectedCalibration.calibration_data).map(([joint, data]) => (
-                      <tr key={joint} className="border-b border-gray-700/50 hover:bg-gray-700/30">
-                        <td className="py-2 px-3 text-cyan-400 font-medium">{joint}</td>
-                        <td className="py-2 px-3 text-right font-mono text-white">{data.homing_offset}</td>
-                        <td className="py-2 px-3 text-right font-mono text-white">{data.range_min}</td>
-                        <td className="py-2 px-3 text-right font-mono text-white">{data.range_max}</td>
+              isAliceM1 ? (
+                /* Alice M1: Body Joints / Hand Joints 분리 표시 */
+                <div className="space-y-4">
+                  {/* Body Joints */}
+                  <div>
+                    <p className="text-gray-400 text-xs mb-2 font-medium">Body Joints</p>
+                    <div className="overflow-x-auto rounded-lg border border-gray-700">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="bg-gray-900 border-b border-gray-700">
+                            <th className="text-left text-gray-400 font-medium py-2 px-3">Joint</th>
+                            <th className="text-center text-gray-400 font-medium py-2 px-3">범위</th>
+                            <th className="text-right text-gray-400 font-medium py-2 px-3">Min</th>
+                            <th className="text-right text-gray-400 font-medium py-2 px-3">Max</th>
+                            <th className="text-right text-gray-400 font-medium py-2 px-3">Base 자세</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {ALICE_M1_BODY_JOINTS.map((joint, idx) => {
+                            const data = selectedCalibration.calibration_data[joint.id]
+                            if (!data) return null
+                            return (
+                              <tr key={joint.id} className={`border-b border-gray-700/50 ${idx % 2 === 0 ? 'bg-gray-900/30' : ''}`}>
+                                <td className="py-2 px-3 text-cyan-400 font-mono text-xs">{joint.label}</td>
+                                <td className="py-2 px-3 text-gray-500 text-center text-xs whitespace-nowrap">{joint.min}° ~ {joint.max}°</td>
+                                <td className="py-2 px-3 text-right font-mono text-white">{data.min ?? '-'}</td>
+                                <td className="py-2 px-3 text-right font-mono text-white">{data.max ?? '-'}</td>
+                                <td className="py-2 px-3 text-right font-mono text-emerald-400">{data.base ?? '-'}</td>
+                              </tr>
+                            )
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  {/* Hand Joints */}
+                  <div>
+                    <p className="text-gray-400 text-xs mb-2 font-medium">Hand Joints</p>
+                    <div className="overflow-x-auto rounded-lg border border-gray-700">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="bg-gray-900 border-b border-gray-700">
+                            <th className="text-left text-gray-400 font-medium py-2 px-3">Joint</th>
+                            <th className="text-center text-gray-400 font-medium py-2 px-3">범위</th>
+                            <th className="text-right text-gray-400 font-medium py-2 px-3">Min</th>
+                            <th className="text-right text-gray-400 font-medium py-2 px-3">Max</th>
+                            <th className="text-right text-gray-400 font-medium py-2 px-3">Base 자세</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {ALICE_M1_HAND_JOINTS.map((joint, idx) => {
+                            const data = selectedCalibration.calibration_data[joint.id]
+                            if (!data) return null
+                            return (
+                              <tr key={joint.id} className={`border-b border-gray-700/50 ${idx % 2 === 0 ? 'bg-gray-900/30' : ''}`}>
+                                <td className="py-2 px-3 text-violet-400 font-mono text-xs">{joint.id.replace(/_/g, ' ')}</td>
+                                <td className="py-2 px-3 text-gray-500 text-center text-xs whitespace-nowrap">{joint.min} ~ {joint.max}</td>
+                                <td className="py-2 px-3 text-right font-mono text-white">{data.min ?? '-'}</td>
+                                <td className="py-2 px-3 text-right font-mono text-white">{data.max ?? '-'}</td>
+                                <td className="py-2 px-3 text-right font-mono text-emerald-400">{data.base ?? '-'}</td>
+                              </tr>
+                            )
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* SO101 등 기존 로봇: 기존 테이블 */
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-700">
+                        <th className="text-left text-gray-400 font-medium py-2 px-3">Joint</th>
+                        <th className="text-right text-gray-400 font-medium py-2 px-3">homing_offset</th>
+                        <th className="text-right text-gray-400 font-medium py-2 px-3">range_min</th>
+                        <th className="text-right text-gray-400 font-medium py-2 px-3">range_max</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {Object.entries(selectedCalibration.calibration_data).map(([joint, data]) => (
+                        <tr key={joint} className="border-b border-gray-700/50 hover:bg-gray-700/30">
+                          <td className="py-2 px-3 text-cyan-400 font-medium">{joint}</td>
+                          <td className="py-2 px-3 text-right font-mono text-white">{data.homing_offset}</td>
+                          <td className="py-2 px-3 text-right font-mono text-white">{data.range_min}</td>
+                          <td className="py-2 px-3 text-right font-mono text-white">{data.range_max}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )
             )}
           </div>
         )}
@@ -296,7 +382,7 @@ function ActuatorHistory({ device, calibrations, onDelete }) {
               const dangers = []  // 3σ 이상
 
               Object.entries(analysis).forEach(([joint, data]) => {
-                ['homing_offset', 'range_min', 'range_max'].forEach(param => {
+                paramKeys.forEach(param => {
                   const stats = data[param]
                   if (!stats || stats.stdDev === 0) return
                   const deviation = Math.abs(stats.current - stats.avg) / stats.stdDev
@@ -400,16 +486,16 @@ function ActuatorHistory({ device, calibrations, onDelete }) {
                         <span className="text-lg">⚙️</span> {joint}
                       </h4>
                       <div className="flex items-center gap-2">
-                        {data.homing_offset && (
+                        {data[paramKeys[0]] && (
                           <span className="text-[10px] px-2 py-0.5 bg-gray-800 rounded-full text-gray-400">
-                            n={data.homing_offset.count}
+                            n={data[paramKeys[0]].count}
                           </span>
                         )}
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {['homing_offset', 'range_min', 'range_max'].map(param => {
+                      {paramKeys.map(param => {
                         const stats = data[param]
                         if (!stats) return null
                         const range = stats.max - stats.min || 1

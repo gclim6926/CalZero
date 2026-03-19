@@ -14,53 +14,13 @@ import HandEyeCalculation from './components/camera/HandEyeCalculation'
 import HandEyeHistory from './components/camera/HandEyeHistory'
 import SettingsGeneral from './components/settings/SettingsGeneral'
 import api from './utils/api'
-
-// 상단 메뉴 (Device 의존적인 기능들)
-const menuConfig = {
-  actuator: {
-    id: 'actuator', label: 'Actuator',
-    icon: (<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>),
-    bgActive: 'bg-cyan-500/20', textActive: 'text-cyan-400', borderActive: 'border-cyan-500/50', subMenuBorder: 'border-cyan-400',
-  },
-  camera: {
-    id: 'camera', label: 'Camera',
-    icon: (<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>),
-    bgActive: 'bg-violet-500/20', textActive: 'text-violet-400', borderActive: 'border-violet-500/50', subMenuBorder: 'border-violet-400',
-  },
-  sensors: {
-    id: 'sensors', label: 'Sensors',
-    icon: (<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>),
-    bgActive: 'bg-emerald-500/20', textActive: 'text-emerald-400', borderActive: 'border-emerald-500/50', subMenuBorder: 'border-emerald-400',
-  },
-}
+import { allMenuConfigs, getMenuConfig } from './utils/menuConfig'
 
 // Settings 서브메뉴 (상단 탭용)
 const settingsSubMenus = [
   { id: 'general', label: '일반 설정', icon: '⚙️' },
   { id: 'about', label: '정보', icon: 'ℹ️' },
 ]
-
-const subMenus = {
-  actuator: [
-    { id: 'calibration', label: '캘리브레이션', icon: '⚙️' },
-    { id: 'history', label: '히스토리 분석', icon: '📋' },
-    { id: 'replay-analysis', label: '리플레이 분석', icon: '🎯' },
-    { id: 'data-analysis', label: '학습할 데이터 분석', icon: '📊' },
-    { id: 'stats', label: '통계', icon: '📈' },
-  ],
-  camera: [
-    { id: 'intrinsic', label: 'Intrinsic 계산', icon: '📷' },
-    { id: 'intrinsic-history', label: 'Intrinsic 히스토리', icon: '📋' },
-    { id: 'extrinsic', label: 'Extrinsic 계산', icon: '🌍' },
-    { id: 'extrinsic-history', label: 'Extrinsic 히스토리', icon: '📋' },
-    { id: 'hand-eye', label: 'Hand-Eye 계산', icon: '🤖' },
-    { id: 'hand-eye-history', label: 'Hand-Eye 히스토리', icon: '📋' },
-  ],
-  sensors: [
-    { id: 'force-torque', label: 'Force/Torque', icon: '💪' },
-    { id: 'imu', label: 'IMU', icon: '🧭' },
-  ],
-}
 
 function App() {
   const [user, setUser] = useState(null)
@@ -89,6 +49,15 @@ function App() {
   useEffect(() => {
     if (selectedDevice) loadCalibrations(selectedDevice.id)
   }, [selectedDevice])
+
+  useEffect(() => {
+    if (selectedDevice) {
+      const config = getMenuConfig(selectedDevice.type)
+      const firstMenu = config.menus[0]
+      setActiveTopMenu(firstMenu)
+      setActiveSubMenu(config.subMenus[firstMenu]?.[0]?.id || '')
+    }
+  }, [selectedDevice?.type])
 
   const loadInitialData = async () => {
     setIsLoading(true)
@@ -237,8 +206,9 @@ function App() {
   if (!user) return <Login onLogin={handleLogin} />
 
   const handleTopMenuChange = (menuId) => {
+    const config = getMenuConfig(selectedDevice?.type)
     setActiveTopMenu(menuId)
-    setActiveSubMenu(subMenus[menuId]?.[0]?.id || '')
+    setActiveSubMenu(config.subMenus[menuId]?.[0]?.id || '')
     setActiveSettingsMenu(null) // Settings 비활성화
   }
 
@@ -247,7 +217,8 @@ function App() {
     setSelectedDevice(null) // 장치 선택 해제
   }
 
-  const currentMenuConfig = menuConfig[activeTopMenu]
+  const robotMenuConfig = getMenuConfig(selectedDevice?.type)
+  const currentMenuConfig = allMenuConfigs[activeTopMenu]
 
   const renderContent = () => {
     // Settings 메뉴가 활성화된 경우
@@ -281,7 +252,7 @@ function App() {
         case 'history': return <ActuatorHistory device={selectedDevice} calibrations={calibrations} onDelete={handleActuatorCalibrationDelete} />
         case 'replay-analysis': return <ReplayAnalysis device={selectedDevice} calibrations={calibrations} replayTests={replayTests} onSave={handleReplayTestSave} onDelete={handleReplayTestDelete} />
         case 'data-analysis': return <DataAnalysis device={selectedDevice} calibrations={calibrations} />
-        case 'stats': return <CalibrationStats calibrations={calibrations} />
+        case 'stats': return <CalibrationStats calibrations={calibrations} device={selectedDevice} />
         default: return null
       }
     }
@@ -563,7 +534,7 @@ function App() {
                 <div className="px-5">
                   <div className="flex items-center justify-between h-14">
                     <nav className="flex items-center gap-1">
-                      {Object.values(menuConfig).map(menu => (
+                      {robotMenuConfig.menus.map(id => allMenuConfigs[id]).map(menu => (
                         <button key={menu.id} onClick={() => handleTopMenuChange(menu.id)} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2.5 ${activeTopMenu === menu.id && !activeSettingsMenu ? `${menu.bgActive} ${menu.textActive} border ${menu.borderActive} shadow-sm` : 'text-gray-400 hover:text-white hover:bg-gray-700/50 border border-transparent'}`}>
                           {menu.icon}<span>{menu.label}</span>
                         </button>
@@ -589,7 +560,7 @@ function App() {
               <div className="bg-gray-800/50 border-b border-gray-700/50">
                 <div className="px-5">
                   <nav className="flex items-center gap-1 h-12 overflow-x-auto">
-                    {subMenus[activeTopMenu]?.map(menu => (
+                    {robotMenuConfig.subMenus[activeTopMenu]?.map(menu => (
                       <button key={menu.id} onClick={() => setActiveSubMenu(menu.id)} className={`px-4 py-2.5 text-sm transition-all flex items-center gap-2 border-b-2 -mb-px whitespace-nowrap ${activeSubMenu === menu.id ? `${currentMenuConfig.subMenuBorder} ${currentMenuConfig.textActive} font-medium` : 'border-transparent text-gray-400 hover:text-white hover:border-gray-600'}`}>
                         <span className="text-base">{menu.icon}</span><span>{menu.label}</span>
                       </button>

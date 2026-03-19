@@ -1,13 +1,22 @@
 import { useState } from 'react'
+import { getCameraConfig } from '../../utils/menuConfig.jsx'
 
 function HandEyeHistory({ device, calibrations, setCalibrations }) {
+  const cameraConfig = getCameraConfig(device?.type)
   const [selectedCamera, setSelectedCamera] = useState('all')
   const [selectedCalib, setSelectedCalib] = useState(null)
 
+  // HandEyeHistory uses short keys ('wrist'/'front' or 'right'/'left') mapped from full camera IDs
+  const camShortKeys = cameraConfig.cameras.map(cam => cam.replace('_cam', ''))
+  const getCamLabel = (shortKey) => {
+    const fullKey = shortKey + '_cam'
+    return cameraConfig.labels[fullKey] || { name: shortKey, icon: '📷', short: shortKey }
+  }
+
   const cameras = [
     { id: 'all', name: '전체', icon: '📋' },
-    { id: 'wrist', name: 'Wrist Cam', icon: '🤖', type: 'Eye-in-Hand' },
-    { id: 'front', name: 'Front Cam', icon: '📷', type: 'Eye-to-Hand' },
+    { id: camShortKeys[0], name: getCamLabel(camShortKeys[0]).name, icon: getCamLabel(camShortKeys[0]).icon, type: 'Eye-to-Hand' },
+    { id: camShortKeys[1] || camShortKeys[0], name: getCamLabel(camShortKeys[1] || camShortKeys[0]).name, icon: getCamLabel(camShortKeys[1] || camShortKeys[0]).icon, type: 'Eye-in-Hand' },
   ]
 
   // 디바이스의 Hand-Eye 계산 필터링
@@ -192,7 +201,7 @@ function HandEyeHistory({ device, calibrations, setCalibrations }) {
                 >
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
-                      <span>{calib.camera === 'wrist' ? '🤖' : '📷'}</span>
+                      <span>{getCamLabel(calib.camera).icon}</span>
                       {calib.is_active && (
                         <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] rounded">Active</span>
                       )}
@@ -231,7 +240,7 @@ function HandEyeHistory({ device, calibrations, setCalibrations }) {
                 <div>
                   <div className="flex items-center gap-2">
                     <h4 className="text-white font-semibold">
-                      {selectedCalib.camera === 'wrist' ? '🤖 Wrist Cam' : '📷 Front Cam'}
+                      {getCamLabel(selectedCalib.camera).icon} {getCamLabel(selectedCalib.camera).name}
                     </h4>
                     <span className={`px-2 py-0.5 rounded text-xs ${
                       selectedCalib.type === 'eye-in-hand' ? 'bg-cyan-500/20 text-cyan-400' : 'bg-amber-500/20 text-amber-400'

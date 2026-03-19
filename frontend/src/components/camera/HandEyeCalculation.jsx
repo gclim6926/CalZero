@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { initPyodide, isPyodideReady } from '../../utils/calibration.js'
+import { getCameraConfig } from '../../utils/menuConfig.jsx'
 
 function HandEyeCalculation({ device, intrinsicCalibrations, onCalibrationComplete }) {
+  const cameraConfig = getCameraConfig(device?.type)
   const [pyReady, setPyReady] = useState(false)
   const [pyError, setPyError] = useState(null)
   const [calibrationType, setCalibrationType] = useState('eye-in-hand')
-  const [selectedCamera, setSelectedCamera] = useState('wrist_cam')
+  const [selectedCamera, setSelectedCamera] = useState(cameraConfig.cameras[1] || cameraConfig.cameras[0])
   const [notes, setNotes] = useState('')
 
   // 카메라 좌표계 상태
@@ -48,7 +50,7 @@ function HandEyeCalculation({ device, intrinsicCalibrations, onCalibrationComple
 
   // 카메라/타입 변경시 초기화
   useEffect(() => {
-    const cam = calibrationType === 'eye-in-hand' ? 'wrist_cam' : 'front_cam'
+    const cam = calibrationType === 'eye-in-hand' ? cameraConfig.cameras[1] || cameraConfig.cameras[0] : cameraConfig.cameras[0]
     setSelectedCamera(cam)
     setSelectedIntrinsic(null)
     setCameraImages([])
@@ -461,7 +463,7 @@ function HandEyeCalculation({ device, intrinsicCalibrations, onCalibrationComple
                   <span className="text-white text-sm font-medium">Eye-in-Hand</span>
                 </div>
                 <p className="text-gray-500 text-[10px]">카메라가 로봇 팔 끝에 부착</p>
-                <p className="text-cyan-400 text-[10px] mt-1">→ Wrist Cam</p>
+                <p className="text-cyan-400 text-[10px] mt-1">→ {cameraConfig.labels[cameraConfig.cameras[1] || cameraConfig.cameras[0]]?.name}</p>
               </button>
 
               <button
@@ -477,7 +479,7 @@ function HandEyeCalculation({ device, intrinsicCalibrations, onCalibrationComple
                   <span className="text-white text-sm font-medium">Eye-to-Hand</span>
                 </div>
                 <p className="text-gray-500 text-[10px]">카메라가 외부에 고정</p>
-                <p className="text-amber-400 text-[10px] mt-1">→ Front Cam</p>
+                <p className="text-amber-400 text-[10px] mt-1">→ {cameraConfig.labels[cameraConfig.cameras[0]]?.name}</p>
               </button>
             </div>
           </div>
@@ -486,7 +488,7 @@ function HandEyeCalculation({ device, intrinsicCalibrations, onCalibrationComple
           <div className="bg-gray-800 rounded-xl border border-gray-700 p-4">
             <h4 className="text-white font-bold text-sm mb-3">1️⃣ Intrinsic 선택</h4>
             <p className="text-gray-500 text-xs mb-3">
-              {selectedCamera === 'wrist_cam' ? '🤖 Wrist Cam' : '📷 Front Cam'}의 내부 파라미터
+              {cameraConfig.labels[selectedCamera]?.icon} {cameraConfig.labels[selectedCamera]?.name || selectedCamera}의 내부 파라미터
             </p>
 
             {deviceIntrinsics.length === 0 ? (

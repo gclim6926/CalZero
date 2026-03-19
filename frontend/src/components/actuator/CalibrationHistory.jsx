@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react'
+import AliceM1CalibrationForm from './AliceM1CalibrationForm'
 
 function CalibrationHistory({ device, calibrations, onSave, onDelete, setActiveSubMenu }) {
   const [showRegister, setShowRegister] = useState(false)
@@ -90,6 +91,11 @@ function CalibrationHistory({ device, calibrations, onSave, onDelete, setActiveS
         <p className="text-gray-400 text-sm">왼쪽 사이드바에서 장치를 선택하면 캘리브레이션을 진행할 수 있습니다.</p>
       </div>
     )
+  }
+
+  // Alice M1은 별도 UI
+  if (device.type === 'alice_m1') {
+    return <AliceM1CalibrationForm device={device} calibrations={calibrations} onSave={onSave} setActiveSubMenu={setActiveSubMenu} />
   }
 
   // 현재 장치의 캘리브레이션 개수

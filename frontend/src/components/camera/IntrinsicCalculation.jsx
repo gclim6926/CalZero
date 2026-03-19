@@ -1,13 +1,15 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { initPyodide, runCalibration as runPyCalibration, isPyodideReady } from '../../utils/calibration.js'
+import { getCameraConfig } from '../../utils/menuConfig.jsx'
 
 function IntrinsicCalculation({ device, onCalibrationComplete }) {
+  const cameraConfig = getCameraConfig(device?.type)
   const [pyReady, setPyReady] = useState(false)
   const [pyError, setPyError] = useState(null)
   const [selectedBoard, setSelectedBoard] = useState('standard_9x6')
   const [customSquareSize, setCustomSquareSize] = useState({ 'standard_9x6': 24, '14x8': 17.4 })
-  const [selectedCamera, setSelectedCamera] = useState('front_cam')
-  const cameras = ['front_cam', 'wrist_cam']
+  const [selectedCamera, setSelectedCamera] = useState(cameraConfig.cameras[0])
+  const cameras = cameraConfig.cameras
   const [images, setImages] = useState([])
   const [dragActive, setDragActive] = useState(false)
   const fileInputRef = useRef(null)
@@ -227,7 +229,7 @@ function IntrinsicCalculation({ device, onCalibrationComplete }) {
                 (selectedCamera === cam
                   ? 'bg-violet-500/20 text-violet-400 border-violet-500/50'
                   : 'bg-gray-900 text-gray-400 border-gray-700 hover:border-gray-600')}>
-              {cam === 'front_cam' ? '📷 Front Camera' : '📷 Wrist Camera'}
+              {cameraConfig.labels[cam]?.icon} {cameraConfig.labels[cam]?.name}
             </button>
           ))}
         </div>
@@ -355,9 +357,9 @@ function IntrinsicCalculation({ device, onCalibrationComplete }) {
               <h3 className="text-white font-bold text-sm">5️⃣ 계산 결과</h3>
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 bg-violet-500/20 rounded-lg border border-violet-500/30">
-              <span>{calibResult.camera === 'wrist_cam' ? '🤖' : '📷'}</span>
+              <span>{cameraConfig.labels[calibResult.camera]?.icon || '📷'}</span>
               <span className="text-violet-400 text-sm font-medium">
-                {calibResult.camera === 'wrist_cam' ? 'Wrist Camera' : 'Front Camera'}
+                {cameraConfig.labels[calibResult.camera]?.name || calibResult.camera}
               </span>
             </div>
           </div>

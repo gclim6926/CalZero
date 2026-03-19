@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react'
+import { getCameraConfig } from '../../utils/menuConfig.jsx'
 
 function IntrinsicHistory({ device, calibrations, onDelete }) {
-  const [selectedCamera, setSelectedCamera] = useState('front_cam')
+  const cameraConfig = getCameraConfig(device?.type)
+  const [selectedCamera, setSelectedCamera] = useState(cameraConfig.cameras[0])
   const [selectedItem, setSelectedItem] = useState(null)
   const [compareMode, setCompareMode] = useState(false)
   const [compareItems, setCompareItems] = useState([])
   const [isDeleting, setIsDeleting] = useState(false)
 
-  const cameras = [
-    { id: 'front_cam', name: 'Front Cam', icon: '📷' },
-    { id: 'wrist_cam', name: 'Wrist Cam', icon: '🤖' },
-  ]
+  const cameras = cameraConfig.cameras.map(cam => ({
+    id: cam,
+    name: cameraConfig.labels[cam]?.name || cam,
+    icon: cameraConfig.labels[cam]?.icon || '📷',
+  }))
 
   // 현재 장치의 계산 필터링
   const getFilteredCalibrations = () => {
@@ -167,7 +170,7 @@ function IntrinsicHistory({ device, calibrations, onDelete }) {
       }
     })
 
-    return { data: analysis, cameraName: selectedItem.camera === 'wrist_cam' ? 'Wrist Cam' : 'Front Cam', totalCount: sameCamera.length }
+    return { data: analysis, cameraName: cameraConfig.labels[selectedItem.camera]?.name || selectedItem.camera, totalCount: sameCamera.length }
   }
 
   const analysis = calculateAnalysis()
@@ -250,7 +253,7 @@ function IntrinsicHistory({ device, calibrations, onDelete }) {
                       (isSelected ? 'bg-violet-500/20 border-violet-500/50' : 'bg-gray-900 border-transparent hover:border-gray-700')}>
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-base">{item.camera === 'wrist_cam' ? '🤖' : '📷'}</span>
+                        <span className="text-base">{cameraConfig.labels[item.camera]?.icon || '📷'}</span>
                         {idx === 0 && <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] rounded font-medium">Latest</span>}
                         {compareMode && isSelected && <span className="px-1.5 py-0.5 bg-amber-500/20 text-amber-400 text-[10px] rounded font-medium">선택됨</span>}
                       </div>
@@ -341,7 +344,7 @@ function IntrinsicHistory({ device, calibrations, onDelete }) {
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <h3 className="text-white font-bold text-sm">📊 상세 정보</h3>
-                      <p className="text-gray-500 text-xs">{selectedItem.camera === 'wrist_cam' ? '🤖 Wrist Cam' : '📷 Front Cam'} • {formatDate(selectedItem.created_at)}</p>
+                      <p className="text-gray-500 text-xs">{cameraConfig.labels[selectedItem.camera]?.icon || '📷'} {cameraConfig.labels[selectedItem.camera]?.name || selectedItem.camera} • {formatDate(selectedItem.created_at)}</p>
                     </div>
                     <button onClick={() => exportJSON(selectedItem)}
                       className="px-3 py-1.5 bg-violet-500/20 text-violet-400 border border-violet-500/50 rounded-lg text-xs hover:bg-violet-500/30 transition">

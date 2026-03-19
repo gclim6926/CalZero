@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import DeviceModal from './DeviceModal'
-import { getRobotTypeIcon, robotTypeLabels } from '../../utils/robotIcons'
+import { getRobotTypeIcon, robotTypeLabels, imageIconTypes } from '../../utils/robotIcons'
 
 // 읽기전용 하위 Physical Robot 아이템 (Isaac Sim 탭에서 표시, 편집/삭제 버튼 없음)
 function ReadOnlyLinkedRobotItem({ device, isSelected, onSelect }) {
@@ -25,10 +25,10 @@ function ReadOnlyLinkedRobotItem({ device, isSelected, onSelect }) {
         }`}
       >
         <div className="flex items-center gap-2">
-          <div className={`w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 ${
+          <div className={`w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden ${
             isSelected ? 'bg-cyan-500/20 text-cyan-300' : 'bg-slate-700/60 text-slate-400'
           }`}>
-            {getRobotTypeIcon(device.type, 'w-3.5 h-3.5')}
+            {imageIconTypes.includes(device.type) ? getRobotTypeIcon(device.type, 'w-6 h-6') : getRobotTypeIcon(device.type, 'w-3.5 h-3.5')}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
@@ -142,7 +142,7 @@ function DeviceList({ devices, selectedDevice, onSelectDevice, onDeviceAdd, onDe
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
         </svg>
-        <span className="font-medium">{isPhysicalTab ? '장치 추가' : 'Sim 모델 추가'}</span>
+        <span className="font-medium">{isPhysicalTab ? '새 로봇 추가' : 'Sim 모델 추가'}</span>
       </button>
 
       {/* Physical Robot 탭 */}
@@ -162,10 +162,10 @@ function DeviceList({ devices, selectedDevice, onSelectDevice, onDeviceAdd, onDe
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden ${
                   isSelected ? 'bg-cyan-500/20 text-cyan-300' : 'bg-slate-700/60 text-slate-400'
                 }`}>
-                  {getRobotTypeIcon(device.type, 'w-4 h-4')}
+                  {imageIconTypes.includes(device.type) ? getRobotTypeIcon(device.type, 'w-8 h-8') : getRobotTypeIcon(device.type, 'w-4 h-4')}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">

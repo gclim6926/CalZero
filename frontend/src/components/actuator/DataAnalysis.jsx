@@ -1,4 +1,5 @@
 import { useState, useRef, useMemo, useEffect } from 'react'
+import { getActuatorConfig } from '../../utils/menuConfig'
 
 function DataAnalysis({ device, calibrations }) {
   const [parquetData, setParquetData] = useState(null)
@@ -11,7 +12,10 @@ function DataAnalysis({ device, calibrations }) {
   const [selectedCalibration, setSelectedCalibration] = useState(null)
   const fileInputRef = useRef(null)
 
-  const joints = ['shoulder_pan', 'shoulder_lift', 'elbow_flex', 'wrist_flex', 'wrist_roll', 'gripper']
+  const config = getActuatorConfig(device?.type)
+  const joints = config.joints
+  const { min: minField, max: maxField } = config.calibFields
+  const isAlice = device?.type === 'alice_m1'
   
   const deviceCalibrations = device 
     ? calibrations.filter(c => c.device_id === device.id)
@@ -49,8 +53,8 @@ function DataAnalysis({ device, calibrations }) {
     return joints.map((joint, jIdx) => {
       const calibData = activeCalib[joint]
       if (!calibData) return null
-      const calibMin = calibData.range_min
-      const calibMax = calibData.range_max
+      const calibMin = calibData[minField]
+      const calibMax = calibData[maxField]
       const calibRange = calibMax - calibMin
       const binSize = calibRange / binCount
       const normBinSize = 200 / binCount
@@ -408,10 +412,10 @@ function DataAnalysis({ device, calibrations }) {
             {histogramData && histogramData.length > 0 && (
               <div className="bg-gray-800 p-4 rounded-xl border border-gray-700">
                 <div className="flex items-center gap-3 mb-3"><div className="w-3 h-3 bg-cyan-500 rounded"></div><h2 className="text-sm font-bold text-white">Action</h2><span className="text-[10px] text-gray-500">(Present Position)</span></div>
-                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-2">
+                <div className={`grid grid-cols-2 md:grid-cols-3 ${isAlice ? 'xl:grid-cols-4' : 'xl:grid-cols-6'} gap-2`}>
                   {histogramData.map(data => (
                     <div key={data.joint} className="bg-gray-900/50 p-2 rounded-lg">
-                      <h4 className="text-cyan-400 font-medium text-[10px] mb-1 truncate">{data.joint}</h4>
+                      <h4 className="text-cyan-400 font-medium text-[10px] mb-1 truncate" title={data.joint}>{data.joint}</h4>
                       <PresentHistogram bins={data.actionBins} maxCount={data.actionMax} calibMin={data.calibMin} calibMax={data.calibMax} binSize={data.binSize} color="bg-cyan-500" dataMin={data.actionMinVal} dataMax={data.actionMaxVal} count={data.actionCount} dangerBinCount={data.dangerBinCount} warningBinCount={data.warningBinCount} dangerLow={data.actionDangerLow} dangerHigh={data.actionDangerHigh} warningLow={data.actionWarningLow} warningHigh={data.actionWarningHigh} />
                     </div>
                   ))}
@@ -423,7 +427,7 @@ function DataAnalysis({ device, calibrations }) {
             {histogramData && histogramData.length > 0 && (
               <div className="bg-gray-800 p-4 rounded-xl border border-gray-700">
                 <div className="flex items-center gap-3 mb-3"><div className="w-3 h-3 bg-cyan-500/50 rounded"></div><h2 className="text-sm font-bold text-white">Action</h2><span className="text-[10px] text-gray-500">(Normalized: -100 ~ 100)</span></div>
-                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-2">
+                <div className={`grid grid-cols-2 md:grid-cols-3 ${isAlice ? 'xl:grid-cols-4' : 'xl:grid-cols-6'} gap-2`}>
                   {histogramData.map(data => (
                     <div key={data.joint} className="bg-gray-900/50 p-2 rounded-lg">
                       <h4 className="text-cyan-400/70 font-medium text-[10px] mb-1 truncate">{data.joint}</h4>
@@ -438,7 +442,7 @@ function DataAnalysis({ device, calibrations }) {
             {histogramData && histogramData.length > 0 && (
               <div className="bg-gray-800 p-4 rounded-xl border border-gray-700">
                 <div className="flex items-center gap-3 mb-3"><div className="w-3 h-3 bg-emerald-500 rounded"></div><h2 className="text-sm font-bold text-white">observation.state</h2><span className="text-[10px] text-gray-500">(Present Position)</span></div>
-                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-2">
+                <div className={`grid grid-cols-2 md:grid-cols-3 ${isAlice ? 'xl:grid-cols-4' : 'xl:grid-cols-6'} gap-2`}>
                   {histogramData.map(data => (
                     <div key={data.joint} className="bg-gray-900/50 p-2 rounded-lg">
                       <h4 className="text-emerald-400 font-medium text-[10px] mb-1 truncate">{data.joint}</h4>
@@ -453,7 +457,7 @@ function DataAnalysis({ device, calibrations }) {
             {histogramData && histogramData.length > 0 && (
               <div className="bg-gray-800 p-4 rounded-xl border border-gray-700">
                 <div className="flex items-center gap-3 mb-3"><div className="w-3 h-3 bg-emerald-500/50 rounded"></div><h2 className="text-sm font-bold text-white">observation.state</h2><span className="text-[10px] text-gray-500">(Normalized: -100 ~ 100)</span></div>
-                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-2">
+                <div className={`grid grid-cols-2 md:grid-cols-3 ${isAlice ? 'xl:grid-cols-4' : 'xl:grid-cols-6'} gap-2`}>
                   {histogramData.map(data => (
                     <div key={data.joint} className="bg-gray-900/50 p-2 rounded-lg">
                       <h4 className="text-emerald-400/70 font-medium text-[10px] mb-1 truncate">{data.joint}</h4>
