@@ -31,12 +31,27 @@ function ReplayAnalysis({ device, calibrations, replayTests, onSave, onDelete })
     setThresholdNormal(parseFloat(localStorage.getItem(storageKeyNormal) || String(defaultNormal)))
     setThresholdWarning(parseFloat(localStorage.getItem(storageKeyWarning) || String(defaultWarning)))
   }, [effectiveType])
-  const positionCount = isAliceM1 ? 12 : 6
 
-  // 위치 오차 입력 (로봇 타입에 따라 6개 또는 12개)
+  // Alice M1: L9 + R9 = 18, SO101: 6
+  const positionCount = isAliceM1 ? 18 : 6
+
+  // Alice M1 위치 라벨 생성 헬퍼
+  const getPositionLabel = (idx) => {
+    if (!isAliceM1) return `${idx + 1}`
+    if (idx < 9) return `L${idx + 1}`
+    return `R${idx - 8}`
+  }
+
+  const getPositionZone = (idx) => {
+    if (!isAliceM1) return null
+    return idx < 9 ? 'L' : 'R'
+  }
+
+  // 위치 오차 입력
   const [positions, setPositions] = useState(
     Array.from({ length: positionCount }, (_, i) => ({
       position: i + 1,
+      label: getPositionLabel(i),
       error_x: '0.0',
       error_y: '0.0',
       error_z: '0.0'
@@ -48,9 +63,10 @@ function ReplayAnalysis({ device, calibrations, replayTests, onSave, onDelete })
     setPositions(
       Array.from({ length: positionCount }, (_, i) => ({
         position: i + 1,
-        error_x: '',
-        error_y: '',
-        error_z: ''
+        label: getPositionLabel(i),
+        error_x: '0.0',
+        error_y: '0.0',
+        error_z: '0.0'
       }))
     )
   }, [positionCount])
@@ -102,7 +118,6 @@ function ReplayAnalysis({ device, calibrations, replayTests, onSave, onDelete })
   }
 
   const handleSave = async () => {
-    // 유효성 검사: 최소 1개 위치에 값이 있어야 함
     const hasData = positions.some(p =>
       p.error_x !== '' || p.error_y !== '' || p.error_z !== ''
     )
@@ -118,6 +133,7 @@ function ReplayAnalysis({ device, calibrations, replayTests, onSave, onDelete })
         calibration_id: selectedCalibrationId ? parseInt(selectedCalibrationId) : null,
         positions: positions.map(p => ({
           position: p.position,
+          label: p.label,
           error_x: parseFloat(p.error_x) || 0,
           error_y: parseFloat(p.error_y) || 0,
           error_z: parseFloat(p.error_z) || 0
@@ -129,7 +145,7 @@ function ReplayAnalysis({ device, calibrations, replayTests, onSave, onDelete })
 
       // 폼 초기화
       setPositions(Array.from({ length: positionCount }, (_, i) => ({
-        position: i + 1, error_x: '', error_y: '', error_z: ''
+        position: i + 1, label: getPositionLabel(i), error_x: '0.0', error_y: '0.0', error_z: '0.0'
       })))
       setNotes('')
       setSelectedCalibrationId('')
@@ -167,6 +183,157 @@ function ReplayAnalysis({ device, calibrations, replayTests, onSave, onDelete })
     }
   }
 
+  // 오차 추이 막대 렌더링 헬퍼
+  const renderTrendBar = (test, globalMax) => {
+    const testPositions = test.positions
+    if (testPositions.length === 0) return null
+    const distances = testPositions.map(p => p.distance)
+    let avgError, minError, maxError
+    avgError = distances.reduce((s, d) => s + d, 0) / distances.length
+    minError = Math.min(...distances)
+    maxError = Math.max(...distances)
+
+    const quality = getQualityStatus(avgError)
+    const isSelected = selectedTest?.id === test.id
+
+    const minPos = (minError / globalMax) * 100
+    const avgPos = (avgError / globalMax) * 100
+    const maxPos = (maxError / globalMax) * 100
+    const rangeWidth = maxPos - minPos
+
+    const barColorClass = quality.color === 'emerald' ? 'bg-emerald-500'
+      : quality.color === 'amber' ? 'bg-amber-500' : 'bg-rose-500'
+    const barBgClass = quality.color === 'emerald' ? 'bg-emerald-500/30'
+      : quality.color === 'amber' ? 'bg-amber-500/30' : 'bg-rose-500/30'
+
+    return (
+      <div
+        key={test.id}
+        onClick={() => setSelectedTest(test)}
+        className={`flex items-center gap-2 py-1.5 px-2 rounded-lg cursor-pointer transition ${
+          isSelected ? 'bg-cyan-500/20 ring-1 ring-cyan-500/50' : 'hover:bg-gray-700/30'
+        }`}
+      >
+        <span className={`text-xs w-24 truncate ${isSelected ? 'text-cyan-400 font-medium' : 'text-gray-500'}`}>
+          {new Date(test.created_at).toLocaleDateString('ko-KR', {
+            month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+          })}
+        </span>
+
+        <div className="flex-1 h-6 bg-gray-900 rounded relative">
+          <div className="absolute top-0 bottom-0 w-px bg-amber-500/40 z-10"
+            style={{ left: `${(thresholdNormal / globalMax) * 100}%` }} />
+          <div className="absolute top-0 bottom-0 w-px bg-rose-500/40 z-10"
+            style={{ left: `${(thresholdWarning / globalMax) * 100}%` }} />
+
+          <div className={`absolute top-1/2 -translate-y-1/2 h-3 ${barBgClass} rounded`}
+            style={{ left: `${minPos}%`, width: `${Math.max(rangeWidth, 1)}%` }} />
+          <div className={`absolute top-1/2 -translate-y-1/2 w-1.5 h-4 ${barColorClass} rounded-sm`}
+            style={{ left: `calc(${minPos}% - 3px)` }} title={`Min: ${minError.toFixed(2)}mm`} />
+          <div className={`absolute top-1/2 -translate-y-1/2 w-3 h-3 ${barColorClass} rounded-full ring-2 ring-gray-900 z-20`}
+            style={{ left: `calc(${avgPos}% - 6px)` }} title={`평균: ${avgError.toFixed(2)}mm`} />
+          <div className={`absolute top-1/2 -translate-y-1/2 w-1.5 h-4 ${barColorClass} rounded-sm`}
+            style={{ left: `calc(${maxPos}% - 3px)` }} title={`Max: ${maxError.toFixed(2)}mm`} />
+        </div>
+
+        <div className={`text-[10px] font-mono w-20 text-right ${isSelected ? 'text-white' : 'text-gray-400'}`}>
+          <span className="text-emerald-400">{minError.toFixed(1)}</span>
+          <span className="text-gray-600"> / </span>
+          <span className={quality.textClass}>{avgError.toFixed(1)}</span>
+          <span className="text-gray-600"> / </span>
+          <span className="text-rose-400">{maxError.toFixed(1)}</span>
+        </div>
+      </div>
+    )
+  }
+
+  // 오차 추이 섹션 렌더 헬퍼
+  const renderTrendSection = () => {
+    const allMaxErrors = deviceTests.map(t => t.max_error)
+    const globalMax = Math.max(...allMaxErrors, thresholdWarning * 1.5)
+
+    const allAvgs = deviceTests.map(t => t.avg_error)
+
+    return (
+      <div className="space-y-1">
+        {/* X축 스케일 */}
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-gray-600 text-[10px] w-24"></span>
+          <div className="flex-1 flex justify-between text-[10px] text-gray-500 px-1">
+            <span>0</span>
+            <span>{(globalMax / 2).toFixed(1)}mm</span>
+            <span>{globalMax.toFixed(1)}mm</span>
+          </div>
+          <span className="w-20"></span>
+        </div>
+
+        {deviceTests.slice(0, 10).map(test => renderTrendBar(test, globalMax))}
+
+        {/* 통계 요약 */}
+        <div className="mt-3 pt-3 border-t border-gray-700/50 grid grid-cols-3 gap-4 text-center">
+          <div>
+            <div className="text-gray-400 text-xs">전체 평균</div>
+            <div className="text-white font-mono font-bold text-sm">
+              {(allAvgs.reduce((s, v) => s + v, 0) / allAvgs.length).toFixed(2)}mm
+            </div>
+          </div>
+          <div>
+            <div className="text-gray-400 text-xs">최저 평균</div>
+            <div className="text-emerald-400 font-mono font-bold text-sm">
+              {Math.min(...allAvgs).toFixed(2)}mm
+            </div>
+          </div>
+          <div>
+            <div className="text-gray-400 text-xs">최고 평균</div>
+            <div className="text-rose-400 font-mono font-bold text-sm">
+              {Math.max(...allAvgs).toFixed(2)}mm
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // --- 위치 입력 카드 렌더 ---
+  const renderPositionCard = (pos, idx) => {
+    const distance = calculateDistance(pos.error_x, pos.error_y, pos.error_z)
+    const quality = getQualityStatus(distance)
+    const zone = getPositionZone(idx)
+    const zoneBorder = zone === 'L' ? 'border-orange-500/30' : zone === 'R' ? 'border-emerald-500/30' : 'border-gray-700'
+    const zoneLabelColor = zone === 'L' ? 'text-orange-400' : zone === 'R' ? 'text-emerald-400' : 'text-cyan-400'
+
+    return (
+      <div key={idx} className={`bg-gray-900 rounded-lg p-3 border ${zoneBorder}`}>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-cyan-400 text-sm font-medium flex items-center gap-1">
+            📍 {isAliceM1 && <span className={`${zoneLabelColor} text-xs font-bold`}>[{zone}]</span>} {pos.label}
+          </span>
+          {(pos.error_x !== '0.0' || pos.error_y !== '0.0' || pos.error_z !== '0.0') && distance > 0 && (
+            <span className={`text-xs px-2 py-0.5 rounded ${quality.bgClass} ${quality.textClass}`}>
+              {distance.toFixed(2)}mm
+            </span>
+          )}
+        </div>
+        <div className="space-y-2">
+          {['error_x', 'error_y', 'error_z'].map((field, fi) => (
+            <div key={field} className="flex items-center gap-2">
+              <span className="text-gray-500 text-xs w-6">{['X', 'Y', 'Z'][fi]}:</span>
+              <input
+                type="number"
+                step="0.01"
+                value={pos[field]}
+                onChange={(e) => handlePositionChange(idx, field, e.target.value)}
+                placeholder="0.00"
+                className="flex-1 px-2 py-1 bg-gray-800 border border-gray-700 rounded text-white text-sm"
+              />
+              <span className="text-gray-500 text-xs">mm</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   if (!device) {
     return (
       <div className="bg-gray-800 rounded-xl border border-amber-500/50 p-8 text-center">
@@ -194,16 +361,16 @@ function ReplayAnalysis({ device, calibrations, replayTests, onSave, onDelete })
             </div>
 
             {isAliceM1 ? (
-              /* ===== Alice M1: 12개 위치, 양손 L/R Zone ===== */
+              /* ===== Alice M1: 18개 측정 (L9 + R9), 양손 L/R Zone ===== */
               <>
                 <p className="text-gray-300 text-sm leading-relaxed mb-4">
                   캘리브레이션된 로봇의 <span className="text-orange-400 font-medium">왼손</span>과{' '}
                   <span className="text-emerald-400 font-medium">오른손</span>이 각각 지정된 타겟을 얼마나 정확하게
-                  터치하는지 측정합니다. 왼손으로 <span className="text-orange-400">L-touch Zone(위치 1~9)</span>,
-                  오른손으로 <span className="text-emerald-400">R-touch Zone(위치 4~12)</span>을 각각 터치하며,
-                  <span className="text-cyan-400">위치 4~9는 양손이 공유</span>하는 중앙 영역입니다.
-                  총 <span className="text-cyan-400 font-medium">12개 고유 위치</span>의 오차
-                  <span className="text-gray-400">(mm)</span>를 기록하여 캘리브레이션 품질을 검증하고,
+                  터치하는지 측정합니다. 왼손으로 <span className="text-orange-400">L-touch Zone 9개(L1~L9)</span>,
+                  오른손으로 <span className="text-emerald-400">R-touch Zone 9개(R1~R9)</span>를 각각 터치하여
+                  총 <span className="text-cyan-400 font-medium">18개 측정값</span>의 오차
+                  <span className="text-gray-400">(mm)</span>를 기록합니다.
+                  좌·우 팔의 캘리브레이션 품질을 독립적으로 검증하고,
                   반복 측정을 통해 양팔의 정밀도를 추적합니다.
                 </p>
 
@@ -215,28 +382,27 @@ function ReplayAnalysis({ device, calibrations, replayTests, onSave, onDelete })
                     <div className="flex-shrink-0">
                       <img
                         src="/robots/replay_alice_m1.png"
-                        alt="Alice M1 리플레이 타겟 배치도 - L-touch Zone, R-touch Zone, 4×3 그리드"
+                        alt="Alice M1 리플레이 타겟 배치도 - L-touch Zone, R-touch Zone"
                         className="max-w-[360px] w-full rounded-lg border border-gray-600 object-contain"
                       />
                     </div>
                     <div className="flex-1 space-y-2">
                       <p className="text-gray-300 text-sm leading-relaxed">
                         로봇 정면에 <span className="text-cyan-400 font-medium">4×3 격자 형태</span>로
-                        총 <span className="text-cyan-400 font-medium">12개의 원형 타겟</span>을 배치하고,
-                        좌우 양손의 터치 영역을 나누어 측정합니다.
+                        타겟을 배치하고, 좌우 양손의 터치 영역을 나누어 측정합니다.
                       </p>
                       <ul className="text-gray-400 text-xs space-y-1.5 list-none">
                         <li className="flex items-start gap-2">
                           <span className="text-orange-400 mt-0.5">●</span>
-                          <span><span className="text-orange-400 font-medium">L-touch Zone (위치 1~9)</span> — 왼손이 터치하는 9개 타겟 (좌측 3열)</span>
+                          <span><span className="text-orange-400 font-medium">L-touch Zone (L1~L9)</span> — 왼손이 터치하는 9개 타겟 (좌측 3열)</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-emerald-400 mt-0.5">●</span>
-                          <span><span className="text-emerald-400 font-medium">R-touch Zone (위치 4~12)</span> — 오른손이 터치하는 9개 타겟 (우측 3열)</span>
+                          <span><span className="text-emerald-400 font-medium">R-touch Zone (R1~R9)</span> — 오른손이 터치하는 9개 타겟 (우측 3열)</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-cyan-400 mt-0.5">●</span>
-                          <span><span className="text-cyan-400 font-medium">공유 영역 (위치 4~9)</span> — 양손이 모두 터치하는 중앙 6개 타겟</span>
+                          <span>중앙 2열은 양손이 공유하는 영역으로, L과 R 각각 독립 측정하여 교차 검증합니다.</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-cyan-500 mt-0.5">●</span>
@@ -249,10 +415,6 @@ function ReplayAnalysis({ device, calibrations, replayTests, onSave, onDelete })
                         <li className="flex items-start gap-2">
                           <span className="text-cyan-500 mt-0.5">●</span>
                           <span>로봇이 각 타겟 중심을 순서대로 터치하며, 실제 도달 위치와 목표 위치 간의 편차를 mm 단위로 기록합니다.</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-cyan-500 mt-0.5">●</span>
-                          <span>중앙 2열은 양손이 공유하는 영역으로, 좌·우 양쪽에서 각각 터치하여 교차 검증합니다.</span>
                         </li>
                       </ul>
                     </div>
@@ -381,93 +543,35 @@ function ReplayAnalysis({ device, calibrations, replayTests, onSave, onDelete })
             </div>
 
             {/* 위치 오차 입력 */}
-            {isAliceM1 && (
-              <div className="flex items-center gap-4 text-xs mb-2">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-orange-500/60"></span>
-                  <span className="text-orange-400">L-touch Zone (위치 1~9)</span>
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-cyan-500/60"></span>
-                  <span className="text-cyan-400">공유 영역 (위치 4~9)</span>
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/60"></span>
-                  <span className="text-emerald-400">R-touch Zone (위치 4~12)</span>
-                </span>
+            {isAliceM1 ? (
+              /* Alice M1: L/R 두 그룹으로 분리 */
+              <div className="space-y-4">
+                {/* L-touch Zone */}
+                <div className="bg-gray-900/40 rounded-lg border border-orange-500/20 p-4">
+                  <h4 className="text-orange-400 font-semibold text-sm flex items-center gap-2 mb-3">
+                    <span>🤚</span> L-touch Zone — 왼손 (L1~L9)
+                  </h4>
+                  <div className="grid grid-cols-3 gap-3">
+                    {positions.slice(0, 9).map((pos, idx) => renderPositionCard(pos, idx))}
+                  </div>
+                </div>
+
+                {/* R-touch Zone */}
+                <div className="bg-gray-900/40 rounded-lg border border-emerald-500/20 p-4">
+                  <h4 className="text-emerald-400 font-semibold text-sm flex items-center gap-2 mb-3">
+                    <span>✋</span> R-touch Zone — 오른손 (R1~R9)
+                  </h4>
+                  <div className="grid grid-cols-3 gap-3">
+                    {positions.slice(9, 18).map((pos, idx) => renderPositionCard(pos, idx + 9))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* SO101: 기존 6개 */
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {positions.map((pos, idx) => renderPositionCard(pos, idx))}
               </div>
             )}
-            <div className={`grid gap-4 ${isAliceM1 ? 'grid-cols-3' : 'grid-cols-2 md:grid-cols-3'}`}>
-              {positions.map((pos, idx) => {
-                const distance = calculateDistance(pos.error_x, pos.error_y, pos.error_z)
-                const quality = getQualityStatus(distance)
-                // Alice M1 zone 판정: L(1~9), R(4~12), 공유(4~9)
-                const isLeftOnly = isAliceM1 && idx < 3           // 위치 1~3: L 전용
-                const isShared = isAliceM1 && idx >= 3 && idx < 9 // 위치 4~9: L+R 공유
-                const isRightOnly = isAliceM1 && idx >= 9         // 위치 10~12: R 전용
-                const zoneBorder = isLeftOnly ? 'border-orange-500/30'
-                  : isRightOnly ? 'border-emerald-500/30'
-                  : isShared ? 'border-cyan-500/30'
-                  : 'border-gray-700'
-                const zoneLabel = isLeftOnly ? 'L' : isRightOnly ? 'R' : isShared ? 'L+R' : ''
-                const zoneLabelColor = isLeftOnly ? 'text-orange-400'
-                  : isRightOnly ? 'text-emerald-400'
-                  : isShared ? 'text-cyan-400' : ''
-
-                return (
-                  <div key={idx} className={`bg-gray-900 rounded-lg p-3 border ${zoneBorder}`}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-cyan-400 text-sm font-medium flex items-center gap-1">
-                        📍 {isAliceM1 && <span className={`${zoneLabelColor} text-xs font-bold`}>[{zoneLabel}]</span>} 위치 {pos.position}
-                      </span>
-                      {(pos.error_x || pos.error_y || pos.error_z) && (
-                        <span className={`text-xs px-2 py-0.5 rounded ${quality.bgClass} ${quality.textClass}`}>
-                          {distance.toFixed(2)}mm
-                        </span>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-gray-500 text-xs w-6">X:</span>
-                        <input
-                          type="number"
-                          step="0.01"
-                          value={pos.error_x}
-                          onChange={(e) => handlePositionChange(idx, 'error_x', e.target.value)}
-                          placeholder="0.00"
-                          className="flex-1 px-2 py-1 bg-gray-800 border border-gray-700 rounded text-white text-sm"
-                        />
-                        <span className="text-gray-500 text-xs">mm</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-gray-500 text-xs w-6">Y:</span>
-                        <input
-                          type="number"
-                          step="0.01"
-                          value={pos.error_y}
-                          onChange={(e) => handlePositionChange(idx, 'error_y', e.target.value)}
-                          placeholder="0.00"
-                          className="flex-1 px-2 py-1 bg-gray-800 border border-gray-700 rounded text-white text-sm"
-                        />
-                        <span className="text-gray-500 text-xs">mm</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-gray-500 text-xs w-6">Z:</span>
-                        <input
-                          type="number"
-                          step="0.01"
-                          value={pos.error_z}
-                          onChange={(e) => handlePositionChange(idx, 'error_z', e.target.value)}
-                          placeholder="0.00"
-                          className="flex-1 px-2 py-1 bg-gray-800 border border-gray-700 rounded text-white text-sm"
-                        />
-                        <span className="text-gray-500 text-xs">mm</span>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
 
             {/* 메모 */}
             <div>
@@ -593,53 +697,129 @@ function ReplayAnalysis({ device, calibrations, replayTests, onSave, onDelete })
                 </div>
 
                 {/* 위치별 오차 테이블 */}
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-gray-700">
-                        <th className="text-left text-gray-400 font-medium py-2 px-3">위치</th>
-                        <th className="text-right text-gray-400 font-medium py-2 px-3">X 오차</th>
-                        <th className="text-right text-gray-400 font-medium py-2 px-3">Y 오차</th>
-                        <th className="text-right text-gray-400 font-medium py-2 px-3">Z 오차</th>
-                        <th className="text-right text-gray-400 font-medium py-2 px-3">거리</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {selectedTest.positions.map((pos) => {
-                        const quality = getQualityStatus(pos.distance)
-                        return (
-                          <tr key={pos.position} className="border-b border-gray-700/50 hover:bg-gray-700/30">
-                            <td className="py-2 px-3 text-cyan-400 font-medium">📍 {pos.position}</td>
-                            <td className={`py-2 px-3 text-right font-mono ${pos.error_x >= 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
-                              {pos.error_x >= 0 ? '+' : ''}{pos.error_x.toFixed(2)}
-                            </td>
-                            <td className={`py-2 px-3 text-right font-mono ${pos.error_y >= 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
-                              {pos.error_y >= 0 ? '+' : ''}{pos.error_y.toFixed(2)}
-                            </td>
-                            <td className={`py-2 px-3 text-right font-mono ${pos.error_z >= 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
-                              {pos.error_z >= 0 ? '+' : ''}{pos.error_z.toFixed(2)}
-                            </td>
-                            <td className={`py-2 px-3 text-right font-mono ${quality.textClass}`}>
-                              {pos.distance.toFixed(2)}mm
-                            </td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                {isAliceM1 && selectedTest.positions.length >= 18 ? (
+                  /* Alice M1: L/R 분리 테이블 */
+                  <div className="space-y-4">
+                    {[
+                      { label: '🤚 L-touch Zone (왼손)', color: 'text-orange-400', borderColor: 'border-orange-500/30', start: 0, end: 9 },
+                      { label: '✋ R-touch Zone (오른손)', color: 'text-emerald-400', borderColor: 'border-emerald-500/30', start: 9, end: 18 },
+                    ].map(({ label, color, borderColor, start, end }) => {
+                      const zonePositions = selectedTest.positions.slice(start, end)
+                      const zoneAvg = zonePositions.reduce((s, p) => s + p.distance, 0) / zonePositions.length
+                      const zoneMax = Math.max(...zonePositions.map(p => p.distance))
+                      const zoneQuality = getQualityStatus(zoneAvg)
 
-                {/* 요약 */}
-                <div className="mt-4 pt-4 border-t border-gray-700 flex items-center justify-end gap-6 text-sm">
-                  <div>
-                    <span className="text-gray-400">평균 오차: </span>
-                    <span className="text-white font-mono font-bold">{selectedTest.avg_error.toFixed(2)}mm</span>
+                      return (
+                        <div key={label} className={`border ${borderColor} rounded-lg p-3`}>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className={`${color} text-sm font-semibold`}>{label}</span>
+                            <span className={`text-xs px-2 py-0.5 rounded ${zoneQuality.bgClass} ${zoneQuality.textClass}`}>
+                              평균 {zoneAvg.toFixed(2)}mm / 최대 {zoneMax.toFixed(2)}mm
+                            </span>
+                          </div>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                              <thead>
+                                <tr className="border-b border-gray-700">
+                                  <th className="text-left text-gray-400 font-medium py-1.5 px-2">위치</th>
+                                  <th className="text-right text-gray-400 font-medium py-1.5 px-2">X 오차</th>
+                                  <th className="text-right text-gray-400 font-medium py-1.5 px-2">Y 오차</th>
+                                  <th className="text-right text-gray-400 font-medium py-1.5 px-2">Z 오차</th>
+                                  <th className="text-right text-gray-400 font-medium py-1.5 px-2">거리</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {zonePositions.map((pos) => {
+                                  const q = getQualityStatus(pos.distance)
+                                  return (
+                                    <tr key={pos.position} className="border-b border-gray-700/50 hover:bg-gray-700/30">
+                                      <td className={`py-1.5 px-2 ${color} font-medium`}>📍 {pos.label || pos.position}</td>
+                                      <td className={`py-1.5 px-2 text-right font-mono ${pos.error_x >= 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                                        {pos.error_x >= 0 ? '+' : ''}{pos.error_x.toFixed(2)}
+                                      </td>
+                                      <td className={`py-1.5 px-2 text-right font-mono ${pos.error_y >= 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                                        {pos.error_y >= 0 ? '+' : ''}{pos.error_y.toFixed(2)}
+                                      </td>
+                                      <td className={`py-1.5 px-2 text-right font-mono ${pos.error_z >= 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                                        {pos.error_z >= 0 ? '+' : ''}{pos.error_z.toFixed(2)}
+                                      </td>
+                                      <td className={`py-1.5 px-2 text-right font-mono ${q.textClass}`}>
+                                        {pos.distance.toFixed(2)}mm
+                                      </td>
+                                    </tr>
+                                  )
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )
+                    })}
+
+                    {/* 전체 요약 */}
+                    <div className="pt-3 border-t border-gray-700 flex items-center justify-end gap-6 text-sm">
+                      <div>
+                        <span className="text-gray-400">전체 평균 오차: </span>
+                        <span className="text-white font-mono font-bold">{selectedTest.avg_error.toFixed(2)}mm</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">전체 최대 오차: </span>
+                        <span className="text-rose-400 font-mono font-bold">{selectedTest.max_error.toFixed(2)}mm</span>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-gray-400">최대 오차: </span>
-                    <span className="text-rose-400 font-mono font-bold">{selectedTest.max_error.toFixed(2)}mm</span>
-                  </div>
-                </div>
+                ) : (
+                  /* SO101 또는 기존 데이터 */
+                  <>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-gray-700">
+                            <th className="text-left text-gray-400 font-medium py-2 px-3">위치</th>
+                            <th className="text-right text-gray-400 font-medium py-2 px-3">X 오차</th>
+                            <th className="text-right text-gray-400 font-medium py-2 px-3">Y 오차</th>
+                            <th className="text-right text-gray-400 font-medium py-2 px-3">Z 오차</th>
+                            <th className="text-right text-gray-400 font-medium py-2 px-3">거리</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {selectedTest.positions.map((pos) => {
+                            const quality = getQualityStatus(pos.distance)
+                            return (
+                              <tr key={pos.position} className="border-b border-gray-700/50 hover:bg-gray-700/30">
+                                <td className="py-2 px-3 text-cyan-400 font-medium">📍 {pos.label || pos.position}</td>
+                                <td className={`py-2 px-3 text-right font-mono ${pos.error_x >= 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                                  {pos.error_x >= 0 ? '+' : ''}{pos.error_x.toFixed(2)}
+                                </td>
+                                <td className={`py-2 px-3 text-right font-mono ${pos.error_y >= 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                                  {pos.error_y >= 0 ? '+' : ''}{pos.error_y.toFixed(2)}
+                                </td>
+                                <td className={`py-2 px-3 text-right font-mono ${pos.error_z >= 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                                  {pos.error_z >= 0 ? '+' : ''}{pos.error_z.toFixed(2)}
+                                </td>
+                                <td className={`py-2 px-3 text-right font-mono ${quality.textClass}`}>
+                                  {pos.distance.toFixed(2)}mm
+                                </td>
+                              </tr>
+                            )
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* 요약 */}
+                    <div className="mt-4 pt-4 border-t border-gray-700 flex items-center justify-end gap-6 text-sm">
+                      <div>
+                        <span className="text-gray-400">평균 오차: </span>
+                        <span className="text-white font-mono font-bold">{selectedTest.avg_error.toFixed(2)}mm</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">최대 오차: </span>
+                        <span className="text-rose-400 font-mono font-bold">{selectedTest.max_error.toFixed(2)}mm</span>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* 오차 추이 분석 - 2개 이상이면 표시 */}
@@ -661,6 +841,17 @@ function ReplayAnalysis({ device, calibrations, replayTests, onSave, onDelete })
                     </div>
                   </div>
 
+                  {/* 설명 */}
+                  <div className="bg-gray-900/50 rounded-lg p-3 mb-4">
+                    <p className="text-gray-400 text-xs leading-relaxed">
+                      오차 추이 분석은 반복 측정된 리플레이 테스트 데이터의 <span className="text-cyan-400">오차 추세를 시각적으로 모니터링</span>하는 데 사용됩니다.
+                      각 테스트의 <span className="text-emerald-400">최소(Min)</span>, <span className="text-white">평균(Avg)</span>, <span className="text-rose-400">최대(Max)</span> 오차를
+                      범위 막대로 표시하며, 품질 판정 임계값과 비교하여 캘리브레이션 상태를 한눈에 파악할 수 있습니다.
+                      전체 {isAliceM1 ? '18개(L9+R9)' : '6개'} 측정 위치의 통합 오차를 기반으로 추세를 분석합니다.
+                    </p>
+                  </div>
+
+                  {/* 판정 기준 범례 */}
                   <div className="flex items-center gap-3 text-[10px] text-gray-500 mb-4">
                     <span>판정 기준:</span>
                     <div className="flex items-center gap-1.5">
@@ -683,169 +874,24 @@ function ReplayAnalysis({ device, calibrations, replayTests, onSave, onDelete })
                     </div>
                   </div>
 
-                  {/* Min-평균-Max 범위 막대 그래프 - 최근이 상단 */}
-                  {(() => {
-                    // 전체 범위 계산 (모든 테스트의 min/max 포함)
-                    const allMinErrors = deviceTests.map(t => Math.min(...t.positions.map(p => p.distance)))
-                    const allMaxErrors = deviceTests.map(t => t.max_error)
-                    const globalMin = 0
-                    const globalMax = Math.max(...allMaxErrors, thresholdWarning * 1.5)
+                  {renderTrendSection()}
 
-                    return (
-                      <div className="space-y-1">
-                        {/* X축 스케일 표시 */}
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-gray-600 text-[10px] w-24"></span>
-                          <div className="flex-1 flex justify-between text-[10px] text-gray-500 px-1">
-                            <span>0</span>
-                            <span>{(globalMax / 2).toFixed(1)}mm</span>
-                            <span>{globalMax.toFixed(1)}mm</span>
-                          </div>
-                          <span className="w-20"></span>
-                        </div>
-
-                        {deviceTests.slice(0, 10).map((test) => {
-                          const minError = Math.min(...test.positions.map(p => p.distance))
-                          const avgError = test.avg_error
-                          const maxError = test.max_error
-                          const quality = getQualityStatus(avgError)
-                          const isSelected = selectedTest?.id === test.id
-
-                          // 위치 계산 (백분율)
-                          const minPos = (minError / globalMax) * 100
-                          const avgPos = (avgError / globalMax) * 100
-                          const maxPos = (maxError / globalMax) * 100
-                          const rangeWidth = maxPos - minPos
-
-                          // 색상 클래스
-                          const barColorClass = quality.color === 'emerald'
-                            ? 'bg-emerald-500'
-                            : quality.color === 'amber'
-                            ? 'bg-amber-500'
-                            : 'bg-rose-500'
-
-                          const barBgClass = quality.color === 'emerald'
-                            ? 'bg-emerald-500/30'
-                            : quality.color === 'amber'
-                            ? 'bg-amber-500/30'
-                            : 'bg-rose-500/30'
-
-                          return (
-                            <div
-                              key={test.id}
-                              onClick={() => setSelectedTest(test)}
-                              className={`flex items-center gap-2 py-1.5 px-2 rounded-lg cursor-pointer transition ${
-                                isSelected
-                                  ? 'bg-cyan-500/20 ring-1 ring-cyan-500/50'
-                                  : 'hover:bg-gray-700/30'
-                              }`}
-                            >
-                              {/* 날짜 라벨 */}
-                              <span className={`text-xs w-24 truncate ${isSelected ? 'text-cyan-400 font-medium' : 'text-gray-500'}`}>
-                                {new Date(test.created_at).toLocaleDateString('ko-KR', {
-                                  month: '2-digit',
-                                  day: '2-digit',
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
-                              </span>
-
-                              {/* 범위 막대 */}
-                              <div className="flex-1 h-6 bg-gray-900 rounded relative">
-                                {/* 임계값 라인 */}
-                                <div
-                                  className="absolute top-0 bottom-0 w-px bg-amber-500/40 z-10"
-                                  style={{ left: `${(thresholdNormal / globalMax) * 100}%` }}
-                                />
-                                <div
-                                  className="absolute top-0 bottom-0 w-px bg-rose-500/40 z-10"
-                                  style={{ left: `${(thresholdWarning / globalMax) * 100}%` }}
-                                />
-
-                                {/* Min-Max 범위 막대 */}
-                                <div
-                                  className={`absolute top-1/2 -translate-y-1/2 h-3 ${barBgClass} rounded`}
-                                  style={{
-                                    left: `${minPos}%`,
-                                    width: `${Math.max(rangeWidth, 1)}%`
-                                  }}
-                                />
-
-                                {/* Min 마커 */}
-                                <div
-                                  className={`absolute top-1/2 -translate-y-1/2 w-1.5 h-4 ${barColorClass} rounded-sm`}
-                                  style={{ left: `calc(${minPos}% - 3px)` }}
-                                  title={`Min: ${minError.toFixed(2)}mm`}
-                                />
-
-                                {/* 평균 마커 (중앙 원) */}
-                                <div
-                                  className={`absolute top-1/2 -translate-y-1/2 w-3 h-3 ${barColorClass} rounded-full ring-2 ring-gray-900 z-20`}
-                                  style={{ left: `calc(${avgPos}% - 6px)` }}
-                                  title={`평균: ${avgError.toFixed(2)}mm`}
-                                />
-
-                                {/* Max 마커 */}
-                                <div
-                                  className={`absolute top-1/2 -translate-y-1/2 w-1.5 h-4 ${barColorClass} rounded-sm`}
-                                  style={{ left: `calc(${maxPos}% - 3px)` }}
-                                  title={`Max: ${maxError.toFixed(2)}mm`}
-                                />
-                              </div>
-
-                              {/* 수치 표시 */}
-                              <div className={`text-[10px] font-mono w-20 text-right ${isSelected ? 'text-white' : 'text-gray-400'}`}>
-                                <span className="text-emerald-400">{minError.toFixed(1)}</span>
-                                <span className="text-gray-600"> / </span>
-                                <span className={quality.textClass}>{avgError.toFixed(1)}</span>
-                                <span className="text-gray-600"> / </span>
-                                <span className="text-rose-400">{maxError.toFixed(1)}</span>
-                              </div>
-                            </div>
-                          )
-                        })}
-
-                        {/* 범례 */}
-                        <div className="flex items-center justify-center gap-4 mt-3 pt-3 border-t border-gray-700/50 text-[10px] text-gray-500">
-                          <div className="flex items-center gap-1">
-                            <div className="w-1.5 h-3 bg-gray-400 rounded-sm"></div>
-                            <span>Min</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <div className="w-2.5 h-2.5 bg-gray-400 rounded-full"></div>
-                            <span>평균</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <div className="w-1.5 h-3 bg-gray-400 rounded-sm"></div>
-                            <span>Max</span>
-                          </div>
-                          <span className="text-gray-600">|</span>
-                          <span>클릭하여 상세 보기</span>
-                        </div>
-                      </div>
-                    )
-                  })()}
-
-                  {/* 통계 요약 */}
-                  <div className="mt-4 pt-4 border-t border-gray-700 grid grid-cols-3 gap-4 text-center">
-                    <div>
-                      <div className="text-gray-400 text-xs">전체 평균</div>
-                      <div className="text-white font-mono font-bold">
-                        {(deviceTests.reduce((sum, t) => sum + t.avg_error, 0) / deviceTests.length).toFixed(2)}mm
-                      </div>
+                  {/* 범례 */}
+                  <div className="flex items-center justify-center gap-4 mt-4 pt-3 border-t border-gray-700/50 text-[10px] text-gray-500">
+                    <div className="flex items-center gap-1">
+                      <div className="w-1.5 h-3 bg-gray-400 rounded-sm"></div>
+                      <span>Min</span>
                     </div>
-                    <div>
-                      <div className="text-gray-400 text-xs">최저 평균</div>
-                      <div className="text-emerald-400 font-mono font-bold">
-                        {Math.min(...deviceTests.map(t => t.avg_error)).toFixed(2)}mm
-                      </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-2.5 h-2.5 bg-gray-400 rounded-full"></div>
+                      <span>평균</span>
                     </div>
-                    <div>
-                      <div className="text-gray-400 text-xs">최고 평균</div>
-                      <div className="text-rose-400 font-mono font-bold">
-                        {Math.max(...deviceTests.map(t => t.avg_error)).toFixed(2)}mm
-                      </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-1.5 h-3 bg-gray-400 rounded-sm"></div>
+                      <span>Max</span>
                     </div>
+                    <span className="text-gray-600">|</span>
+                    <span>클릭하여 상세 보기</span>
                   </div>
                 </div>
               )}
