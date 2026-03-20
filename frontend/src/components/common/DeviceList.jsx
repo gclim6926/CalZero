@@ -50,9 +50,26 @@ function DeviceList({ devices, selectedDevice, onSelectDevice, onDeviceAdd, onDe
   const [editingDevice, setEditingDevice] = useState(null)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [sortMode, setSortMode] = useState('name') // 'name' | 'newest' | 'oldest' | 'type'
 
-  const simDevices = devices.filter(d => d.type === 'isaac_sim')
-  const physicalDevices = devices.filter(d => d.type !== 'isaac_sim')
+  const sortDevices = (list) => {
+    const sorted = [...list]
+    switch (sortMode) {
+      case 'name':
+        return sorted.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ko'))
+      case 'newest':
+        return sorted.sort((a, b) => (b.id || 0) - (a.id || 0))
+      case 'oldest':
+        return sorted.sort((a, b) => (a.id || 0) - (b.id || 0))
+      case 'type':
+        return sorted.sort((a, b) => (a.type || '').localeCompare(b.type || '') || (a.name || '').localeCompare(b.name || '', 'ko'))
+      default:
+        return sorted
+    }
+  }
+
+  const simDevices = sortDevices(devices.filter(d => d.type === 'isaac_sim'))
+  const physicalDevices = sortDevices(devices.filter(d => d.type !== 'isaac_sim'))
 
   // Physical Robot이 연결된 Sim 찾기
   const getLinkedSim = (physicalId) => {
@@ -144,6 +161,23 @@ function DeviceList({ devices, selectedDevice, onSelectDevice, onDeviceAdd, onDe
         </svg>
         <span className="font-medium">{isPhysicalTab ? '새 로봇 추가' : 'Sim 모델 추가'}</span>
       </button>
+
+      {/* 정렬 드롭다운 */}
+      {displayDevices.length > 1 && (
+        <div className="flex items-center justify-end gap-1.5 px-1">
+          <span className="text-[10px] text-slate-500">정렬:</span>
+          <select
+            value={sortMode}
+            onChange={(e) => setSortMode(e.target.value)}
+            className="text-[10px] bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-slate-400 cursor-pointer hover:border-slate-600 focus:outline-none focus:border-cyan-500/50"
+          >
+            <option value="name">이름순</option>
+            <option value="newest">최신 등록순</option>
+            <option value="oldest">오래된 순</option>
+            {isPhysicalTab && <option value="type">타입별</option>}
+          </select>
+        </div>
+      )}
 
       {/* Physical Robot 탭 */}
       {isPhysicalTab && physicalDevices.map(device => {
