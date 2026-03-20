@@ -163,30 +163,53 @@ function ReplayAnalysis({ device, calibrations, replayTests, onSave, onDelete })
                 {deviceTests.length}개 기록
               </span>
             </div>
-            <p className="text-gray-300 text-sm leading-relaxed">
+            <p className="text-gray-300 text-sm leading-relaxed mb-4">
               캘리브레이션된 로봇이 지정된 <span className="text-cyan-400">6개 위치</span>를 얼마나 정확하게 터치하는지 측정합니다.
               각 위치별 오차<span className="text-gray-400">(mm)</span>를 기록하여 캘리브레이션 품질을 검증하고,
               반복 측정을 통해 정밀도를 추적합니다.
             </p>
+
+            {/* 측정 타겟 배치도 (헤더 내부) */}
+            <div className="bg-gray-900/60 rounded-lg border border-gray-700/50 p-4">
+              <h4 className="text-cyan-400 font-semibold text-sm flex items-center gap-2 mb-3">
+                <span>📐</span> 측정 타겟 배치도
+              </h4>
+              <div className="flex flex-col md:flex-row gap-4 items-start">
+                <div className="flex-shrink-0">
+                  <img
+                    src="/robots/replay_so101.jpg"
+                    alt="리플레이 분석 타겟 배치도 - 3×2 그리드, 10cm 간격, 1cm 직경 타겟"
+                    className="max-w-[280px] w-full rounded-lg border border-gray-600 object-contain"
+                  />
+                </div>
+                <div className="flex-1 space-y-2">
+                  <p className="text-gray-300 text-sm leading-relaxed">
+                    로봇 앞에 <span className="text-cyan-400 font-medium">3×2 격자 형태</span>로
+                    총 <span className="text-cyan-400 font-medium">6개의 원형 타겟</span>을 배치합니다.
+                  </p>
+                  <ul className="text-gray-400 text-xs space-y-1.5 list-none">
+                    <li className="flex items-start gap-2">
+                      <span className="text-cyan-500 mt-0.5">●</span>
+                      <span>타겟 간 <span className="text-white">가로 간격: 10cm</span>, <span className="text-white">세로 간격: 10cm</span></span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-cyan-500 mt-0.5">●</span>
+                      <span>각 타겟 직경: <span className="text-white">1cm</span> (정밀 포인트)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-cyan-500 mt-0.5">●</span>
+                      <span>로봇이 각 타겟 중심을 순서대로 터치하며, 실제 도달 위치와 목표 위치 간의 편차를 mm 단위로 기록합니다.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-cyan-500 mt-0.5">●</span>
+                      <span>번호 순서: 좌상단(①) → 우하단(⑥), 좌→우 / 상→하 방향</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* 측정 타겟 배치도 */}
-      <div className="bg-gray-800 rounded-xl border border-gray-700 p-4">
-        <h3 className="text-white font-bold text-sm flex items-center gap-2 mb-3">
-          <span>🎯</span> 측정 타겟 배치도
-        </h3>
-        <div className="flex justify-center">
-          <img
-            src="/robots/replay_so101.jpg"
-            alt="리플레이 분석 타겟 배치도 - 6개 위치, 10cm 간격, 1cm 타겟"
-            className="max-w-full max-h-80 rounded-lg border border-gray-600 object-contain"
-          />
-        </div>
-        <p className="text-gray-500 text-xs text-center mt-2">
-          6개 타겟 위치 (3×2 배열, 가로/세로 10cm 간격, 타겟 직경 1cm)
-        </p>
       </div>
 
       {/* 품질 판정 기준 설정 */}
