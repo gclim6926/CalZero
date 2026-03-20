@@ -1,0 +1,52 @@
+name: Deploy to Oracle Cloud
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # 수동 실행 허용
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker build -t calzero:latest .
+          docker save calzero:latest | gzip > calzero.tar.gz
+
+      - name: Transfer image to OCI
+        run: |
+          echo "${{ secrets.OCI_SSH_KEY }}" > /tmp/oci_key
+          chmod 600 /tmp/oci_key
+          scp -i /tmp/oci_key \
+            -o StrictHostKeyChecking=no \
+            calzero.tar.gz \
+            ubuntu@${{ secrets.OCI_HOST }}:~/calzero.tar.gz
+
+      - name: Deploy on OCI
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.OCI_HOST }}
+          username: ubuntu
+          key: ${{ secrets.OCI_SSH_KEY }}
+          script: |
+            # 이미지 로드
+            docker load < ~/calzero.tar.gz
+            rm ~/calzero.tar.gz
+
+            # 컨테이너 재시작 (데이터 볼륨 유지)
+            cd ~/calzero
+            docker compose -f docker-compose.oci.yml down
+            docker compose -f docker-compose.oci.yml up -d
+
+            # 헬스체크 대기
+            echo "Waiting for health check..."
+            sleep 15
+            curl -f http://localhost:8000/api/health && echo "Deploy successful" || echo "Health check failed"

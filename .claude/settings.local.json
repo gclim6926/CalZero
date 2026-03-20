@@ -39,7 +39,32 @@
       "Bash(npx vite build)",
       "Bash(lsof -ti:8000)",
       "Bash(lsof -ti:5173)",
-      "Bash(git status -u)"
+      "Bash(git status -u)",
+      "Bash(railway domain)",
+      "Bash(railway logs)",
+      "Bash(railway logs --deployment)",
+      "Bash(railway status)",
+      "Bash(railway logs --build)",
+      "Bash(railway logs -n 100)",
+      "Bash(railway up --detach)",
+      "Bash(/opt/homebrew/bin/node /opt/homebrew/bin/npm run build)",
+      "Bash(PATH=/opt/homebrew/bin:$PATH npm run build)",
+      "Bash(PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/local/bin /opt/homebrew/bin/npx vite build)",
+      "Bash(PATH=/opt/homebrew/bin:/usr/bin:/bin /opt/homebrew/bin/npx vite build)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(npx --yes vite build)",
+      "WebSearch",
+      "WebFetch(domain:www.unitree.com)",
+      "WebFetch(domain:www.agibot.com)",
+      "Bash(echo $PATH)",
+      "Read(//usr/local/bin/**)",
+      "Read(//Users/1110472/.nvm/versions/**)",
+      "Read(//usr/local/lib/node_modules/npm/bin/**)",
+      "Bash(/usr/local/bin/node --version)",
+      "Bash(PATH=/usr/local/bin:$PATH npx vite build)",
+      "Bash(export PATH=/usr/local/bin:$PATH)",
+      "Bash(node node_modules/.bin/vite build)",
+      "Bash(export PATH=/usr/local/bin:/usr/bin:/bin:$PATH)"
     ]
   }
 }
