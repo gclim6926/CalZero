@@ -9,17 +9,28 @@ function ReplayAnalysis({ device, calibrations, replayTests, onSave, onDelete })
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  // 품질 판정 기준 (localStorage 저장)
-  const [thresholdNormal, setThresholdNormal] = useState(() => {
-    return parseFloat(localStorage.getItem('replay_threshold_normal') || '3')
-  })
-  const [thresholdWarning, setThresholdWarning] = useState(() => {
-    return parseFloat(localStorage.getItem('replay_threshold_warning') || '5')
-  })
-
   // 로봇 타입별 리플레이 설정
   const effectiveType = getEffectiveRobotType(device)
   const isAliceM1 = effectiveType === 'alice_m1'
+
+  // 품질 판정 기준 (localStorage 저장, 로봇 타입별 기본값)
+  const defaultNormal = isAliceM1 ? 5 : 3
+  const defaultWarning = isAliceM1 ? 10 : 5
+  const storageKeyNormal = `replay_threshold_normal_${effectiveType || 'default'}`
+  const storageKeyWarning = `replay_threshold_warning_${effectiveType || 'default'}`
+
+  const [thresholdNormal, setThresholdNormal] = useState(() => {
+    return parseFloat(localStorage.getItem(storageKeyNormal) || String(defaultNormal))
+  })
+  const [thresholdWarning, setThresholdWarning] = useState(() => {
+    return parseFloat(localStorage.getItem(storageKeyWarning) || String(defaultWarning))
+  })
+
+  // 로봇 타입 변경 시 임계값 재로드
+  useEffect(() => {
+    setThresholdNormal(parseFloat(localStorage.getItem(storageKeyNormal) || String(defaultNormal)))
+    setThresholdWarning(parseFloat(localStorage.getItem(storageKeyWarning) || String(defaultWarning)))
+  }, [effectiveType])
   const positionCount = isAliceM1 ? 12 : 6
 
   // 위치 오차 입력 (로봇 타입에 따라 6개 또는 12개)
@@ -63,11 +74,11 @@ function ReplayAnalysis({ device, calibrations, replayTests, onSave, onDelete })
     }
   }, [deviceTests])
 
-  // 임계값 저장
+  // 임계값 저장 (로봇 타입별)
   useEffect(() => {
-    localStorage.setItem('replay_threshold_normal', thresholdNormal.toString())
-    localStorage.setItem('replay_threshold_warning', thresholdWarning.toString())
-  }, [thresholdNormal, thresholdWarning])
+    localStorage.setItem(storageKeyNormal, thresholdNormal.toString())
+    localStorage.setItem(storageKeyWarning, thresholdWarning.toString())
+  }, [thresholdNormal, thresholdWarning, storageKeyNormal, storageKeyWarning])
 
   const formatDate = (dateStr) => {
     const date = new Date(dateStr)
