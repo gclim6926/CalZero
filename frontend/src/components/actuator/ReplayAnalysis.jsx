@@ -172,6 +172,23 @@ function ReplayAnalysis({ device, calibrations, replayTests, onSave, onDelete })
         </div>
       </div>
 
+      {/* 측정 타겟 배치도 */}
+      <div className="bg-gray-800 rounded-xl border border-gray-700 p-4">
+        <h3 className="text-white font-bold text-sm flex items-center gap-2 mb-3">
+          <span>🎯</span> 측정 타겟 배치도
+        </h3>
+        <div className="flex justify-center">
+          <img
+            src="/robots/replay_so101.jpg"
+            alt="리플레이 분석 타겟 배치도 - 6개 위치, 10cm 간격, 1cm 타겟"
+            className="max-w-full max-h-80 rounded-lg border border-gray-600 object-contain"
+          />
+        </div>
+        <p className="text-gray-500 text-xs text-center mt-2">
+          6개 타겟 위치 (3×2 배열, 가로/세로 10cm 간격, 타겟 직경 1cm)
+        </p>
+      </div>
+
       {/* 품질 판정 기준 설정 */}
       <div className="bg-gray-800 rounded-xl border border-gray-700 p-4">
         <h3 className="text-white font-bold text-sm flex items-center gap-2 mb-3">
