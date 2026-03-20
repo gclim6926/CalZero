@@ -37,9 +37,9 @@ function ReplayAnalysis({ device, calibrations, replayTests, onSave, onDelete })
   const [positions, setPositions] = useState(
     Array.from({ length: positionCount }, (_, i) => ({
       position: i + 1,
-      error_x: '',
-      error_y: '',
-      error_z: ''
+      error_x: '0.0',
+      error_y: '0.0',
+      error_z: '0.0'
     }))
   )
 
