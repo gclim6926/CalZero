@@ -120,10 +120,12 @@ const so101Joints = ['shoulder_pan', 'shoulder_lift', 'elbow_flex', 'wrist_flex'
 
 const so101ActuatorConfig = {
   joints: so101Joints,
-  // calibration_data 내 필드명
   calibFields: { value: 'homing_offset', min: 'range_min', max: 'range_max' },
-  // 단위 변환: SO101은 steps (4096 per revolution)
+  paramLabels: { value: 'Homing Offset', min: 'Range Min', max: 'Range Max' },
   stepsPerRev: 4096,
+  homingDefault: 2047,       // 4096/2 - 1 (중간값)
+  threshold: 30,             // steps 기준 이상 감지 임계값
+  unit: 'steps',
   colors: {
     shoulder_pan: '#00d4ff', shoulder_lift: '#ff6b6b', elbow_flex: '#4ecdc4',
     wrist_flex: '#ffd93d', wrist_roll: '#a855f7', gripper: '#ff8c00',
@@ -153,10 +155,12 @@ const aliceM1ActuatorConfig = {
   joints: [...aliceM1BodyJoints, ...aliceM1HandJoints],
   bodyJoints: aliceM1BodyJoints,
   handJoints: aliceM1HandJoints,
-  // calibration_data 내 필드명
   calibFields: { value: 'base', min: 'min', max: 'max' },
-  // 단위: 각도(degrees) 직접 사용
+  paramLabels: { value: 'Base', min: 'Min', max: 'Max' },
   stepsPerRev: null,
+  homingDefault: 0,          // degrees 기준 (0도)
+  threshold: 5,              // degrees 기준 이상 감지 임계값
+  unit: 'degrees',
   colors: aliceM1Colors,
 }
 

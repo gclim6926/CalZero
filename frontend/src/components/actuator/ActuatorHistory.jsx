@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import ExportButton from '../common/ExportButton'
 import { ALICE_M1_BODY_JOINTS, ALICE_M1_HAND_JOINTS } from './AliceM1CalibrationForm'
+import { getEffectiveRobotType, getActuatorConfig } from '../../utils/menuConfig'
 
 function ActuatorHistory({ device, calibrations, onDelete }) {
   const [selectedCalibration, setSelectedCalibration] = useState(null)
@@ -67,8 +68,9 @@ function ActuatorHistory({ device, calibrations, onDelete }) {
       if (c.calibration_data) Object.keys(c.calibration_data).forEach(j => allJoints.add(j))
     })
 
-    const isAliceM1 = device?.type === 'alice_m1'
-    const paramKeys = isAliceM1 ? ['min', 'max', 'base'] : ['homing_offset', 'range_min', 'range_max']
+    const effectiveType = getEffectiveRobotType(device)
+    const config = getActuatorConfig(effectiveType)
+    const paramKeys = [config.calibFields.value, config.calibFields.min, config.calibFields.max]
 
     // 선택된 캘리브레이션을 제외한 나머지 데이터로 통계 계산
     const otherCalibrations = deviceCalibrations.filter(c => c.id !== selectedCalibration.id)
@@ -125,19 +127,19 @@ function ActuatorHistory({ device, calibrations, onDelete }) {
   }
 
   // 파라미터별 색상
-  const isAliceM1 = device?.type === 'alice_m1'
-  const paramKeys = isAliceM1 ? ['min', 'max', 'base'] : ['homing_offset', 'range_min', 'range_max']
+  const effectiveType = getEffectiveRobotType(device)
+  const config = getActuatorConfig(effectiveType)
+  const isAliceM1 = effectiveType === 'alice_m1'
+  const paramKeys = [config.calibFields.value, config.calibFields.min, config.calibFields.max]
 
   const getParamStyle = (param) => {
-    const styles = {
-      homing_offset: { label: 'Homing Offset', icon: '🏠', color: 'cyan' },
-      range_min: { label: 'Range Min', icon: '⬇️', color: 'emerald' },
-      range_max: { label: 'Range Max', icon: '⬆️', color: 'amber' },
-      min: { label: 'Min', icon: '⬇️', color: 'cyan' },
-      max: { label: 'Max', icon: '⬆️', color: 'amber' },
-      base: { label: 'Base 자세', icon: '🏠', color: 'emerald' },
+    const icons = { [config.calibFields.value]: '🏠', [config.calibFields.min]: '⬇️', [config.calibFields.max]: '⬆️' }
+    const colors = { [config.calibFields.value]: 'cyan', [config.calibFields.min]: 'emerald', [config.calibFields.max]: 'amber' }
+    return {
+      label: config.paramLabels?.[Object.keys(config.calibFields).find(k => config.calibFields[k] === param)] || param,
+      icon: icons[param] || '📊',
+      color: colors[param] || 'gray',
     }
-    return styles[param] || { label: param, icon: '📊', color: 'gray' }
   }
 
   if (!device) {
@@ -297,24 +299,24 @@ function ActuatorHistory({ device, calibrations, onDelete }) {
                   </div>
                 </div>
               ) : (
-                /* SO101 등 기존 로봇: 기존 테이블 */
+                /* 기본 로봇: config 기반 테이블 */
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-gray-700">
                         <th className="text-left text-gray-400 font-medium py-2 px-3">Joint</th>
-                        <th className="text-right text-gray-400 font-medium py-2 px-3">homing_offset</th>
-                        <th className="text-right text-gray-400 font-medium py-2 px-3">range_min</th>
-                        <th className="text-right text-gray-400 font-medium py-2 px-3">range_max</th>
+                        <th className="text-right text-gray-400 font-medium py-2 px-3">{config.paramLabels.value}</th>
+                        <th className="text-right text-gray-400 font-medium py-2 px-3">{config.paramLabels.min}</th>
+                        <th className="text-right text-gray-400 font-medium py-2 px-3">{config.paramLabels.max}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {Object.entries(selectedCalibration.calibration_data).map(([joint, data]) => (
                         <tr key={joint} className="border-b border-gray-700/50 hover:bg-gray-700/30">
                           <td className="py-2 px-3 text-cyan-400 font-medium">{joint}</td>
-                          <td className="py-2 px-3 text-right font-mono text-white">{data.homing_offset}</td>
-                          <td className="py-2 px-3 text-right font-mono text-white">{data.range_min}</td>
-                          <td className="py-2 px-3 text-right font-mono text-white">{data.range_max}</td>
+                          <td className="py-2 px-3 text-right font-mono text-white">{data[config.calibFields.value]}</td>
+                          <td className="py-2 px-3 text-right font-mono text-white">{data[config.calibFields.min]}</td>
+                          <td className="py-2 px-3 text-right font-mono text-white">{data[config.calibFields.max]}</td>
                         </tr>
                       ))}
                     </tbody>

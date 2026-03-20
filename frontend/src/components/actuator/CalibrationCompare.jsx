@@ -9,7 +9,7 @@ function CalibrationCompare({ device, calibrations }) {
   const joints = config.joints
   const { value: valueField } = config.calibFields
   const colors = config.colors
-  const isAlice = device?.type === 'alice_m1'
+  const isAlice = getEffectiveRobotType(device) === 'alice_m1'
 
   const deviceCalibrations = device
     ? calibrations.filter(c => c.device_id === device.id)
@@ -45,13 +45,13 @@ function CalibrationCompare({ device, calibrations }) {
     const val1 = calib1?.calibration_data?.[joint]?.[valueField] || 0
     const val2 = calib2?.calibration_data?.[joint]?.[valueField] || 0
     const diff = val2 - val1
-    if (isAlice) {
+    if (config.stepsPerRev) {
+      // steps 단위 → 각도 변환
+      const degrees = Math.abs(diff * 360 / config.stepsPerRev).toFixed(2)
+      return { val1, val2, diff, degrees }
+    } else {
       // 이미 각도값
       return { val1, val2, diff, degrees: Math.abs(diff).toFixed(2) }
-    } else {
-      // SO101: steps, 4096 per revolution
-      const degrees = Math.abs(diff * 360 / 4096).toFixed(2)
-      return { val1, val2, diff, degrees }
     }
   }
 
@@ -81,7 +81,7 @@ function CalibrationCompare({ device, calibrations }) {
         <tbody>
           {jointList.map((joint) => {
             const { val1, val2, diff, degrees } = getDiff(joint)
-            const threshold = isAlice ? 5 : 30
+            const threshold = config.threshold
             const isLarge = Math.abs(diff) > threshold
             return (
               <tr key={joint} className="border-t border-gray-700">
@@ -149,7 +149,7 @@ function CalibrationCompare({ device, calibrations }) {
       {/* 경고 */}
       <div className="mt-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
         <p className="text-yellow-400">
-          ⚠️ {isAlice ? '5°' : '30 steps'} 이상 차이나는 조인트는 빨간색으로 표시됩니다.
+          ⚠️ {config.threshold} {config.unit} 이상 차이나는 조인트는 빨간색으로 표시됩니다.
           큰 편차는 캘리브레이션 절차를 확인해주세요.
         </p>
       </div>

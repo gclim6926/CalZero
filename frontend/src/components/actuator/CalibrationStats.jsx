@@ -14,7 +14,7 @@ function CalibrationStats({ calibrations, device }) {
   const joints = config.joints
   const { value: valueField } = config.calibFields
   const colors = config.colors
-  const isAlice = device?.type === 'alice_m1'
+  const isAlice = getEffectiveRobotType(device) === 'alice_m1'
 
   // 조인트별 통계 계산
   const calcStats = (joint) => {
@@ -28,15 +28,15 @@ function CalibrationStats({ calibrations, device }) {
     const max = Math.max(...values)
     const range = max - min
 
-    if (isAlice) {
-      // Alice M1: 값이 이미 각도(degrees)
-      return { mean: mean.toFixed(1), std: std.toFixed(2), min, max, range: range.toFixed(1), stdDeg: std.toFixed(2), rangeDeg: range.toFixed(2), error330mm: (330 * std * Math.PI / 180).toFixed(1) }
-    } else {
-      // SO101: steps 단위, 4096 steps per revolution
-      const stdDeg = (std * 360 / 4096).toFixed(2)
-      const rangeDeg = (range * 360 / 4096).toFixed(2)
-      const error330mm = (330 * std * Math.PI / 180 * 360 / 4096).toFixed(1)
+    if (config.stepsPerRev) {
+      // steps 단위 (SO101 등): stepsPerRev로 각도 변환
+      const stdDeg = (std * 360 / config.stepsPerRev).toFixed(2)
+      const rangeDeg = (range * 360 / config.stepsPerRev).toFixed(2)
+      const error330mm = (330 * std * Math.PI / 180 * 360 / config.stepsPerRev).toFixed(1)
       return { mean: mean.toFixed(1), std: std.toFixed(1), min, max, range, stdDeg, rangeDeg, error330mm }
+    } else {
+      // 이미 각도(degrees) 단위 (Alice M1 등)
+      return { mean: mean.toFixed(1), std: std.toFixed(2), min, max, range: range.toFixed(1), stdDeg: std.toFixed(2), rangeDeg: range.toFixed(2), error330mm: (330 * std * Math.PI / 180).toFixed(1) }
     }
   }
 

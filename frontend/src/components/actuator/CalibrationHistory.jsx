@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from 'react'
 import AliceM1CalibrationForm from './AliceM1CalibrationForm'
+import { getEffectiveRobotType } from '../../utils/menuConfig'
 
 function CalibrationHistory({ device, calibrations, onSave, onDelete, setActiveSubMenu }) {
   const [showRegister, setShowRegister] = useState(false)
@@ -94,7 +95,7 @@ function CalibrationHistory({ device, calibrations, onSave, onDelete, setActiveS
   }
 
   // Alice M1은 별도 UI
-  if (device.type === 'alice_m1') {
+  if (getEffectiveRobotType(device) === 'alice_m1') {
     return <AliceM1CalibrationForm device={device} calibrations={calibrations} onSave={onSave} setActiveSubMenu={setActiveSubMenu} />
   }
 

@@ -15,7 +15,7 @@ function DataAnalysis({ device, calibrations }) {
   const config = getActuatorConfig(getEffectiveRobotType(device))
   const joints = config.joints
   const { min: minField, max: maxField } = config.calibFields
-  const isAlice = device?.type === 'alice_m1'
+  const isAlice = getEffectiveRobotType(device) === 'alice_m1'
   
   const deviceCalibrations = device 
     ? calibrations.filter(c => c.device_id === device.id)
@@ -171,7 +171,7 @@ function DataAnalysis({ device, calibrations }) {
   }
 
   const PresentHistogram = ({ bins, maxCount, calibMin, calibMax, binSize, color, dataMin, dataMax, count, dangerBinCount, warningBinCount, dangerLow, dangerHigh, warningLow, warningHigh }) => {
-    const homing = 2047
+    const homing = config.homingDefault
     const totalDanger = dangerLow + dangerHigh
     const totalWarning = warningLow + warningHigh
     const dangerPercent = count > 0 ? (totalDanger / count * 100).toFixed(1) : 0
@@ -207,7 +207,7 @@ function DataAnalysis({ device, calibrations }) {
         </div>
         <div className="relative h-3 mb-1">
           <span className="absolute left-0 text-[8px] text-rose-400">{calibMin}</span>
-          <span className="absolute text-[8px] text-amber-400" style={{ left: `${((homing - calibMin) / (calibMax - calibMin)) * 100}%`, transform: 'translateX(-50%)' }}>2047</span>
+          <span className="absolute text-[8px] text-amber-400" style={{ left: `${((homing - calibMin) / (calibMax - calibMin)) * 100}%`, transform: 'translateX(-50%)' }}>{config.homingDefault}</span>
           <span className="absolute right-0 text-[8px] text-emerald-400">{calibMax}</span>
         </div>
         <div className="flex justify-between text-[8px]">
