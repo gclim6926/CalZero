@@ -86,6 +86,13 @@ export function getMenuConfig(robotType) {
   return robotTypeMenuConfig[robotType] ?? defaultConfig
 }
 
+// ==================== Isaac Sim → robot_type 변환 ====================
+export function getEffectiveRobotType(device) {
+  if (!device) return null
+  if (device.type === 'isaac_sim' && device.robot_type) return device.robot_type
+  return device.type
+}
+
 // ==================== 카메라 라벨 설정 (타입별) ====================
 const defaultCameraConfig = {
   cameras: ['front_cam', 'wrist_cam'],

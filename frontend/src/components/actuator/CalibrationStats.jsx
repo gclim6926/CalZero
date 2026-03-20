@@ -1,5 +1,5 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts'
-import { getActuatorConfig } from '../../utils/menuConfig'
+import { getActuatorConfig, getEffectiveRobotType } from '../../utils/menuConfig'
 
 function CalibrationStats({ calibrations, device }) {
   if (!calibrations || calibrations.length === 0) {
@@ -10,7 +10,7 @@ function CalibrationStats({ calibrations, device }) {
     )
   }
 
-  const config = getActuatorConfig(device?.type)
+  const config = getActuatorConfig(getEffectiveRobotType(device))
   const joints = config.joints
   const { value: valueField } = config.calibFields
   const colors = config.colors

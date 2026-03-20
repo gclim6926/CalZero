@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { getActuatorConfig } from '../../utils/menuConfig'
+import { getActuatorConfig, getEffectiveRobotType } from '../../utils/menuConfig'
 
 function CalibrationCompare({ device, calibrations }) {
   const [calib1Idx, setCalib1Idx] = useState(0)
   const [calib2Idx, setCalib2Idx] = useState(1)
 
-  const config = getActuatorConfig(device?.type)
+  const config = getActuatorConfig(getEffectiveRobotType(device))
   const joints = config.joints
   const { value: valueField } = config.calibFields
   const colors = config.colors

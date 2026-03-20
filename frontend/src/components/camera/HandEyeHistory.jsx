@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { getCameraConfig } from '../../utils/menuConfig.jsx'
+import { getCameraConfig, getEffectiveRobotType } from '../../utils/menuConfig.jsx'
 
 function HandEyeHistory({ device, calibrations, setCalibrations }) {
-  const cameraConfig = getCameraConfig(device?.type)
+  const cameraConfig = getCameraConfig(getEffectiveRobotType(device))
   const [selectedCamera, setSelectedCamera] = useState('all')
   const [selectedCalib, setSelectedCalib] = useState(null)
 

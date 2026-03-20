@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo, useEffect } from 'react'
-import { getActuatorConfig } from '../../utils/menuConfig'
+import { getActuatorConfig, getEffectiveRobotType } from '../../utils/menuConfig'
 
 function DataAnalysis({ device, calibrations }) {
   const [parquetData, setParquetData] = useState(null)
@@ -12,7 +12,7 @@ function DataAnalysis({ device, calibrations }) {
   const [selectedCalibration, setSelectedCalibration] = useState(null)
   const fileInputRef = useRef(null)
 
-  const config = getActuatorConfig(device?.type)
+  const config = getActuatorConfig(getEffectiveRobotType(device))
   const joints = config.joints
   const { min: minField, max: maxField } = config.calibFields
   const isAlice = device?.type === 'alice_m1'

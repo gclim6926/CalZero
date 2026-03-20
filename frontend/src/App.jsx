@@ -14,7 +14,7 @@ import HandEyeCalculation from './components/camera/HandEyeCalculation'
 import HandEyeHistory from './components/camera/HandEyeHistory'
 import SettingsGeneral from './components/settings/SettingsGeneral'
 import api from './utils/api'
-import { allMenuConfigs, getMenuConfig } from './utils/menuConfig'
+import { allMenuConfigs, getMenuConfig, getEffectiveRobotType } from './utils/menuConfig'
 
 // Settings 서브메뉴 (상단 탭용)
 const settingsSubMenus = [
@@ -52,12 +52,12 @@ function App() {
 
   useEffect(() => {
     if (selectedDevice) {
-      const config = getMenuConfig(selectedDevice.type)
+      const config = getMenuConfig(getEffectiveRobotType(selectedDevice))
       const firstMenu = config.menus[0]
       setActiveTopMenu(firstMenu)
       setActiveSubMenu(config.subMenus[firstMenu]?.[0]?.id || '')
     }
-  }, [selectedDevice?.type])
+  }, [selectedDevice?.type, selectedDevice?.robot_type])
 
   const loadInitialData = async () => {
     setIsLoading(true)
@@ -206,7 +206,7 @@ function App() {
   if (!user) return <Login onLogin={handleLogin} />
 
   const handleTopMenuChange = (menuId) => {
-    const config = getMenuConfig(selectedDevice?.type)
+    const config = getMenuConfig(getEffectiveRobotType(selectedDevice))
     setActiveTopMenu(menuId)
     setActiveSubMenu(config.subMenus[menuId]?.[0]?.id || '')
     setActiveSettingsMenu(null) // Settings 비활성화
@@ -217,7 +217,7 @@ function App() {
     setSelectedDevice(null) // 장치 선택 해제
   }
 
-  const robotMenuConfig = getMenuConfig(selectedDevice?.type)
+  const robotMenuConfig = getMenuConfig(getEffectiveRobotType(selectedDevice))
   const currentMenuConfig = allMenuConfigs[activeTopMenu]
 
   const renderContent = () => {

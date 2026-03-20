@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import { getCameraConfig } from '../../utils/menuConfig.jsx'
+import { getCameraConfig, getEffectiveRobotType } from '../../utils/menuConfig.jsx'
 
 function ExtrinsicHistory({ device, calibrations, onDelete }) {
-  const cameraConfig = getCameraConfig(device?.type)
+  const cameraConfig = getCameraConfig(getEffectiveRobotType(device))
   const [selectedCamera, setSelectedCamera] = useState(cameraConfig.cameras[0])
   const [selectedItem, setSelectedItem] = useState(null)
   const [compareMode, setCompareMode] = useState(false)

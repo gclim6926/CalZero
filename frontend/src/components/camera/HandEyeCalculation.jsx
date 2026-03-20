@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { initPyodide, isPyodideReady } from '../../utils/calibration.js'
-import { getCameraConfig } from '../../utils/menuConfig.jsx'
+import { getCameraConfig, getEffectiveRobotType } from '../../utils/menuConfig.jsx'
 
 function HandEyeCalculation({ device, intrinsicCalibrations, onCalibrationComplete }) {
-  const cameraConfig = getCameraConfig(device?.type)
+  const cameraConfig = getCameraConfig(getEffectiveRobotType(device))
   const [pyReady, setPyReady] = useState(false)
   const [pyError, setPyError] = useState(null)
   const [calibrationType, setCalibrationType] = useState('eye-in-hand')
