@@ -199,9 +199,9 @@ function ReplayAnalysis({ device, calibrations, replayTests, onSave, onDelete })
                 <p className="text-gray-300 text-sm leading-relaxed mb-4">
                   캘리브레이션된 로봇의 <span className="text-orange-400 font-medium">왼손</span>과{' '}
                   <span className="text-emerald-400 font-medium">오른손</span>이 각각 지정된 타겟을 얼마나 정확하게
-                  터치하는지 측정합니다. 왼손으로 <span className="text-orange-400">L-touch Zone 9개</span>,
-                  오른손으로 <span className="text-emerald-400">R-touch Zone 9개</span>를 터치하며,
-                  양 Zone이 <span className="text-cyan-400">6개씩 겹치는 중앙 영역</span>을 공유합니다.
+                  터치하는지 측정합니다. 왼손으로 <span className="text-orange-400">L-touch Zone(위치 1~9)</span>,
+                  오른손으로 <span className="text-emerald-400">R-touch Zone(위치 4~12)</span>을 각각 터치하며,
+                  <span className="text-cyan-400">위치 4~9는 양손이 공유</span>하는 중앙 영역입니다.
                   총 <span className="text-cyan-400 font-medium">12개 고유 위치</span>의 오차
                   <span className="text-gray-400">(mm)</span>를 기록하여 캘리브레이션 품질을 검증하고,
                   반복 측정을 통해 양팔의 정밀도를 추적합니다.
@@ -228,11 +228,15 @@ function ReplayAnalysis({ device, calibrations, replayTests, onSave, onDelete })
                       <ul className="text-gray-400 text-xs space-y-1.5 list-none">
                         <li className="flex items-start gap-2">
                           <span className="text-orange-400 mt-0.5">●</span>
-                          <span><span className="text-orange-400 font-medium">L-touch Zone</span> — 왼손이 터치하는 9개 타겟 (좌측 3열)</span>
+                          <span><span className="text-orange-400 font-medium">L-touch Zone (위치 1~9)</span> — 왼손이 터치하는 9개 타겟 (좌측 3열)</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-emerald-400 mt-0.5">●</span>
-                          <span><span className="text-emerald-400 font-medium">R-touch Zone</span> — 오른손이 터치하는 9개 타겟 (우측 3열)</span>
+                          <span><span className="text-emerald-400 font-medium">R-touch Zone (위치 4~12)</span> — 오른손이 터치하는 9개 타겟 (우측 3열)</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-cyan-400 mt-0.5">●</span>
+                          <span><span className="text-cyan-400 font-medium">공유 영역 (위치 4~9)</span> — 양손이 모두 터치하는 중앙 6개 타겟</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-cyan-500 mt-0.5">●</span>
@@ -381,23 +385,34 @@ function ReplayAnalysis({ device, calibrations, replayTests, onSave, onDelete })
               <div className="flex items-center gap-4 text-xs mb-2">
                 <span className="flex items-center gap-1.5">
                   <span className="w-2.5 h-2.5 rounded-full bg-orange-500/60"></span>
-                  <span className="text-orange-400">L-touch Zone (위치 1~6)</span>
+                  <span className="text-orange-400">L-touch Zone (위치 1~9)</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-cyan-500/60"></span>
+                  <span className="text-cyan-400">공유 영역 (위치 4~9)</span>
                 </span>
                 <span className="flex items-center gap-1.5">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/60"></span>
-                  <span className="text-emerald-400">R-touch Zone (위치 7~12)</span>
+                  <span className="text-emerald-400">R-touch Zone (위치 4~12)</span>
                 </span>
               </div>
             )}
-            <div className={`grid gap-4 ${isAliceM1 ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-2 md:grid-cols-3'}`}>
+            <div className={`grid gap-4 ${isAliceM1 ? 'grid-cols-3' : 'grid-cols-2 md:grid-cols-3'}`}>
               {positions.map((pos, idx) => {
                 const distance = calculateDistance(pos.error_x, pos.error_y, pos.error_z)
                 const quality = getQualityStatus(distance)
-                const isLeftZone = isAliceM1 && idx < 6
-                const isRightZone = isAliceM1 && idx >= 6
-                const zoneBorder = isLeftZone ? 'border-orange-500/30' : isRightZone ? 'border-emerald-500/30' : 'border-gray-700'
-                const zoneLabel = isLeftZone ? 'L' : isRightZone ? 'R' : ''
-                const zoneLabelColor = isLeftZone ? 'text-orange-400' : 'text-emerald-400'
+                // Alice M1 zone 판정: L(1~9), R(4~12), 공유(4~9)
+                const isLeftOnly = isAliceM1 && idx < 3           // 위치 1~3: L 전용
+                const isShared = isAliceM1 && idx >= 3 && idx < 9 // 위치 4~9: L+R 공유
+                const isRightOnly = isAliceM1 && idx >= 9         // 위치 10~12: R 전용
+                const zoneBorder = isLeftOnly ? 'border-orange-500/30'
+                  : isRightOnly ? 'border-emerald-500/30'
+                  : isShared ? 'border-cyan-500/30'
+                  : 'border-gray-700'
+                const zoneLabel = isLeftOnly ? 'L' : isRightOnly ? 'R' : isShared ? 'L+R' : ''
+                const zoneLabelColor = isLeftOnly ? 'text-orange-400'
+                  : isRightOnly ? 'text-emerald-400'
+                  : isShared ? 'text-cyan-400' : ''
 
                 return (
                   <div key={idx} className={`bg-gray-900 rounded-lg p-3 border ${zoneBorder}`}>
