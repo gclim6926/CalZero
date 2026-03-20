@@ -64,7 +64,9 @@
       "Bash(PATH=/usr/local/bin:$PATH npx vite build)",
       "Bash(export PATH=/usr/local/bin:$PATH)",
       "Bash(node node_modules/.bin/vite build)",
-      "Bash(export PATH=/usr/local/bin:/usr/bin:/bin:$PATH)"
+      "Bash(export PATH=/usr/local/bin:/usr/bin:/bin:$PATH)",
+      "Bash(git rm:*)",
+      "Bash(git reset:*)"
     ]
   }
 }

@@ -121,6 +121,7 @@ class DeviceCreate(BaseModel):
     firmware_version: str = ""
     usd_file_path: str = ""
     target_device_ids: List[int] = []
+    robot_type: str = ""
 
 
 class DeviceUpdate(BaseModel):
@@ -138,6 +139,7 @@ class DeviceUpdate(BaseModel):
     firmware_version: str = ""
     usd_file_path: str = ""
     target_device_ids: List[int] = []
+    robot_type: str = ""
 
 
 class ActuatorCalibrationCreate(BaseModel):

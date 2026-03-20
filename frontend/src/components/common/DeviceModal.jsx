@@ -39,6 +39,7 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [], defa
     firmware_version: '',
     usd_file_path: '',
     target_device_ids: [],
+    robot_type: 'so101',
   })
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
@@ -65,6 +66,7 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [], defa
         firmware_version: device.firmware_version || '',
         usd_file_path: device.usd_file_path || '',
         target_device_ids: device.target_device_ids || [],
+        robot_type: device.robot_type || 'so101',
       })
       setRobotCategory(device.type === 'isaac_sim' ? 'simulation' : 'physical')
       // 편집 시 연결된 Sim 탐지
@@ -91,6 +93,7 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [], defa
         firmware_version: '',
         usd_file_path: '',
         target_device_ids: [],
+        robot_type: 'so101',
       })
       setRobotCategory(isSim ? 'simulation' : 'physical')
       setLinkedSimId(null)
@@ -378,6 +381,56 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [], defa
             </div>
           )}
 
+          {/* Isaac Sim: 로봇 타입 선택 */}
+          {isSimulation && (
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-violet-400"></span>
+                로봇 타입
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {deviceTypes.map(type => (
+                  <button
+                    key={type.value}
+                    type="button"
+                    onClick={() => {
+                      handleChange('robot_type', type.value)
+                      // 로봇 타입 변경 시 기존 타겟 초기화
+                      handleChange('target_device_ids', [])
+                    }}
+                    className={`p-3 rounded-xl border text-left transition-all ${
+                      formData.robot_type === type.value
+                        ? 'bg-gradient-to-br from-violet-500/20 to-purple-500/20 border-violet-500/50 shadow-lg shadow-violet-500/10'
+                        : 'bg-slate-700/30 border-slate-600/50 hover:border-slate-500'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      {imageIconTypes.includes(type.value) ? (
+                        <div className={`w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 ring-1 ${
+                          formData.robot_type === type.value ? 'ring-violet-500/50' : 'ring-slate-600/50'
+                        }`}>
+                          {getRobotTypeIcon(type.value, 'w-10 h-10')}
+                        </div>
+                      ) : (
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                          formData.robot_type === type.value ? 'bg-violet-500/30 text-violet-300' : 'bg-slate-600/50 text-slate-400'
+                        }`}>
+                          {getRobotTypeIcon(type.value, 'w-4 h-4')}
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <span className={`text-sm font-medium block truncate ${
+                          formData.robot_type === type.value ? 'text-violet-300' : 'text-slate-200'
+                        }`}>{type.label}</span>
+                        {type.custom && <span className="text-[10px] text-slate-500">사용자 정의</span>}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Isaac Sim: 전용 설정 */}
           {isSimulation && (
             <div className="space-y-4">
@@ -398,7 +451,7 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [], defa
                   />
                 </div>
 
-                {/* Sim-to-Real 타겟 (다중 선택) */}
+                {/* Sim-to-Real 타겟 (다중 선택) - 동일 로봇 타입만 표시 */}
                 <div>
                   <label className="block text-violet-300 text-sm mb-1.5">
                     Sim-to-Real 타겟 로봇
@@ -406,43 +459,46 @@ function DeviceModal({ isOpen, onClose, onSave, device = null, robots = [], defa
                       <span className="ml-2 text-[10px] text-violet-400 bg-violet-500/20 px-1.5 py-0.5 rounded">{formData.target_device_ids.length}개 선택</span>
                     )}
                   </label>
-                  {physicalRobots.length === 0 ? (
-                    <p className="text-slate-500 text-sm py-2">등록된 Physical Robot이 없습니다</p>
-                  ) : (
-                    <div className="space-y-1 max-h-40 overflow-y-auto rounded-lg border border-violet-500/20 bg-slate-900 p-2">
-                      {physicalRobots.map(r => {
-                        const isChecked = formData.target_device_ids.includes(r.id)
-                        return (
-                          <label
-                            key={r.id}
-                            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg cursor-pointer transition-all ${
-                              isChecked ? 'bg-violet-500/10 border border-violet-500/30' : 'hover:bg-slate-800 border border-transparent'
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={() => {
-                                const newIds = isChecked
-                                  ? formData.target_device_ids.filter(id => id !== r.id)
-                                  : [...formData.target_device_ids, r.id]
-                                handleChange('target_device_ids', newIds)
-                              }}
-                              className="w-3.5 h-3.5 rounded border-slate-600 text-violet-500 focus:ring-violet-500 bg-slate-800"
-                            />
-                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                              <div className="w-5 h-5 rounded flex items-center justify-center overflow-hidden bg-slate-700/60 text-slate-400">
-                                {imageIconTypes.includes(r.type) ? getRobotTypeIcon(r.type, 'w-5 h-5') : getRobotTypeIcon(r.type, 'w-3 h-3')}
+                  {(() => {
+                    const sameTypeRobots = physicalRobots.filter(r => r.type === formData.robot_type)
+                    if (sameTypeRobots.length === 0) {
+                      return <p className="text-slate-500 text-sm py-2">동일 타입({deviceTypes.find(t => t.value === formData.robot_type)?.label || formData.robot_type})의 Physical Robot이 없습니다</p>
+                    }
+                    return (
+                      <div className="space-y-1 max-h-40 overflow-y-auto rounded-lg border border-violet-500/20 bg-slate-900 p-2">
+                        {sameTypeRobots.map(r => {
+                          const isChecked = formData.target_device_ids.includes(r.id)
+                          return (
+                            <label
+                              key={r.id}
+                              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg cursor-pointer transition-all ${
+                                isChecked ? 'bg-violet-500/10 border border-violet-500/30' : 'hover:bg-slate-800 border border-transparent'
+                              }`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={() => {
+                                  const newIds = isChecked
+                                    ? formData.target_device_ids.filter(id => id !== r.id)
+                                    : [...formData.target_device_ids, r.id]
+                                  handleChange('target_device_ids', newIds)
+                                }}
+                                className="w-3.5 h-3.5 rounded border-slate-600 text-violet-500 focus:ring-violet-500 bg-slate-800"
+                              />
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <div className="w-5 h-5 rounded flex items-center justify-center overflow-hidden bg-slate-700/60 text-slate-400">
+                                  {imageIconTypes.includes(r.type) ? getRobotTypeIcon(r.type, 'w-5 h-5') : getRobotTypeIcon(r.type, 'w-3 h-3')}
+                                </div>
+                                <span className={`text-sm truncate ${isChecked ? 'text-violet-200' : 'text-slate-300'}`}>{r.name}</span>
                               </div>
-                              <span className={`text-sm truncate ${isChecked ? 'text-violet-200' : 'text-slate-300'}`}>{r.name}</span>
-                              <span className="text-[10px] text-slate-500">{r.type}</span>
-                            </div>
-                          </label>
-                        )
-                      })}
-                    </div>
-                  )}
-                  <p className="text-slate-500 text-xs mt-1">시뮬레이션 결과를 배포할 물리 로봇을 선택하세요 (복수 선택 가능)</p>
+                            </label>
+                          )
+                        })}
+                      </div>
+                    )
+                  })()}
+                  <p className="text-slate-500 text-xs mt-1">선택한 로봇 타입({deviceTypes.find(t => t.value === formData.robot_type)?.label || formData.robot_type})과 동일한 물리 로봇만 표시됩니다</p>
                 </div>
               </div>
             </div>
