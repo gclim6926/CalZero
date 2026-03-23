@@ -175,7 +175,7 @@ function AliceM1CalibrationForm({ device, calibrations, onSave, setActiveSubMenu
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/10 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <img
-                src="/robots/alice_m1_joints.png"
+                src="/robots/alice_mobile_joint.png"
                 alt="Alice M1 Joint Diagram"
                 className="w-full max-h-64 object-contain opacity-85 group-hover:opacity-100 transition-opacity drop-shadow-[0_0_8px_rgba(6,182,212,0.15)]"
               />
