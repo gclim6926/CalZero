@@ -177,6 +177,11 @@ const initValues = () => {
 // ===== joint_states 파일 파싱 =====
 // ROS2 `ros2 topic echo --once /joint_states` 출력 형식 파싱
 // name: [joint1, joint2, ...] + position: [val1, val2, ...]
+// Body Joints의 position 값은 radian이므로 degree로 변환하여 반환
+const RAD_TO_DEG = 180 / Math.PI
+// Body Joint ID Set (radian → degree 변환 대상)
+const BODY_JOINT_IDS = new Set(ALICE_M1_BODY_JOINTS.map(j => j.id))
+
 function parseJointStatesFile(text) {
   const result = {}
   try {
@@ -191,7 +196,12 @@ function parseJointStatesFile(text) {
 
     names.forEach((name, i) => {
       if (i < positions.length) {
-        result[name] = Math.round(positions[i] * 1000) / 1000  // 소수점 3자리
+        const raw = positions[i]
+        // Body Joints: radian → degree 변환, Hand Joints: 그대로 사용
+        const value = BODY_JOINT_IDS.has(name)
+          ? Math.round(raw * RAD_TO_DEG * 100) / 100   // degree, 소수점 2자리
+          : Math.round(raw * 1000) / 1000               // 원본값, 소수점 3자리
+        result[name] = value
       }
     })
   } catch (e) {
@@ -542,7 +552,7 @@ function AliceM1CalibrationForm({ device, calibrations, onSave, setActiveSubMenu
               {inputMode === 'file' && (
                 <div className="space-y-3">
                   <p className="text-gray-500 text-xs">
-                    위 명령어 실행 후 생성된 로그 파일(joint_status_*.txt)을 업로드하면 측정값이 자동으로 채워집니다.
+                    위 명령어 실행 후 생성된 로그 파일(joint_status_*.txt)을 업로드하면 측정값이 자동으로 채워집니다. (업로드 값은 radian이며, degree로 변환되어 저장됩니다)
                   </p>
 
                   {/* 파일 업로드 슬롯 */}

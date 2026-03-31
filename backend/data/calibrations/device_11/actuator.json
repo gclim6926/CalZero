@@ -1,1 +1,165 @@
-[]
+[
+  {
+    "device_id": 11,
+    "notes": "min/max/base 측정1",
+    "calibration_data": {
+      "head_p": {
+        "min": -40.01,
+        "max": 40.01,
+        "base": 20
+      },
+      "head_y": {
+        "min": -45,
+        "max": 45,
+        "base": 0
+      },
+      "waist_y": {
+        "min": -43.49,
+        "max": 42.81,
+        "base": -0.01
+      },
+      "waist_upper_pitch": {
+        "min": 0.12,
+        "max": 89.16,
+        "base": 50
+      },
+      "waist_lower_pitch": {
+        "min": 0.15,
+        "max": 79.9,
+        "base": 50
+      },
+      "l_sh_p": {
+        "min": -109.17,
+        "max": 49.38,
+        "base": 10.39
+      },
+      "l_sh_r": {
+        "min": -8.35,
+        "max": 168.23,
+        "base": 0.52
+      },
+      "l_sh_y": {
+        "min": -69.39,
+        "max": 69.59,
+        "base": 0.33
+      },
+      "l_el_p": {
+        "min": -74.24,
+        "max": -0.72,
+        "base": -73.59
+      },
+      "l_wr_y": {
+        "min": -67.23,
+        "max": 68.16,
+        "base": 1.58
+      },
+      "l_wr_p": {
+        "min": -28.53,
+        "max": 29.02,
+        "base": -8.54
+      },
+      "l_wr_r": {
+        "min": -38.9,
+        "max": 8.67,
+        "base": 1.22
+      },
+      "r_sh_p": {
+        "min": -48.92,
+        "max": 109.91,
+        "base": -9.83
+      },
+      "r_sh_r": {
+        "min": -168.38,
+        "max": 8.81,
+        "base": -0.13
+      },
+      "r_sh_y": {
+        "min": -69.34,
+        "max": 69.55,
+        "base": 0.09
+      },
+      "r_el_p": {
+        "min": 1.21,
+        "max": 74.94,
+        "base": 74.45
+      },
+      "r_wr_y": {
+        "min": -68.38,
+        "max": 67.63,
+        "base": 1.42
+      },
+      "r_wr_p": {
+        "min": -28.35,
+        "max": 27.93,
+        "base": 11.79
+      },
+      "r_wr_r": {
+        "min": -8.59,
+        "max": 38.68,
+        "base": 0.92
+      },
+      "Left_Pinky_Pitch": {
+        "min": 0,
+        "max": 1000,
+        "base": 1000
+      },
+      "Left_Ring_Pitch": {
+        "min": 0,
+        "max": 1000,
+        "base": 1000
+      },
+      "Left_Middle_Pitch": {
+        "min": 0,
+        "max": 1000,
+        "base": 1000
+      },
+      "Left_Index_Pitch": {
+        "min": 0,
+        "max": 1000,
+        "base": 1000
+      },
+      "Left_Thumb_Pitch": {
+        "min": 0,
+        "max": 1000,
+        "base": 1000
+      },
+      "Left_Thumb_Roll": {
+        "min": 0,
+        "max": 1000,
+        "base": 1000
+      },
+      "Right_Pinky_Pitch": {
+        "min": 0,
+        "max": 1000,
+        "base": 1000
+      },
+      "Right_Ring_Pitch": {
+        "min": 0,
+        "max": 1000,
+        "base": 1000
+      },
+      "Right_Middle_Pitch": {
+        "min": 0,
+        "max": 1000,
+        "base": 1000
+      },
+      "Right_Index_Pitch": {
+        "min": 0,
+        "max": 1000,
+        "base": 1000
+      },
+      "Right_Thumb_Pitch": {
+        "min": 0,
+        "max": 1000,
+        "base": 1000
+      },
+      "Right_Thumb_Roll": {
+        "min": 0,
+        "max": 1000,
+        "base": 1000
+      }
+    },
+    "id": 1,
+    "created_at": "2026-03-31T15:27:07.032755+09:00"
+  }
+]

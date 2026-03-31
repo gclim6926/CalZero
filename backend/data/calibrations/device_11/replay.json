@@ -6,129 +6,129 @@
     "positions": [
       {
         "position": 1,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 2,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 3,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 4,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 5,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 6,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 7,
         "error_x": 0.01,
-        "error_y": 0.0,
-        "error_z": 0.0,
+        "error_y": 0,
+        "error_z": 0,
         "distance": 0.01
       },
       {
         "position": 8,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 9,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 10,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 11,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 12,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 13,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 14,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 15,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 16,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 17,
         "error_x": 0.01,
-        "error_y": 0.0,
-        "error_z": 0.0,
+        "error_y": 0,
+        "error_z": 0,
         "distance": 0.01
       },
       {
         "position": 18,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       }
     ],
     "avg_error": 0.001,
@@ -143,129 +143,129 @@
     "positions": [
       {
         "position": 1,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 2,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 3,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 4,
         "error_x": 0.02,
-        "error_y": 0.0,
-        "error_z": 0.0,
+        "error_y": 0,
+        "error_z": 0,
         "distance": 0.02
       },
       {
         "position": 5,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 6,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 7,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 8,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 9,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 10,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 11,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 12,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 13,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 14,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 15,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 16,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 17,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       },
       {
         "position": 18,
-        "error_x": 0.0,
-        "error_y": 0.0,
-        "error_z": 0.0,
-        "distance": 0.0
+        "error_x": 0,
+        "error_y": 0,
+        "error_z": 0,
+        "distance": 0
       }
     ],
     "avg_error": 0.001,
