@@ -66,7 +66,30 @@
       "Bash(node node_modules/.bin/vite build)",
       "Bash(export PATH=/usr/local/bin:/usr/bin:/bin:$PATH)",
       "Bash(git rm:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Read(//Users/1110472/.ssh/**)",
+      "Bash(ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no opc@144.24.73.254 \"echo SSH_SUCCESS\")",
+      "Bash(nc -z -w 5 144.24.73.254 22)",
+      "Bash(xargs ls:*)",
+      "Bash(export PATH=\"/opt/homebrew/bin:/usr/local/bin:$PATH\")",
+      "Bash(xargs kill:*)",
+      "WebFetch(domain:www.advantech.com)",
+      "WebFetch(domain:humanoid.guide)",
+      "WebFetch(domain:eng.arobot4all.com)",
+      "WebFetch(domain:www.aparobot.com)",
+      "WebFetch(domain:www.hellot.net)",
+      "WebFetch(domain:www.irobotnews.com)",
+      "WebFetch(domain:www.k-robot.co.kr)",
+      "WebFetch(domain:zdnet.co.kr)",
+      "WebFetch(domain:www.aitimes.kr)",
+      "WebFetch(domain:www.etoday.co.kr)",
+      "WebFetch(domain:en.wowtale.net)",
+      "WebFetch(domain:www.koreaherald.com)",
+      "WebFetch(domain:www.therobotreport.com)",
+      "WebFetch(domain:docs.arobot4all.com)",
+      "Bash(export PATH=\"/usr/local/bin:/opt/homebrew/bin:$HOME/.nvm/versions/node/*/bin:$PATH\")",
+      "Bash(./node_modules/.bin/vite build:*)",
+      "Bash(/usr/local/bin/node ./node_modules/.bin/vite build)"
     ]
   }
 }

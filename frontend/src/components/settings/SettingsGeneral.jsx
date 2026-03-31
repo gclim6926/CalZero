@@ -68,7 +68,7 @@ function SettingsGeneral() {
 
       setMessage({
         type: 'success',
-        text: `복원 완료! (장치 ${result.stats?.devices_count || 0}개, 캘리브레이션 ${result.stats?.calibrations_count || 0}개)`
+        text: `복원 완료! (장치 ${result.stats?.devices_count || 0}개, 캘리브레이션 ${result.stats?.calibrations_count || 0}개, 체크리스트 ${result.stats?.checklists_count || 0}개)`
       })
 
       // 페이지 새로고침 권장
@@ -221,6 +221,8 @@ function SettingsGeneral() {
               <span className="text-gray-500">장치:</span> {lastBackup.stats?.devices_count || 0}개
               <span className="mx-2">•</span>
               <span className="text-gray-500">캘리브레이션:</span> {lastBackup.stats?.calibrations_count || 0}개
+              <span className="mx-2">•</span>
+              <span className="text-gray-500">체크리스트:</span> {lastBackup.stats?.checklists_count || 0}개
             </p>
           </div>
         )}
@@ -232,13 +234,13 @@ function SettingsGeneral() {
           <span>🗑️</span> 데이터 초기화
         </h3>
         <p className="text-gray-500 text-sm mb-4">
-          모든 장치와 캘리브레이션 데이터를 삭제합니다. <span className="text-rose-400">이 작업은 되돌릴 수 없습니다!</span>
+          모든 장치, 캘리브레이션, 체크리스트 데이터를 삭제합니다. <span className="text-rose-400">이 작업은 되돌릴 수 없습니다!</span>
         </p>
 
         <div className="p-4 bg-rose-500/10 border border-rose-500/30 rounded-lg mb-4">
           <p className="text-rose-400 text-sm">
             ⚠️ <strong>주의:</strong> 초기화 전에 반드시 백업을 다운로드하세요.
-            사용자 계정은 유지되지만, 모든 장치와 캘리브레이션 데이터가 삭제됩니다.
+            사용자 계정은 유지되지만, 모든 장치·캘리브레이션·체크리스트 데이터가 삭제됩니다.
           </p>
         </div>
 

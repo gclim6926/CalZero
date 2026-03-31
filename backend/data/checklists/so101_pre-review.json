@@ -1,0 +1,150 @@
+{
+  "pre-1-1": {
+    "checked": true,
+    "note": "HuggingFace LeRobot 오픈소스 프로젝트. TheRobotStudio 설계. 글로벌 커뮤니티 기반 개발·지원"
+  },
+  "pre-1-2": {
+    "checked": true,
+    "note": "전세계 수천대 DIY 조립·운용 중. 481개 커뮤니티 데이터셋(23,000에피소드, 1,060만프레임) 축적"
+  },
+  "pre-1-3": {
+    "checked": true,
+    "note": "SO-ARM101, 6DOF(5축암+1축그리퍼). Feetech STS3215 서보x6. 3D프린트+BOM 조립"
+  },
+  "pre-1-4": {
+    "checked": true,
+    "note": "DIY 빌드 약 $110-130/팔. 완제품 키트 $160-300. LeKiwi 모바일 풀셋 약 $660"
+  },
+  "pre-1-5": {
+    "checked": true,
+    "note": "부품 즉시 구매 가능(Hiwonder·Waveshare·Seeed). 3D프린트 1-2일. A/S는 커뮤니티 자가 수리"
+  },
+  "pre-2-1": {
+    "checked": true,
+    "note": "Feetech STS3215 데이터시트 공개. LeRobot 문서에 조립·캘리브레이션·운용 가이드 완비"
+  },
+  "pre-2-2": {
+    "checked": true,
+    "note": "페이로드 600g-1kg(단팔). 소형·경량 물체 피킹 전용. 자세별 페이로드 차이 있음"
+  },
+  "pre-2-3": {
+    "checked": true,
+    "note": "전용 핸드 없음. 1DOF 평행 그리퍼. 파지력 수치 미공개, 서보 토크 기반 간접 추정"
+  },
+  "pre-2-4": {
+    "checked": true,
+    "note": "그리퍼 최소 파지 크기 미공개. TPU 95A 핑거팁으로 소형 물체 파지 가능"
+  },
+  "pre-2-5": {
+    "checked": true,
+    "note": "3D프린트 구조로 커스텀 그리퍼 설계·교체 용이. 커뮤니티 다양한 그리퍼 설계 공유"
+  },
+  "pre-2-6": {
+    "checked": true,
+    "note": "촉각센서 미탑재. F/T센서 없음. 서보 전류 피드백으로 간접 힘 추정만 가능"
+  },
+  "pre-2-7": {
+    "checked": true,
+    "note": "STS3215 서보 위치·부하·전압·온도 실시간 피드백. USB 시리얼 UART로 raw data 접근"
+  },
+  "pre-2-8": {
+    "checked": true,
+    "note": "Position 직접 제어 가능. LeRobot SDK로 관절 레벨 명령 전송. 30Hz 기본 제어 루프"
+  },
+  "pre-2-9": {
+    "checked": true,
+    "note": "Joint angle 공간 완전 접근. End-effector 공간은 IK 라이브러리 별도 필요"
+  },
+  "pre-3-1": {
+    "checked": true,
+    "note": "LeRobot(ACT·DiffusionPolicy·VQ-BeT), SmolVLA, Pi0, GR00T N1 등 다수 프레임워크 연동 확인"
+  },
+  "pre-3-2": {
+    "checked": true,
+    "note": "리더-팔로워 텔레옵. SO-101은 기어 제거 없이 백드라이브. lerobot-record로 데이터 수집"
+  },
+  "pre-3-3": {
+    "checked": true,
+    "note": "SmolVLA(HF 자체 VLA), ACT, DiffusionPolicy, Pi0 네이티브 지원. OpenVLA 파인튜닝 가능"
+  },
+  "pre-3-4": {
+    "checked": true,
+    "note": "단팔 로봇으로 바이매뉴얼 불가. 듀얼암 구성시 별도 동기화 필요"
+  },
+  "pre-3-5": {
+    "checked": true,
+    "note": "SmolVLA 기준 50-100 에피소드 파인튜닝으로 78.3% 성공률. 태스크별 상이"
+  },
+  "pre-3-6": {
+    "checked": true,
+    "note": "텔레옵/녹화 30Hz 기본. 서보 UART 최대 1Mbps. Policy 추론 10-30Hz(모델 복잡도별)"
+  },
+  "pre-3-7": {
+    "checked": true,
+    "note": "URDF 공식 제공(SO-ARM100/URDF/). MuJoCo Menagerie 모델. Isaac Lab 연동 프로젝트 존재"
+  },
+  "pre-3-8": {
+    "checked": true,
+    "note": "Isaac Lab/MuJoCo 시뮬 에셋→LeRobot 학습 파이프라인 연동. 커스텀 태스크 환경 구성 가능"
+  },
+  "pre-3-9": {
+    "checked": true,
+    "note": "MuJoCo Menagerie에 actuator 파라미터 포함. URDF에는 미포함, 별도 설정 필요"
+  },
+  "pre-3-10": {
+    "checked": true,
+    "note": "Isaac Lab GPU 가속 RL 학습으로 합성 데이터 생성. MuJoCo sim 환경 커뮤니티 프로젝트 다수"
+  },
+  "pre-4-1": {
+    "checked": true,
+    "note": "소형 물체 pick-and-place, 정리, 분류 태스크 수행 가능. 600g 이내 물체 대상"
+  },
+  "pre-4-2": {
+    "checked": true,
+    "note": "피킹 정확도 정량 수치 미공개. SmolVLA 기준 78.3% 태스크 성공률(프리트레이닝 후)"
+  },
+  "pre-4-3": {
+    "checked": true,
+    "note": "고정형 암으로 환경 적응 개념 제한적. 새 물체/배치에는 추가 에피소드 학습 필요"
+  },
+  "pre-4-4": {
+    "checked": true,
+    "note": "동적 장애물 회피 기능 없음. 고정 작업공간 내 단순 태스크 전용"
+  },
+  "pre-4-5": {
+    "checked": true,
+    "note": "자율 복구 기능 미구현. 파지 실패시 태스크 policy에 재시도 로직 학습 필요"
+  },
+  "pre-4-6": {
+    "checked": true,
+    "note": "SmolVLA: 다양한 물체 pick-place 데모. ACT: 정밀 삽입 태스크. 커뮤니티 481개 데이터셋 태스크"
+  },
+  "pre-5-1": {
+    "checked": true,
+    "note": "전용 E-Stop 미탑재. 서보 펌웨어 과부하 보호만 존재. USB 분리로 즉시 정지 가능"
+  },
+  "pre-5-2": {
+    "checked": true,
+    "note": "안전 구역 감지 기능 없음. 소형·저토크 설계로 위험도 낮음"
+  },
+  "pre-5-3": {
+    "checked": true,
+    "note": "충돌 감지 전용 기능 없음. 서보 전류 기반 간접 감지만 가능. ISO 10218-2 미적용"
+  },
+  "pre-5-4": {
+    "checked": true,
+    "note": "서보 기어비 1/345, 저토크 설계. 전원 차단시 자중으로 서서히 하강. 위험도 낮음"
+  },
+  "pre-5-5": {
+    "checked": true,
+    "note": "속도 제한 구역 설정 기능 없음. 서보 속도 제한은 펌웨어 레벨에서 가능"
+  },
+  "pre-5-6": {
+    "checked": true,
+    "note": "STS3215 서보 과열·과전압·과부하 자동 감지 및 보호. 온도·전압 실시간 모니터링"
+  },
+  "pre-5-7": {
+    "checked": true,
+    "note": "산업 안전 인증 없음. 교육/연구용 오픈소스 플랫폼. CE/UL 등 미취득"
+  }
+}

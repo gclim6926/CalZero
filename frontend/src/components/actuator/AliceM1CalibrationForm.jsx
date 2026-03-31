@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 // ===== 정적 데이터 =====
 export const ALICE_M1_BODY_JOINTS = [
@@ -32,15 +32,127 @@ export const ALICE_M1_HAND_JOINTS = [
   { id: 'Right_Thumb_Pitch',  min: 0, max: 1000 }, { id: 'Right_Thumb_Roll',   min: 0, max: 1000 },
 ]
 
-const MIN_COMMAND = `ros2 topic pub --once /aeirobot/alice_mobile/command aeirobot_msgs/msg/Command "{command: 1, style: 1, value: [5.0, -40.0, -45.0, -45.0, 0.0, 0.0]}" & \\
-ros2 topic pub --once /aeirobot/alice_mobile/command aeirobot_msgs/msg/Command "{command: 1, style: 2, value: [5.0, -110.0, -10.0, -70.0, -80.0, -75.0, -35.0, -45.0, -50.0, -180.0, -70.0, 0.0, -75.0, -35.0, -15.0]}" & \\
-ros2 topic pub --once /aeirobot_hand/set_angle aeirobot_hand_msgs/msg/SetAngle "{status: 'set_angle', hand_id: 2, angle: }" & \\
-ros2 topic pub --once /aeirobot_hand/set_angle aeirobot_hand_msgs/msg/SetAngle "{status: 'set_angle', hand_id: 1, angle: }"`
+// ===== 캘리브레이션 테스트 명령어 =====
 
-const MAX_COMMAND = `ros2 topic pub --once /aeirobot/alice_mobile/command aeirobot_msgs/msg/Command "{command: 1, style: 1, value: [5.0, 40.0, 45.0, 45.0, 90.0, 90.0]}" & \\
-ros2 topic pub --once /aeirobot/alice_mobile/command aeirobot_msgs/msg/Command "{command: 1, style: 2, value: [5.0, 50.0, 180.0, 70.0, 0.0, 75.0, 35.0, 15.0, 110.0, 10.0, 70.0, 80.0, 75.0, 35.0, 45.0]}" & \\
-ros2 topic pub --once /aeirobot_hand/set_angle aeirobot_hand_msgs/msg/SetAngle "{status: 'set_angle', hand_id: 2, angle: }" & \\
-ros2 topic pub --once /aeirobot_hand/set_angle aeirobot_hand_msgs/msg/SetAngle "{status: 'set_angle', hand_id: 1, angle: }"`
+const CMD_BASE = {
+  title: '① 머리/허리 BASE 자세 이동 + 양팔 중립 + 로그 저장',
+  desc: '머리/허리를 BASE 자세로, 양팔을 중립 자세로 이동 후 joint_states를 로그 파일로 저장합니다.',
+  command: `echo "▶ 머리/허리 BASE자세로 이동 시작..." && \\
+ros2 topic pub --once /aeirobot/alice_mobile/command aeirobot_msgs/msg/Command \\
+  "{command: 1, style: 1, value: [5.0, 20.0, 0.0, 0.0, 50.0, 50.0]}" && \\
+sleep 6 && \\
+echo "▶ 양팔 BASE(중립) 자세로 ..." && \\
+ros2 topic pub --once /aeirobot/alice_mobile/command aeirobot_msgs/msg/Command \\
+  "{command: 1, style: 2, value: [5.0, 10.0, 0.0, 0.0, -75.0, 0.0, -10.0, 0.0, -10.0, 0.0, 0.0, 75.0, 0.0, 10.0, 0.0]}" && \\
+sleep 6 && \\
+ros2 topic echo --once /joint_states > joint_status_base.txt`,
+}
+
+const CMD_HEAD_WAIST_MINMAX = {
+  title: '② 머리/허리 Min/Max 이동 + 로그 저장',
+  desc: '머리/허리를 Min → Max 순서로 이동하며 각각의 joint_states를 저장하고, 완료 후 BASE로 복귀합니다.',
+  command: `echo "▶ 머리/허리 Min 각도로 이동 시작..." && \\
+ros2 topic pub --once /aeirobot/alice_mobile/command aeirobot_msgs/msg/Command \\
+  "{command: 1, style: 1, value: [5.0, -40.0, -45.0, -45.0, 0.0, 0.0]}" && \\
+sleep 6 && \\
+ros2 topic echo --once /joint_states > joint_status_style1_min.txt && \\
+sleep 1 && \\
+echo "▶ 머리/허리 Max 각도로 이동 시작..." && \\
+ros2 topic pub --once /aeirobot/alice_mobile/command aeirobot_msgs/msg/Command \\
+  "{command: 1, style: 1, value: [5.0, 40.0, 45.0, 45.0, 90.0, 80.0]}" && \\
+sleep 6 && \\
+ros2 topic echo --once /joint_states > joint_status_style1_max.txt && \\
+sleep 1 && \\
+echo "▶ 머리/허리 BASE자세로 복귀 중..." && \\
+ros2 topic pub --once /aeirobot/alice_mobile/command aeirobot_msgs/msg/Command \\
+  "{command: 1, style: 1, value: [5.0, 20.0, 0.0, 0.0, 50.0, 50.0]}" && \\
+sleep 6`,
+}
+
+const CMD_ARM_MINMAX = {
+  title: '③ 양팔 Min/Max 이동 + 로그 저장',
+  desc: '양팔을 Min → Max 순서로 이동하며 각각의 joint_states를 저장하고, 완료 후 중립으로 복귀합니다.',
+  command: `echo "▶ 양팔 Min 각도로 이동 시작..." && \\
+ros2 topic pub --once /aeirobot/alice_mobile/command aeirobot_msgs/msg/Command \\
+  "{command: 1, style: 2, value: [5.0, -110.0, -10.0, -70.0, -75.0, -70.0, -30.0, -40.0, -50.0, -170.0, -70.0, 0.0, -70.0, -30.0, -10.0]}" && \\
+sleep 6 && \\
+ros2 topic echo --once /joint_states > joint_status_style2_min.txt && \\
+sleep 1 && \\
+echo "▶ 양팔 Max 각도로 이동 시작..." && \\
+ros2 topic pub --once /aeirobot/alice_mobile/command aeirobot_msgs/msg/Command \\
+  "{command: 1, style: 2, value: [5.0, 50.0, 170.0, 70.0, 0.0, 70.0, 30.0, 10.0, 110.0, 10.0, 70.0, 75.0, 70.0, 30.0, 40.0]}" && \\
+sleep 6 && \\
+ros2 topic echo --once /joint_states > joint_status_style2_max.txt && \\
+sleep 1 && \\
+echo "▶ 양팔 BASE(중립) 자세로 복귀 중..." && \\
+ros2 topic pub --once /aeirobot/alice_mobile/command aeirobot_msgs/msg/Command \\
+  "{command: 1, style: 2, value: [5.0, 10.0, 0.0, 0.0, -75.0, 0.0, -10.0, 0.0, -10.0, 0.0, 0.0, 75.0, 0.0, 10.0, 0.0]}" && \\
+sleep 6 && \\
+echo "✅ 모든 테스트 및 저장이 완료되었습니다!"`,
+}
+
+const CMD_SCP_LOGS = {
+  title: '④ 로그 파일 로컬 PC로 복사',
+  desc: '로봇(Orin)에 저장된 joint_status 로그 파일을 로컬 PC로 다운로드합니다. (PowerShell)',
+  command: `$folder = "C:\\Users\\GL\\Desktop\\$(Get-Date -Format 'yyyyMMdd_HHmm')"
+New-Item -ItemType Directory -Path $folder
+scp orin@192.168.10.3:~/joint_status_*.txt "$folder"`,
+}
+
+const CALIB_COMMANDS = [CMD_BASE, CMD_HEAD_WAIST_MINMAX, CMD_ARM_MINMAX, CMD_SCP_LOGS]
+
+// Base/Min/Max 명령어 (데이터 등록 섹션에서 사용)
+const BASE_COMMAND = `echo "▶ 머리/허리 BASE자세로 이동 시작..." && \\
+ros2 topic pub --once /aeirobot/alice_mobile/command \\
+  aeirobot_msgs/msg/Command \\
+  "{command: 1, style: 1, value: [5.0, 20.0, 0.0, 0.0, 50.0, 50.0]}" && \\
+sleep 6 && \\
+echo "▶ 양팔 BASE(중립) 자세로 ..." && \\
+ros2 topic pub --once /aeirobot/alice_mobile/command \\
+  aeirobot_msgs/msg/Command \\
+  "{command: 1, style: 2, value: [5.0, 10.0, 0.0, 0.0, -75.0, 0.0, -10.0, 0.0, -10.0, 0.0, 0.0, 75.0, 0.0, 10.0, 0.0]}" && \\
+sleep 6 && \\
+ros2 topic echo --once /joint_states > joint_status_base.txt`
+
+const MIN_COMMAND = `echo "▶ 머리/허리 Min 각도로 이동 시작..." && \\
+ros2 topic pub --once /aeirobot/alice_mobile/command \\
+  aeirobot_msgs/msg/Command \\
+  "{command: 1, style: 1, value: [5.0, -40.0, -45.0, -45.0, 0.0, 0.0]}" && \\
+sleep 6 && \\
+ros2 topic echo --once /joint_states > joint_status_style1_min.txt && \\
+sleep 1 && \\
+echo "▶ 머리/허리 Max 각도로 이동 시작..." && \\
+ros2 topic pub --once /aeirobot/alice_mobile/command \\
+  aeirobot_msgs/msg/Command \\
+  "{command: 1, style: 1, value: [5.0, 40.0, 45.0, 45.0, 90.0, 80.0]}" && \\
+sleep 6 && \\
+ros2 topic echo --once /joint_states > joint_status_style1_max.txt && \\
+sleep 1 && \\
+echo "▶ 머리/허리 BASE자세로 이동 시작..." && \\
+ros2 topic pub --once /aeirobot/alice_mobile/command \\
+  aeirobot_msgs/msg/Command \\
+  "{command: 1, style: 1, value: [5.0, 20.0, 0.0, 0.0, 50.0, 50.0]}" && \\
+sleep 6`
+
+const MAX_COMMAND = `echo "▶ 양팔 Min 각도로 이동 시작..." && \\
+ros2 topic pub --once /aeirobot/alice_mobile/command \\
+  aeirobot_msgs/msg/Command \\
+  "{command: 1, style: 2, value: [5.0, -110.0, -10.0, -70.0, -75.0, -70.0, -30.0, -40.0, -50.0, -170.0, -70.0, 0.0, -70.0, -30.0, -10.0]}" && \\
+sleep 6 && \\
+ros2 topic echo --once /joint_states > joint_status_style2_min.txt && \\
+sleep 1 && \\
+echo "▶ 양팔 Max 각도로 이동 시작..." && \\
+ros2 topic pub --once /aeirobot/alice_mobile/command \\
+  aeirobot_msgs/msg/Command \\
+  "{command: 1, style: 2, value: [5.0, 50.0, 170.0, 70.0, 0.0, 70.0, 30.0, 10.0, 110.0, 10.0, 70.0, 75.0, 70.0, 30.0, 40.0]}" && \\
+sleep 6 && \\
+ros2 topic echo --once /joint_states > joint_status_style2_max.txt && \\
+sleep 1 && \\
+echo "▶ 양팔 BASE(중립) 자세로 복귀 중..." && \\
+ros2 topic pub --once /aeirobot/alice_mobile/command \\
+  aeirobot_msgs/msg/Command \\
+  "{command: 1, style: 2, value: [5.0, 10.0, 0.0, 0.0, -75.0, 0.0, -10.0, 0.0, -10.0, 0.0, 0.0, 75.0, 0.0, 10.0, 0.0]}" && \\
+sleep 6`
 
 // ===== 초기 상태 생성 (default 값 포함) =====
 const HAND_JOINT_IDS = new Set(ALICE_M1_HAND_JOINTS.map(j => j.id))
@@ -49,10 +161,10 @@ const initValues = () => {
   const v = {}
   ;[...ALICE_M1_BODY_JOINTS, ...ALICE_M1_HAND_JOINTS].forEach(j => {
     if (HAND_JOINT_IDS.has(j.id)) {
-      // Hand Joints: Min 기본값 0, Max/Base 기본값 1000
+      // Hand Joints: Min 기본값 0, Max / Base 기본값 1000
       v[j.id] = { min: '0', max: '1000', base: '1000' }
     } else {
-      // Body Joints: min/max는 범위값, base는 중간값
+      // Body Joints: Min/Max는 범위값, Base는 중간값
       const minVal = j.min !== undefined ? String(j.min) : ''
       const maxVal = j.max !== undefined ? String(j.max) : ''
       const baseVal = (j.min !== undefined && j.max !== undefined) ? String((j.min + j.max) / 2) : ''
@@ -61,6 +173,50 @@ const initValues = () => {
   })
   return v
 }
+
+// ===== joint_states 파일 파싱 =====
+// ROS2 `ros2 topic echo --once /joint_states` 출력 형식 파싱
+// name: [joint1, joint2, ...] + position: [val1, val2, ...]
+function parseJointStatesFile(text) {
+  const result = {}
+  try {
+    // name 배열 추출
+    const nameMatch = text.match(/name:\s*\n((?:\s*-\s*.+\n?)+)/)
+    // position 배열 추출
+    const posMatch = text.match(/position:\s*\n((?:\s*-\s*[\d.eE+\-]+\n?)+)/)
+    if (!nameMatch || !posMatch) return null
+
+    const names = nameMatch[1].match(/-\s*(.+)/g).map(s => s.replace(/^-\s*/, '').trim().replace(/['"]/g, ''))
+    const positions = posMatch[1].match(/-\s*([\d.eE+\-]+)/g).map(s => parseFloat(s.replace(/^-\s*/, '')))
+
+    names.forEach((name, i) => {
+      if (i < positions.length) {
+        result[name] = Math.round(positions[i] * 1000) / 1000  // 소수점 3자리
+      }
+    })
+  } catch (e) {
+    console.error('Failed to parse joint_states file:', e)
+    return null
+  }
+  return Object.keys(result).length > 0 ? result : null
+}
+
+// 파일 업로드 슬롯 정의
+const FILE_SLOTS = [
+  { key: 'base',       filename: 'joint_status_base.txt',       label: 'Base 자세',       field: 'base', color: 'emerald', desc: '모든 Joint의 Base 자세 측정값' },
+  { key: 'style1_min', filename: 'joint_status_style1_min.txt', label: '머리/허리 Min',   field: 'min',  color: 'cyan',    desc: '머리/허리 Joint의 Min 측정값', jointGroup: 'head_waist' },
+  { key: 'style1_max', filename: 'joint_status_style1_max.txt', label: '머리/허리 Max',   field: 'max',  color: 'cyan',    desc: '머리/허리 Joint의 Max 측정값', jointGroup: 'head_waist' },
+  { key: 'style2_min', filename: 'joint_status_style2_min.txt', label: '팔 Min',          field: 'min',  color: 'violet',  desc: '양팔 Joint의 Min 측정값',      jointGroup: 'arm' },
+  { key: 'style2_max', filename: 'joint_status_style2_max.txt', label: '팔 Max',          field: 'max',  color: 'violet',  desc: '양팔 Joint의 Max 측정값',      jointGroup: 'arm' },
+]
+
+// 머리/허리 Joint ID (style 1)
+const HEAD_WAIST_IDS = new Set(['head_p', 'head_y', 'waist_y', 'waist_upper_pitch', 'waist_lower_pitch'])
+// 팔 Joint ID (style 2)
+const ARM_IDS = new Set([
+  'l_sh_p', 'l_sh_r', 'l_sh_y', 'l_el_p', 'l_wr_y', 'l_wr_p', 'l_wr_r',
+  'r_sh_p', 'r_sh_r', 'r_sh_y', 'r_el_p', 'r_wr_y', 'r_wr_p', 'r_wr_r',
+])
 
 // ===== 복사 버튼 컴포넌트 =====
 function CopyButton({ text, label }) {
@@ -91,6 +247,9 @@ function AliceM1CalibrationForm({ device, calibrations, onSave, setActiveSubMenu
   const [notes, setNotes] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [showRegister, setShowRegister] = useState(false)
+  const [uploadedFiles, setUploadedFiles] = useState({})  // { key: { name, count, data } }
+  const [inputMode, setInputMode] = useState('file')      // 'file' | 'manual'
+  const fileInputRefs = useRef({})
 
   const deviceCalibrations = calibrations.filter(c => c.device_id === device.id)
 
@@ -100,6 +259,75 @@ function AliceM1CalibrationForm({ device, calibrations, onSave, setActiveSubMenu
       [jointId]: { ...prev[jointId], [field]: value }
     }))
   }
+
+  // 파일 업로드 처리
+  const handleFileUpload = async (slotKey, e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const text = await file.text()
+    const parsed = parseJointStatesFile(text)
+
+    if (!parsed) {
+      alert('파일을 파싱할 수 없습니다. ROS2 joint_states 형식인지 확인하세요.')
+      e.target.value = ''
+      return
+    }
+
+    const slot = FILE_SLOTS.find(s => s.key === slotKey)
+    if (!slot) return
+
+    // 파싱된 데이터를 jointValues에 반영
+    setJointValues(prev => {
+      const next = { ...prev }
+      const allJoints = [...ALICE_M1_BODY_JOINTS, ...ALICE_M1_HAND_JOINTS]
+
+      allJoints.forEach(j => {
+        if (parsed[j.id] === undefined) return
+
+        // jointGroup 필터: style1은 머리/허리만, style2는 팔만, base는 전체
+        if (slot.jointGroup === 'head_waist' && !HEAD_WAIST_IDS.has(j.id)) return
+        if (slot.jointGroup === 'arm' && !ARM_IDS.has(j.id)) return
+
+        next[j.id] = { ...next[j.id], [slot.field]: String(parsed[j.id]) }
+      })
+      return next
+    })
+
+    // 매칭된 Joint 수 계산
+    const allJoints = [...ALICE_M1_BODY_JOINTS, ...ALICE_M1_HAND_JOINTS]
+    let matchCount = 0
+    allJoints.forEach(j => {
+      if (parsed[j.id] === undefined) return
+      if (slot.jointGroup === 'head_waist' && !HEAD_WAIST_IDS.has(j.id)) return
+      if (slot.jointGroup === 'arm' && !ARM_IDS.has(j.id)) return
+      matchCount++
+    })
+
+    setUploadedFiles(prev => ({
+      ...prev,
+      [slotKey]: { name: file.name, count: matchCount, data: parsed }
+    }))
+
+    e.target.value = ''
+  }
+
+  // 파일 업로드 초기화
+  const handleClearFile = (slotKey) => {
+    setUploadedFiles(prev => {
+      const next = { ...prev }
+      delete next[slotKey]
+      return next
+    })
+  }
+
+  // 전체 파일 초기화
+  const handleClearAllFiles = () => {
+    setUploadedFiles({})
+    setJointValues(initValues())
+  }
+
+  const uploadedCount = Object.keys(uploadedFiles).length
 
   const handleRegister = async () => {
     const calibration_data = {}
@@ -151,7 +379,7 @@ function AliceM1CalibrationForm({ device, calibrations, onSave, setActiveSubMenu
               </span>
             </div>
             <p className="text-gray-300 text-sm leading-relaxed mb-4">
-              Alice M1의 Joint별 min/max 및 Base 자세에 대한 각도를 측정하여 캘리브레이션 데이터를 등록합니다.
+              Alice M1의 Joint별 Min/Max 및 Base 자세에 대한 각도를 측정하여 캘리브레이션 데이터를 등록합니다.
             </p>
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-xs">
@@ -161,6 +389,12 @@ function AliceM1CalibrationForm({ device, calibrations, onSave, setActiveSubMenu
                 <span className="text-gray-600 mx-1">|</span>
                 <span className="text-gray-400">Hand Joints</span>
                 <span className="text-violet-400 font-mono font-medium">{ALICE_M1_HAND_JOINTS.length}개</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <span className="w-2 h-2 rounded-full bg-gray-500"></span>
+                <span className="text-gray-500">Mobile Platform</span>
+                <span className="text-gray-500 font-mono font-medium">Wheel 2개</span>
+                <span className="text-gray-600 text-[10px] ml-1">(l_wheel_link, r_wheel_link — 캘리브레이션 대상 아님)</span>
               </div>
               <div className="flex items-center gap-2 text-xs">
                 <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
@@ -202,14 +436,14 @@ function AliceM1CalibrationForm({ device, calibrations, onSave, setActiveSubMenu
               <span className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 text-xs flex items-center justify-center font-bold">2</span>
               <span className="text-white font-medium text-sm">캘리브레이션 실행</span>
             </div>
-            <p className="text-gray-400 text-xs">리모트 컨트롤러로 Go Base 버튼을 클릭하여 Base 자세를 만든 후, 터미널에서 Joint별 min/max 움직임 명령어를 입력합니다.</p>
+            <p className="text-gray-400 text-xs">리모트 컨트롤러로 Go Base 버튼을 클릭하여 Base 자세를 만든 후, 터미널에서 Joint별 Min/Max 움직임 명령어를 입력합니다.</p>
           </div>
           <div className="bg-gray-900 rounded-lg p-4 border border-gray-700">
             <div className="flex items-center gap-2 mb-2">
               <span className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 text-xs flex items-center justify-center font-bold">3</span>
               <span className="text-white font-medium text-sm">데이터 등록</span>
             </div>
-            <p className="text-gray-400 text-xs">Base 자세에 대한 모니터링 값을 입력하고, Joint별 min/max 모니터링 값을 등록합니다.</p>
+            <p className="text-gray-400 text-xs">Base 자세에 대한 모니터링 값을 입력하고, Joint별 Min/Max 모니터링 값을 등록합니다.</p>
           </div>
         </div>
       </div>
@@ -230,11 +464,25 @@ function AliceM1CalibrationForm({ device, calibrations, onSave, setActiveSubMenu
           <div className="mt-4 space-y-5">
             <p className="text-gray-500 text-xs">장치를 새롭게 캘리브레이션한 경우, 여기에 값을 등록하세요.</p>
 
-            {/* ── 1. Min 명령어 ── */}
+            {/* ── 1. Base 자세 명령어 ── */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-xs flex items-center justify-center font-bold flex-shrink-0">1</span>
-                <span className="text-white text-sm font-medium">모든 Joint을 min 각도로 이동</span>
+                <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs flex items-center justify-center font-bold flex-shrink-0">1</span>
+                <span className="text-white text-sm font-medium">Base 자세로 이동</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <pre className="flex-1 p-3 bg-gray-900 border border-gray-700 rounded-lg text-emerald-400 text-[10px] font-mono leading-relaxed overflow-x-auto whitespace-pre-wrap break-all">
+                  {BASE_COMMAND}
+                </pre>
+                <CopyButton text={BASE_COMMAND} label="복사" />
+              </div>
+            </div>
+
+            {/* ── 2. 머리/허리 Min/Max 명령어 ── */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-xs flex items-center justify-center font-bold flex-shrink-0">2</span>
+                <span className="text-white text-sm font-medium">머리/허리 Min/Max 자세로 이동</span>
               </div>
               <div className="flex items-start gap-2">
                 <pre className="flex-1 p-3 bg-gray-900 border border-gray-700 rounded-lg text-cyan-400 text-[10px] font-mono leading-relaxed overflow-x-auto whitespace-pre-wrap break-all">
@@ -244,11 +492,11 @@ function AliceM1CalibrationForm({ device, calibrations, onSave, setActiveSubMenu
               </div>
             </div>
 
-            {/* ── 2. Max 명령어 ── */}
+            {/* ── 3. Max 명령어 ── */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-xs flex items-center justify-center font-bold flex-shrink-0">2</span>
-                <span className="text-white text-sm font-medium">모든 Joint을 max 각도로 이동</span>
+                <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-xs flex items-center justify-center font-bold flex-shrink-0">3</span>
+                <span className="text-white text-sm font-medium">팔 Min/Max 자세로 이동</span>
               </div>
               <div className="flex items-start gap-2">
                 <pre className="flex-1 p-3 bg-gray-900 border border-gray-700 rounded-lg text-cyan-400 text-[10px] font-mono leading-relaxed overflow-x-auto whitespace-pre-wrap break-all">
@@ -258,13 +506,154 @@ function AliceM1CalibrationForm({ device, calibrations, onSave, setActiveSubMenu
               </div>
             </div>
 
-            {/* ── 3. 측정값 입력 테이블 ── */}
+            {/* ── 4. 측정값 입력 ── */}
             <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-xs flex items-center justify-center font-bold flex-shrink-0">3</span>
-                <span className="text-white text-sm font-medium">측정 값 입력</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-xs flex items-center justify-center font-bold flex-shrink-0">4</span>
+                  <span className="text-white text-sm font-medium">측정 값 입력</span>
+                </div>
+                {/* 입력 모드 토글 */}
+                <div className="flex items-center bg-gray-900 rounded-lg border border-gray-700 p-0.5">
+                  <button
+                    onClick={() => setInputMode('file')}
+                    className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                      inputMode === 'file'
+                        ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                        : 'text-gray-500 hover:text-gray-300'
+                    }`}
+                  >
+                    📁 파일 입력
+                  </button>
+                  <button
+                    onClick={() => setInputMode('manual')}
+                    className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                      inputMode === 'manual'
+                        ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                        : 'text-gray-500 hover:text-gray-300'
+                    }`}
+                  >
+                    ✏️ 직접 입력
+                  </button>
+                </div>
               </div>
 
+              {/* ── 파일 입력 모드 ── */}
+              {inputMode === 'file' && (
+                <div className="space-y-3">
+                  <p className="text-gray-500 text-xs">
+                    위 명령어 실행 후 생성된 로그 파일(joint_status_*.txt)을 업로드하면 측정값이 자동으로 채워집니다.
+                  </p>
+
+                  {/* 파일 업로드 슬롯 */}
+                  <div className="grid grid-cols-1 gap-2">
+                    {FILE_SLOTS.map((slot) => {
+                      const uploaded = uploadedFiles[slot.key]
+                      const colorMap = {
+                        emerald: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-400', dot: 'bg-emerald-400' },
+                        cyan:    { bg: 'bg-cyan-500/10',    border: 'border-cyan-500/30',    text: 'text-cyan-400',    dot: 'bg-cyan-400' },
+                        violet:  { bg: 'bg-violet-500/10',  border: 'border-violet-500/30',  text: 'text-violet-400',  dot: 'bg-violet-400' },
+                      }
+                      const c = colorMap[slot.color]
+
+                      return (
+                        <div
+                          key={slot.key}
+                          className={`flex items-center gap-3 px-4 py-3 rounded-lg border transition-all ${
+                            uploaded
+                              ? `${c.bg} ${c.border}`
+                              : 'bg-gray-900/50 border-gray-700 hover:border-gray-600'
+                          }`}
+                        >
+                          {/* 상태 아이콘 */}
+                          <div className={`w-2 h-2 rounded-full flex-shrink-0 ${uploaded ? c.dot : 'bg-gray-600'}`} />
+
+                          {/* 파일 정보 */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className={`text-xs font-semibold ${uploaded ? c.text : 'text-gray-300'}`}>
+                                {slot.label}
+                              </span>
+                              <span className="text-gray-600 text-[10px] font-mono">{slot.filename}</span>
+                            </div>
+                            {uploaded ? (
+                              <p className="text-gray-400 text-[10px] mt-0.5">
+                                ✅ {uploaded.name} — {uploaded.count}개 Joint 매칭됨
+                              </p>
+                            ) : (
+                              <p className="text-gray-600 text-[10px] mt-0.5">{slot.desc}</p>
+                            )}
+                          </div>
+
+                          {/* 업로드/삭제 버튼 */}
+                          <input
+                            type="file"
+                            accept=".txt"
+                            ref={el => fileInputRefs.current[slot.key] = el}
+                            className="hidden"
+                            onChange={e => handleFileUpload(slot.key, e)}
+                          />
+                          {uploaded ? (
+                            <button
+                              onClick={() => handleClearFile(slot.key)}
+                              className="flex-shrink-0 px-2 py-1 rounded text-[10px] text-gray-500 hover:text-rose-400 hover:bg-rose-500/10 transition-all"
+                            >
+                              ✕ 제거
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => fileInputRefs.current[slot.key]?.click()}
+                              className="flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white transition-all"
+                            >
+                              파일 선택
+                            </button>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+
+                  {/* 업로드 상태 요약 */}
+                  <div className="flex items-center justify-between px-3 py-2 bg-gray-900/30 rounded-lg border border-gray-700/50">
+                    <div className="flex items-center gap-3">
+                      <span className="text-gray-400 text-xs">
+                        업로드: <span className={`font-semibold ${uploadedCount === 5 ? 'text-emerald-400' : 'text-amber-400'}`}>{uploadedCount} / 5</span>
+                      </span>
+                      {uploadedCount === 5 && (
+                        <span className="text-emerald-400 text-xs">✅ 모든 파일 준비 완료</span>
+                      )}
+                    </div>
+                    {uploadedCount > 0 && (
+                      <button
+                        onClick={handleClearAllFiles}
+                        className="text-xs text-gray-500 hover:text-rose-400 transition-colors"
+                      >
+                        전체 초기화
+                      </button>
+                    )}
+                  </div>
+
+                  {/* 파일 입력 후 결과 확인 안내 */}
+                  {uploadedCount > 0 && (
+                    <div className="p-3 bg-cyan-500/5 border border-cyan-500/20 rounded-lg">
+                      <p className="text-cyan-400/80 text-xs">
+                        💡 업로드된 파일의 값이 아래 테이블에 자동 반영되었습니다. 값을 직접 수정하려면 <button onClick={() => setInputMode('manual')} className="underline font-medium hover:text-cyan-300">직접 입력</button> 모드로 전환하세요.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ── 직접 입력 모드 안내 ── */}
+              {inputMode === 'manual' && uploadedCount > 0 && (
+                <div className="p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg">
+                  <p className="text-amber-400/80 text-xs">
+                    💡 파일에서 불러온 값이 포함되어 있습니다. 필요한 셀만 수정하세요.
+                  </p>
+                </div>
+              )}
+
+              {/* ── 측정값 테이블 (항상 표시) ── */}
               {/* Body Joints */}
               <div>
                 <p className="text-gray-400 text-xs mb-2 font-medium">Body Joints</p>
@@ -295,7 +684,10 @@ function AliceM1CalibrationForm({ device, calibrations, onSave, setActiveSubMenu
                               value={jointValues[joint.id].min}
                               onChange={e => setJointField(joint.id, 'min', e.target.value)}
                               placeholder={String(joint.min)}
-                              className="w-full px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs text-right font-mono focus:border-cyan-500 focus:outline-none focus:bg-gray-800 transition"
+                              readOnly={inputMode === 'file'}
+                              className={`w-full px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs text-right font-mono transition ${
+                                inputMode === 'file' ? 'opacity-70 cursor-default' : 'focus:border-cyan-500 focus:outline-none focus:bg-gray-800'
+                              }`}
                             />
                           </td>
                           <td className="py-1.5 px-3">
@@ -305,7 +697,10 @@ function AliceM1CalibrationForm({ device, calibrations, onSave, setActiveSubMenu
                               value={jointValues[joint.id].max}
                               onChange={e => setJointField(joint.id, 'max', e.target.value)}
                               placeholder={String(joint.max)}
-                              className="w-full px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs text-right font-mono focus:border-cyan-500 focus:outline-none focus:bg-gray-800 transition"
+                              readOnly={inputMode === 'file'}
+                              className={`w-full px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs text-right font-mono transition ${
+                                inputMode === 'file' ? 'opacity-70 cursor-default' : 'focus:border-cyan-500 focus:outline-none focus:bg-gray-800'
+                              }`}
                             />
                           </td>
                           <td className="py-1.5 px-3">
@@ -314,8 +709,11 @@ function AliceM1CalibrationForm({ device, calibrations, onSave, setActiveSubMenu
                               step="0.1"
                               value={jointValues[joint.id].base}
                               onChange={e => setJointField(joint.id, 'base', e.target.value)}
-                              placeholder="base"
-                              className="w-full px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs text-right font-mono focus:border-emerald-500 focus:outline-none focus:bg-gray-800 transition"
+                              placeholder="Base"
+                              readOnly={inputMode === 'file'}
+                              className={`w-full px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs text-right font-mono transition ${
+                                inputMode === 'file' ? 'opacity-70 cursor-default' : 'focus:border-emerald-500 focus:outline-none focus:bg-gray-800'
+                              }`}
                             />
                           </td>
                         </tr>
@@ -354,8 +752,11 @@ function AliceM1CalibrationForm({ device, calibrations, onSave, setActiveSubMenu
                               step="0.1"
                               value={jointValues[joint.id].min}
                               onChange={e => setJointField(joint.id, 'min', e.target.value)}
-                              placeholder="min"
-                              className="w-full px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs text-right font-mono focus:border-violet-500 focus:outline-none focus:bg-gray-800 transition"
+                              placeholder="Min"
+                              readOnly={inputMode === 'file'}
+                              className={`w-full px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs text-right font-mono transition ${
+                                inputMode === 'file' ? 'opacity-70 cursor-default' : 'focus:border-violet-500 focus:outline-none focus:bg-gray-800'
+                              }`}
                             />
                           </td>
                           <td className="py-1.5 px-3">
@@ -364,8 +765,11 @@ function AliceM1CalibrationForm({ device, calibrations, onSave, setActiveSubMenu
                               step="0.1"
                               value={jointValues[joint.id].max}
                               onChange={e => setJointField(joint.id, 'max', e.target.value)}
-                              placeholder="max"
-                              className="w-full px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs text-right font-mono focus:border-violet-500 focus:outline-none focus:bg-gray-800 transition"
+                              placeholder="Max"
+                              readOnly={inputMode === 'file'}
+                              className={`w-full px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs text-right font-mono transition ${
+                                inputMode === 'file' ? 'opacity-70 cursor-default' : 'focus:border-violet-500 focus:outline-none focus:bg-gray-800'
+                              }`}
                             />
                           </td>
                           <td className="py-1.5 px-3">
@@ -374,8 +778,11 @@ function AliceM1CalibrationForm({ device, calibrations, onSave, setActiveSubMenu
                               step="0.1"
                               value={jointValues[joint.id].base}
                               onChange={e => setJointField(joint.id, 'base', e.target.value)}
-                              placeholder="base"
-                              className="w-full px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs text-right font-mono focus:border-emerald-500 focus:outline-none focus:bg-gray-800 transition"
+                              placeholder="Base"
+                              readOnly={inputMode === 'file'}
+                              className={`w-full px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs text-right font-mono transition ${
+                                inputMode === 'file' ? 'opacity-70 cursor-default' : 'focus:border-emerald-500 focus:outline-none focus:bg-gray-800'
+                              }`}
                             />
                           </td>
                         </tr>

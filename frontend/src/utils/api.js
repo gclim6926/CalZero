@@ -126,6 +126,16 @@ export default {
     }),
   },
 
+  // Onboarding Checklist API
+  checklists: {
+    get: (robotType, stage) => fetchAPI(`/checklists/${robotType}/${stage}`),
+    save: (robotType, stage, items) => fetchAPI(`/checklists/${robotType}/${stage}`, {
+      method: 'PUT',
+      body: JSON.stringify({ robot_type: robotType, stage, items }),
+    }),
+    getAll: (robotType) => fetchAPI(`/checklists/${robotType}`),
+  },
+
   // Backup/Restore API
   backup: {
     create: () => fetchAPI('/backup'),

@@ -40,6 +40,7 @@ def ensure_data_dirs():
     """데이터 디렉토리 생성"""
     os.makedirs(DATA_DIR, exist_ok=True)
     os.makedirs(CALIBRATIONS_DIR, exist_ok=True)
+    os.makedirs(os.path.join(DATA_DIR, "checklists"), exist_ok=True)
 
 
 def load_json(filepath, default=None):
@@ -693,6 +694,17 @@ def create_backup():
         if device_calibs:
             backup_data["calibrations"][f"device_{device_id}"] = device_calibs
 
+    # 체크리스트 수집
+    backup_data["checklists"] = {}
+    if os.path.exists(CHECKLISTS_DIR):
+        for filename in os.listdir(CHECKLISTS_DIR):
+            if filename.endswith('.json'):
+                filepath = os.path.join(CHECKLISTS_DIR, filename)
+                key = filename.replace('.json', '')  # e.g. "so101_registration"
+                data = load_json(filepath, {})
+                if data:
+                    backup_data["checklists"][key] = data
+
     # 통계 정보 추가
     total_calibrations = sum(
         len(calibs)
@@ -702,7 +714,8 @@ def create_backup():
     backup_data["stats"] = {
         "users_count": len(backup_data["users"]),
         "devices_count": len(backup_data["devices"]),
-        "calibrations_count": total_calibrations
+        "calibrations_count": total_calibrations,
+        "checklists_count": len(backup_data["checklists"])
     }
 
     return backup_data
@@ -735,6 +748,13 @@ def restore_backup(backup_data: dict):
                     filepath = get_calib_file(device_id, calib_type)
                     save_json(filepath, calibs)
 
+        # 체크리스트 복원
+        if "checklists" in backup_data:
+            os.makedirs(CHECKLISTS_DIR, exist_ok=True)
+            for key, checklist_data in backup_data["checklists"].items():
+                filepath = os.path.join(CHECKLISTS_DIR, f"{key}.json")
+                save_json(filepath, checklist_data)
+
         return {
             "success": True,
             "message": "백업이 복원되었습니다.",
@@ -753,6 +773,11 @@ def reset_all_data():
         if os.path.exists(CALIBRATIONS_DIR):
             shutil.rmtree(CALIBRATIONS_DIR)
         os.makedirs(CALIBRATIONS_DIR, exist_ok=True)
+
+        # 체크리스트 디렉토리 삭제
+        if os.path.exists(CHECKLISTS_DIR):
+            shutil.rmtree(CHECKLISTS_DIR)
+        os.makedirs(CHECKLISTS_DIR, exist_ok=True)
 
         # 장치 초기화
         save_json(DEVICES_FILE, [])
@@ -786,6 +811,56 @@ def startup_event():
 
     print(f"📁 Data directory: {DATA_DIR}")
     print("🚀 CalZero API v0.3.0 started")
+
+
+# ==================== Onboarding Checklist API ====================
+# 로봇 타입별 체크리스트 저장: data/checklists/{robot_type}_{stage}.json
+# 예: data/checklists/so101_registration.json
+
+CHECKLISTS_DIR = os.path.join(DATA_DIR, "checklists")
+
+
+class ChecklistSaveRequest(BaseModel):
+    """체크리스트 저장 요청"""
+    robot_type: str
+    stage: str
+    items: dict  # { itemId: { checked: bool, note: str } }
+
+
+def get_checklist_file(robot_type: str, stage: str):
+    """체크리스트 파일 경로"""
+    return os.path.join(CHECKLISTS_DIR, f"{robot_type}_{stage}.json")
+
+
+@app.get("/api/checklists/{robot_type}/{stage}")
+async def get_checklist(robot_type: str, stage: str):
+    """로봇 타입별 체크리스트 조회"""
+    filepath = get_checklist_file(robot_type, stage)
+    data = load_json(filepath, {})
+    return data
+
+
+@app.put("/api/checklists/{robot_type}/{stage}")
+async def save_checklist(robot_type: str, stage: str, request: ChecklistSaveRequest):
+    """로봇 타입별 체크리스트 저장"""
+    os.makedirs(CHECKLISTS_DIR, exist_ok=True)
+    filepath = get_checklist_file(robot_type, stage)
+    save_json(filepath, request.items)
+    return {"status": "ok", "robot_type": robot_type, "stage": stage}
+
+
+@app.get("/api/checklists/{robot_type}")
+async def get_all_checklists(robot_type: str):
+    """로봇 타입의 전체 스테이지 체크리스트 조회"""
+    os.makedirs(CHECKLISTS_DIR, exist_ok=True)
+    result = {}
+    stages = ['pre-review', 'registration', 'receiving-test', 'sim-to-real']
+    for stage in stages:
+        filepath = get_checklist_file(robot_type, stage)
+        data = load_json(filepath, {})
+        if data:
+            result[stage] = data
+    return result
 
 
 # ==================== Frontend Static Files ====================

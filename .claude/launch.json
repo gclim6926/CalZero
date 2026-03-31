@@ -4,7 +4,7 @@
     {
       "name": "frontend",
       "runtimeExecutable": "bash",
-      "runtimeArgs": ["-c", "export PATH=/usr/local/bin:$PATH && cd frontend && npx vite --host"],
+      "runtimeArgs": ["-c", "export PATH=/opt/homebrew/bin:/usr/local/bin:$PATH && cd frontend && npx vite --host"],
       "port": 5173
     }
   ]

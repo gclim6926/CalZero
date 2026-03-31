@@ -1,0 +1,62 @@
+{
+  "reg-1-1": {
+    "checked": true,
+    "note": "LeRobot CLI lerobot-calibrate로 2단계 보정 수행. 중간위치→풀레인지 측정 방식"
+  },
+  "reg-1-2": {
+    "checked": true,
+    "note": "6DOF (5축 암 + 1축 그리퍼), 전 관절 Revolute 타입, base→shoulder→elbow→wrist→gripper"
+  },
+  "reg-1-3": {
+    "checked": true,
+    "note": "Feetech STS3215 x6, 12bit 자기식 엔코더(4096스텝), 0.088° 해상도, 반이중 UART"
+  },
+  "reg-1-4": {
+    "checked": true,
+    "note": "lerobot-calibrate로 리더-팔로워 위치값 매칭 확인. SO-101은 기어 제거 불필요"
+  },
+  "reg-1-5": {
+    "checked": true,
+    "note": "STS3215 멀티턴 ±7회전 지원. 캘리브레이션 풀레인지 스윕으로 min/max 자동 기록"
+  },
+  "reg-1-6": {
+    "checked": true,
+    "note": "스톨토크 12V시 30kg.cm, 7.4V시 19.5kg.cm. 서보 펌웨어 과부하 보호 내장"
+  },
+  "reg-1-7": {
+    "checked": true,
+    "note": "URDF 제공되나 stiffness/damping 미포함. MuJoCo Menagerie에 actuator 파라미터 별도 정의"
+  },
+  "reg-2-1": {
+    "checked": true,
+    "note": "듀얼 카메라: 그리퍼 1대 + 외부 오버헤드 1대. USB 웹캠(2MP), RealSense도 지원"
+  },
+  "reg-2-2": {
+    "checked": true,
+    "note": "기본 640x480@30fps, 1920x1080@15fps 가능. OpenCV 체커보드 캘리브레이션 적용"
+  },
+  "reg-3-1": {
+    "checked": true,
+    "note": "F/T 센서 미탑재. 서보 전류 피드백으로 간접적 힘 추정만 가능"
+  },
+  "reg-3-2": {
+    "checked": true,
+    "note": "IMU 미탑재. 필요시 외부 IMU 모듈 별도 부착 필요"
+  },
+  "reg-3-3": {
+    "checked": true,
+    "note": "촉각/근접 센서 없음. 서보 피드백(위치·부하·전압·온도)만 활용 가능"
+  },
+  "reg-4-1": {
+    "checked": true,
+    "note": "HuggingFace LeRobot SDK (Python/PyTorch). CLI 완비: calibrate, record, train, rollout"
+  },
+  "reg-4-2": {
+    "checked": true,
+    "note": "USB 시리얼→Feetech UART(최대1Mbps). ROS2 JointState 지원, MoveIt 연동 문서화됨"
+  },
+  "reg-4-3": {
+    "checked": true,
+    "note": "Linux 기본, macOS 부분 지원. Jetson Orin Nano, Raspberry Pi에서도 구동 확인"
+  }
+}

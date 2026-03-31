@@ -1,5 +1,18 @@
 // ==================== Top Menu 메타 정보 ====================
 export const allMenuConfigs = {
+  onboarding: {
+    id: 'onboarding',
+    label: 'Checklist',
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+      </svg>
+    ),
+    bgActive: 'bg-amber-500/20',
+    textActive: 'text-amber-400',
+    borderActive: 'border-amber-500/50',
+    subMenuBorder: 'border-amber-400',
+  },
   actuator: {
     id: 'actuator',
     label: 'Actuator',
@@ -45,6 +58,11 @@ export const allMenuConfigs = {
 
 // ==================== 서브 메뉴 항목 (단일 소스) ====================
 export const allSubMenus = {
+  onboarding: [
+    { id: 'pre-review',      label: '도입 검토 (Pre)',       icon: '🔍' },
+    { id: 'registration',    label: '로봇 등록 (단계1)',     icon: '📝' },
+    { id: 'receiving-test',  label: '입고 & 테스트 (단계2)', icon: '🔧' },
+  ],
   actuator: [
     { id: 'calibration',     label: '캘리브레이션',       icon: '⚙️' },
     { id: 'history',         label: '히스토리 분석',      icon: '📋' },
@@ -69,7 +87,7 @@ export const allSubMenus = {
 // ==================== 타입별 메뉴 설정 ====================
 // ★ 나중에 타입별 커스터마이징은 여기서만 수정
 const defaultConfig = {
-  menus: ['actuator', 'camera', 'sensors'],
+  menus: ['onboarding', 'actuator', 'camera', 'sensors'],
   subMenus: allSubMenus,
 }
 

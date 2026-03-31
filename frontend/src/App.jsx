@@ -13,6 +13,7 @@ import ExtrinsicHistory from './components/camera/ExtrinsicHistory'
 import HandEyeCalculation from './components/camera/HandEyeCalculation'
 import HandEyeHistory from './components/camera/HandEyeHistory'
 import SettingsGeneral from './components/settings/SettingsGeneral'
+import OnboardingChecklist from './components/onboarding/OnboardingChecklist'
 import api from './utils/api'
 import { allMenuConfigs, getMenuConfig, getEffectiveRobotType } from './utils/menuConfig'
 
@@ -244,6 +245,11 @@ function App() {
       }
     }
 
+    // Onboarding은 디바이스 미선택 시에도 조회 가능
+    if (activeTopMenu === 'onboarding') {
+      return <OnboardingChecklist stage={activeSubMenu} device={selectedDevice} />
+    }
+
     if (!selectedDevice) return <div className="bg-gray-800 rounded-xl p-8 text-center"><div className="text-4xl mb-3">👈</div><p className="text-gray-400">왼쪽 사이드바에서 장치를 선택하세요</p></div>
 
     if (activeTopMenu === 'actuator') {
@@ -286,6 +292,7 @@ function App() {
             <div><h3 className="text-white font-semibold">장치를 선택하세요</h3><p className="text-gray-500 text-sm">왼쪽 사이드바에서 시작</p></div>
           </div>
           <div className="space-y-3 text-sm">
+            <div className="flex items-center gap-3 p-3 bg-gray-900/50 rounded-lg"><span className="text-amber-400">📋</span><span className="text-gray-300">Checklist - 로봇 도입 체크리스트</span></div>
             <div className="flex items-center gap-3 p-3 bg-gray-900/50 rounded-lg"><span className="text-cyan-400">⚙️</span><span className="text-gray-300">Actuator - 모터/조인트 계산</span></div>
             <div className="flex items-center gap-3 p-3 bg-gray-900/50 rounded-lg"><span className="text-violet-400">📷</span><span className="text-gray-300">Camera - 카메라 계산</span></div>
             <div className="flex items-center gap-3 p-3 bg-gray-900/50 rounded-lg"><span className="text-emerald-400">📡</span><span className="text-gray-300">Sensors - 센서 계산</span></div>
@@ -298,7 +305,7 @@ function App() {
 
   if (isLoading) return <div className="min-h-screen bg-gray-900 flex items-center justify-center"><div className="text-center"><div className="w-12 h-12 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div><p className="text-gray-400">로딩 중...</p></div></div>
 
-  const showFullUI = selectedDevice || activeSettingsMenu
+  const showFullUI = selectedDevice || activeSettingsMenu || activeTopMenu === 'onboarding'
 
   return (
     <div className="min-h-screen bg-gray-900 flex">

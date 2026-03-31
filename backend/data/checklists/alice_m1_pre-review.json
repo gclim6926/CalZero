@@ -1,0 +1,150 @@
+{
+  "pre-1-1": {
+    "checked": true,
+    "note": "에이로봇(AeiROBOT), 2018년 설립, 한양대 ERICA 스핀오프. Series A 100억 유치. NVIDIA·HD현대·삼성중공업 파트너"
+  },
+  "pre-1-2": {
+    "checked": true,
+    "note": "HL만도 원주공장 최초 공장 투입(2025.12). HD현대미포·삼성중공업 조선소, POSCO E&C 건설현장 실증"
+  },
+  "pre-1-3": {
+    "checked": true,
+    "note": "에이로봇 Alice M1, 33DOF 모바일 매니퓰레이터. 듀얼암+핸드+헤드+웨이스트+이동기반"
+  },
+  "pre-1-4": {
+    "checked": true,
+    "note": "목표 단가 약 5천만원(자동차 1대 수준). 양산 2027년 시작, 2028년 시장 진입 목표"
+  },
+  "pre-1-5": {
+    "checked": true,
+    "note": "규제 샌드박스 승인(조선·건설). M.AX Alliance 참여, 2029년 연 1,000대 생산 목표"
+  },
+  "pre-2-1": {
+    "checked": true,
+    "note": "공식 문서 제공(docs.arobot4all.com). HW사양·SW가이드·커맨드 가이드·데이터수집 가이드 포함"
+  },
+  "pre-2-2": {
+    "checked": true,
+    "note": "팔 페이로드 3kg/팔. 리치 650mm. 양팔 동시 작업 가능"
+  },
+  "pre-2-3": {
+    "checked": true,
+    "note": "Brainco 핸드 6DOF, 각도범위 0-1000. 촉각센서 5점(법선력·전단력·방향·근접·접촉상태)"
+  },
+  "pre-2-4": {
+    "checked": true,
+    "note": "Brainco 핸드 최소 파지 크기 미공개. 핑거 순서: 소지→약지→중지→검지→엄지피치→엄지롤"
+  },
+  "pre-2-5": {
+    "checked": true,
+    "note": "Brainco 전용 핸드 일체형. 서드파티 그리퍼 교체 구조 미확인"
+  },
+  "pre-2-6": {
+    "checked": true,
+    "note": "Brainco 핸드에 촉각센서 내장. 5점 법선력/전단력/방향/근접/접촉 측정. ROS2 토픽으로 스트리밍"
+  },
+  "pre-2-7": {
+    "checked": true,
+    "note": "ROS2 토픽으로 관절각도·촉각·카메라 raw data 스트리밍. /tf로 EE 위치 실시간 제공"
+  },
+  "pre-2-8": {
+    "checked": true,
+    "note": "Position/Trajectory/IK 3가지 제어 모드. /aeirobot/alice_mobile/command 토픽으로 직접 제어 가능"
+  },
+  "pre-2-9": {
+    "checked": true,
+    "note": "Joint angle + End-effector(IK) 제어 지원. torso_link 기준 xyz(m)+rpy(deg) 공간 접근 가능"
+  },
+  "pre-3-1": {
+    "checked": true,
+    "note": "NVIDIA Isaac 플랫폼 연동. GR00T 파운데이션 모델 적용. AWS SageMaker 병렬 시뮬 학습"
+  },
+  "pre-3-2": {
+    "checked": true,
+    "note": "Meta Quest 3 HMD 텔레오퍼레이션. 핸드트래킹+상체포즈 추정. ROS2 bag 녹화/재생 지원"
+  },
+  "pre-3-3": {
+    "checked": true,
+    "note": "NVIDIA GR00T N1 적용. 자연어 명령→물리 동작 수행. LG U+ ixi-O Pro AI 에이전트 연동"
+  },
+  "pre-3-4": {
+    "checked": true,
+    "note": "듀얼암 7DOF+6DOF핸드 바이매뉴얼 VLA 가능. HMD로 양팔 동시 텔레옵 데모 확인"
+  },
+  "pre-3-5": {
+    "checked": true,
+    "note": "파인튜닝 최소 데이터 수량 미공개. AWS 데이터 플라이휠로 현장 데이터 수집→학습 반복"
+  },
+  "pre-3-6": {
+    "checked": true,
+    "note": "제어 루프 주기 미공개. FOC 리니어 액추에이터 실시간 제어, 고주파 루프 예상"
+  },
+  "pre-3-7": {
+    "checked": true,
+    "note": "URDF 제공(문서에 조인트명·범위 명시). NVIDIA Isaac Sim 디지털트윈 지원"
+  },
+  "pre-3-8": {
+    "checked": true,
+    "note": "NVIDIA Isaac 플랫폼으로 외부 학습 환경 연동. AWS SageMaker 병렬 시뮬 학습 파이프라인"
+  },
+  "pre-3-9": {
+    "checked": true,
+    "note": "자체 기어리스 리니어 액추에이터 사용. stiffness/damping 파라미터 공개 여부 미확인"
+  },
+  "pre-3-10": {
+    "checked": true,
+    "note": "AWS SageMaker 병렬 시뮬레이션으로 합성 데이터 생성. IoT Greengrass로 모델 재배포"
+  },
+  "pre-4-1": {
+    "checked": true,
+    "note": "HL만도 공장 부품 조립·반복작업 태스크 수행 확인. 조선소 용접·도장 보조 실증 중"
+  },
+  "pre-4-2": {
+    "checked": true,
+    "note": "피킹 정확도 수치 미공개. 3kg 페이로드 범위 내 다양한 물체 파지 데모 확인"
+  },
+  "pre-4-3": {
+    "checked": true,
+    "note": "SLAM+LiDAR 6대+깊이카메라로 자율 내비게이션. 새 환경 적응 시간 미공개"
+  },
+  "pre-4-4": {
+    "checked": true,
+    "note": "LiDAR 6대+깊이카메라 장애물 회피. 반응 지연 시간 미공개, 실시간 처리 강조"
+  },
+  "pre-4-5": {
+    "checked": true,
+    "note": "비정상 자율 복구 범위 미공개. 토크 초과시 모터 자동 비활성화(안전 페일세이프)"
+  },
+  "pre-4-6": {
+    "checked": true,
+    "note": "CES 2026 데모: 자동 파지력·손목각도 조정, 자연어 명령 수행. MWC 2026 AI에이전트 협업"
+  },
+  "pre-5-1": {
+    "checked": true,
+    "note": "후면 E-Stop 버튼(로터리식). 소프트웨어 Stop 명령 지원. 지상 70mm 높이 배치(오작동 방지)"
+  },
+  "pre-5-2": {
+    "checked": true,
+    "note": "작업자 안전 구역 반응 시간 미공개. 운용 시 1.5m 안전 반경 확보 필수(2인 운용 원칙)"
+  },
+  "pre-5-3": {
+    "checked": true,
+    "note": "기어리스 리니어 액추에이터 백드라이버블 설계로 접촉력 제한. 센서리스 힘 추정 가능"
+  },
+  "pre-5-4": {
+    "checked": true,
+    "note": "Zero Torque Mode 지원. 기어리스 리니어 액추에이터 백드라이브 가능으로 자유 낙하 위험 감소"
+  },
+  "pre-5-5": {
+    "checked": true,
+    "note": "이동속도 최대 0.5m/s(전후진), 1.57rad/s(회전). 평지 운용 전용. 속도 제한 설정 가능"
+  },
+  "pre-5-6": {
+    "checked": true,
+    "note": "관절 정격토크 초과시 화면 적색 경고+모터 자동 비활성화. BMS 배터리 관리 내장"
+  },
+  "pre-5-7": {
+    "checked": true,
+    "note": "규제 샌드박스 승인(조선·건설 현장 투입). 한국 산업안전 기준 준수 요구"
+  }
+}
