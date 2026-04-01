@@ -85,6 +85,9 @@ export const checklistData = {
           { id: 'pre-2-7', label: '로우 데이터 스트리밍 인터페이스', desc: '각 센서 raw data를 외부로 내보내는 인터페이스 종류 및 포맷', provided: 'API 문서' },
           { id: 'pre-2-8', label: '조인트 레벨 직접 제어 가능 여부', desc: 'position/velocity/torque 명령을 외부에서 직접 보낼 수 있는지. VLA/RFM 직접 제어에 필수', provided: 'SDK 문서' },
           { id: 'pre-2-9', label: '액션 스페이스 노출 범위', desc: 'joint angle / delta / end-effector space 중 외부에서 접근 가능한 범위', provided: 'API 레퍼런스' },
+          { id: 'pre-2-10', label: '반복 정밀도 (Repeatability)', desc: '반복된 동일 값으로 액추에이터 제어 시 end-effector의 위치 오차 범위(mm)', provided: '데이터시트' },
+          { id: 'pre-2-11', label: '로봇 연속 동작 시간', desc: '로봇의 권장 또는 최대 연속 동작 시간. 전원 공급 방식(배터리/유선) 포함', provided: '데이터시트' },
+          { id: 'pre-2-12', label: '발열 정보 (Thermal)', desc: '연속 동작 시 주요 관절/모터부의 발열(온도) 정보 및 허용 범위', provided: '데이터시트' },
         ],
       },
       {
@@ -101,6 +104,7 @@ export const checklistData = {
           { id: 'pre-3-8', label: '외부 학습 환경 연동 가이드', desc: '자사 시뮬레이터 에셋/시나리오를 외부 학습 프레임워크로 가져와 커스텀 학습 가능 여부', provided: '연동 가이드' },
           { id: 'pre-3-9', label: '시뮬레이터용 모델 파일 및 액추에이터 파라미터 제공', desc: 'stiffness/damping 파라미터가 모델 파일에 통합 제공되는지', provided: 'MJCF / URDF 모델 파일' },
           { id: 'pre-3-10', label: '합성 데이터 수집 파이프라인', desc: '시뮬레이터에서 합성 데이터를 생성하는 방법 및 가이드', provided: '파이프라인 가이드' },
+          { id: 'pre-3-11', label: 'Deformable Object 상호작용 시뮬레이션', desc: '종이박스 등 Deformable Object와의 상호작용 시뮬레이션 지원 여부 및 사례', provided: '시뮬레이션 사례' },
         ],
       },
       {
@@ -127,6 +131,7 @@ export const checklistData = {
           { id: 'pre-5-5', label: '속도 제한 구역 (Speed Zones) 설정', desc: 'ISO/TS 15066 협동 운용 기준 충족 여부', provided: '안전 매뉴얼' },
           { id: 'pre-5-6', label: '오작동 자동 감지 및 안전 모드 전환', desc: '과열·이상 토크·통신 단절 등 이상 상황 자동 감지 로직 여부' },
           { id: 'pre-5-7', label: '안전 인증 (Safety Certification) 현황', desc: 'ISO 10218, CE, UL 등 보유 인증 목록', provided: '인증서 사본' },
+          { id: 'pre-5-8', label: '안전 구역 스펙', desc: '로봇 가동 범위를 고려한 안전 구역 영역 범위 및 설치 요건', provided: '안전 매뉴얼' },
         ],
       },
     ],
@@ -174,6 +179,7 @@ export const checklistData = {
           { id: 'reg-1-1', label: '캘리브레이션 및 자체 동적 검증 방법', desc: '로봇 사용 전 자체 보정 및 기본 동작 점검 방법', provided: '캘리브레이션 매뉴얼' },
           { id: 'reg-1-2', label: '관절 구성 (Joint Configuration)', desc: '자유도(DOF), 관절 목록/이름/순서, 관절 타입(Revolute/Prismatic)', provided: 'URDF / 사양서' },
           { id: 'reg-1-3', label: '액추에이터 정보 (Actuator Info)', desc: '관절별 모터 모델명, 액추에이터 ID, 엔코더 해상도', provided: '모터 사양서' },
+          { id: 'reg-1-3a', label: '액추에이터 스펙 (Actuator Spec)', desc: '액추에이터 제어 시 latency, gear backlash 등 동적 특성', provided: '데이터시트' },
           { id: 'reg-1-4', label: '캘리브레이션 및 검증 방법', desc: '물리적 로봇 사용 전 기본 점검 방법', provided: '캘리브레이션 매뉴얼' },
           { id: 'reg-1-5', label: '이동 범위 (range_min / range_max)', desc: '관절의 물리적 최소/최대 이동 범위. 소프트 리밋 설정 기준', provided: '데이터시트' },
           { id: 'reg-1-6', label: '최대 속도 / 최대 토크', desc: '관절별 속도 및 토크 한계. 과속/과부하 보호 설정 기준', provided: '데이터시트' },
