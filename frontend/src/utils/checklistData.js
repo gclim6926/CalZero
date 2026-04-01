@@ -86,7 +86,7 @@ export const checklistData = {
           { id: 'pre-2-8', label: '조인트 레벨 직접 제어 가능 여부', desc: 'position/velocity/torque 명령을 외부에서 직접 보낼 수 있는지. VLA/RFM 직접 제어에 필수', provided: 'SDK 문서' },
           { id: 'pre-2-9', label: '액션 스페이스 노출 범위', desc: 'joint angle / delta / end-effector space 중 외부에서 접근 가능한 범위', provided: 'API 레퍼런스' },
           { id: 'pre-2-10', label: '반복 정밀도 (Repeatability)', desc: '반복된 동일 값으로 액추에이터 제어 시 end-effector의 위치 오차 범위(mm)', provided: '데이터시트' },
-          { id: 'pre-2-11', label: '로봇 연속 동작 시간', desc: '로봇의 권장 또는 최대 연속 동작 시간. 전원 공급 방식(배터리/유선) 포함', provided: '데이터시트' },
+          { id: 'pre-2-11', label: '동작 시간 / 수명 / 전원', desc: '권장·최대 연속 동작 시간, 주요 부품(모터·감속기·배터리) 수명 주기, 전원 공급 방식(배터리/유선) 및 소비 전력', provided: '데이터시트' },
           { id: 'pre-2-12', label: '발열 정보 (Thermal)', desc: '연속 동작 시 주요 관절/모터부의 발열(온도) 정보 및 허용 범위', provided: '데이터시트' },
         ],
       },
